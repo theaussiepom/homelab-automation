@@ -39,6 +39,10 @@ consumers must use normal property access or `Object.hasOwn`/the safe
 `Object.prototype.hasOwnProperty.call` pattern, not `result.hasOwnProperty()`.
 The existing Cast-only protobuf 7.6.6 override remains in place.
 
+The state-machine renderer pins Handlebars 4.7.7 upstream. A scoped override now
+selects 4.7.10. Tests exercise its actual precompiled DOT and state-machine text
+templates, preserve transitions and labels, and confirm invalid input is rejected.
+
 The tests use the dependency resolved from the HA node, its actual JSONata service
 with a synthetic Node-RED utility adapter, synthetic states and public flow
 expression parsing. They verify that prototype lookup/function construction is
@@ -47,21 +51,27 @@ not prove compatibility with the expression engine bundled in a selected runtime
 
 ## Validation and remaining work
 
-A clean `npm ci --ignore-scripts` and 21 focused Cast, credential-store and JSONata
-tests pass on Node.js 24. Package lifecycle scripts are deliberately disabled in
-this source review; native serial dependencies and actual flows still need an
-isolated runtime rehearsal before deployment.
+A clean `npm ci --ignore-scripts` and 25 focused Cast, credential-store, JSONata
+and renderer tests pass on Node.js 24. The same 25 tests pass in an isolated
+Node-RED 5.0.8 image using Node.js 24.21.0. A separate network-disabled safe-mode
+check loads the serial and Modbus modules, registers all 22 node packages and the
+theme plugin, and finds all 23 node types used by the public flow snapshot.
+The HA expression service also passes a binding check using the actual Node-RED 5
+utility implementation. Core JSONata resolves to 2.2.2 and rejects the harmless
+function-construction regression.
 
-The refreshed npm audit has 25 affected dependency entries, down from 48: one
-critical, fourteen high and ten moderate. JSONata and protobuf are absent from
-that audit. The remaining critical entry is Handlebars through the state-machine
-node's dependencies; other remaining chains include Cast, InfluxDB and email.
+The refreshed npm audit has 24 affected dependency entries, down from 48: zero
+critical, thirteen high and eleven moderate. JSONata, protobuf and Handlebars are
+absent from that audit. Remaining chains include Cast, InfluxDB, email and the
+state-machine renderer's other dependencies.
 These counts include parent packages affected by a dependency, not independent
 exploits. Latest node releases do not necessarily contain patched transitive
 dependencies. No advisories have been suppressed and no forced downgrade or broad
 major-version override has been applied.
 
-Before deployment, qualify the selected runtime, native modules, private credential
-restore, HA nodes, Modbus, email, feed parsing, dashboard and existing automations
-without connecting the rehearsal to production devices. Deployment remains a
-separate decision after the remaining advisories are assessed.
+These isolated checks used public fixtures, not the protected live settings and
+credentials, and did not execute flows or connect to devices. Before deployment,
+complete a private-copy rehearsal, preserve a consistent rollback backup, and
+assess the remaining advisories. After deployment, verify live connections and
+existing automation behavior separately; palette registration does not establish
+successful device communication.

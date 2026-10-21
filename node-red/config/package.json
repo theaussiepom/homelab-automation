@@ -35,6 +35,9 @@
         },
         "node-red-contrib-home-assistant-websocket": {
             "jsonata": "2.2.2"
+        },
+        "state-machine-cat": {
+            "handlebars": "4.7.10"
         }
     },
     "engines": {
