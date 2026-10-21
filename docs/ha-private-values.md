@@ -8,7 +8,10 @@ Keep real values in the private `secrets.yaml`; preserve existing secret entries
 The dashboard-display script was moved from `scripts.yaml` to the existing
 `integrations` package directory. Its `script.display_living_show` identity is
 unchanged. This one script is maintained in YAML; all other scripts remain
-UI-editable. No `!secret` tags were added to UI-managed `automations.yaml` or
+UI-editable. Set `ha_display_base_url` to the private HA origin without a
+dashboard path. The script appends the checked path and uses the security path
+while the alarm is armed; the old fixed full-URL secret is no longer used.
+No `!secret` tags were added to UI-managed `automations.yaml` or
 `scripts.yaml`.
 
 The conversion was checked by resolving each newly introduced secret to the
