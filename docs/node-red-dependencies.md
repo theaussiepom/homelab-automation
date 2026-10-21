@@ -53,6 +53,13 @@ In-memory adapter tests preserve the speech helper's URL construction,
 request serialization, audio response parsing and transport-error behavior; they
 contact neither Google nor a speaker.
 
+The InfluxDB node pins Lodash to the 4.17 series. A scoped 4.18.1 override removes
+the vulnerable nested copy. Regressions reject malformed template import keys
+and preserve prototype properties when given array-wrapped paths. Tests also
+exercise the actual InfluxDB output node with in-memory clients: v1 field/tag
+conversion, timestamps and unchanged input payloads, plus v2 Point serialization.
+No database connection or write is made.
+
 The unused email node was removed with owner approval. Its latest 5.2.5 release
 bundles DeepmergeTS 7.1.5 through mailparser/html-to-text; a scoped npm override
 still resolves that embedded copy. [The recursive-object advisory](https://github.com/advisories/GHSA-ggr8-5vv4-36mx)
@@ -69,8 +76,8 @@ not prove compatibility with the expression engine bundled in a selected runtime
 
 ## Validation and remaining work
 
-A clean `npm ci --ignore-scripts` and 31 focused Cast, credential-store, JSONata
-and renderer tests pass on Node.js 24. The same 31 tests pass in an isolated
+A clean `npm ci --ignore-scripts` and 37 focused Cast, InfluxDB, credential-store, JSONata
+and renderer tests pass on Node.js 24. The same 37 tests pass in an isolated
 Node-RED 5.0.8 image using Node.js 24.21.0. A separate network-disabled safe-mode
 check loads the serial and Modbus modules, registers all 21 node packages and the
 theme plugin, and finds all 23 node types used by the public flow snapshot.
@@ -78,9 +85,9 @@ The HA expression service also passes a binding check using the actual Node-RED 
 utility implementation. Core JSONata resolves to 2.2.2 and rejects the harmless
 function-construction regression.
 
-The refreshed npm audit has 12 affected dependency entries, down from 48: zero
-critical, 2 high and 10 moderate. JSONata, protobuf, Handlebars and Axios
-are absent from that audit. Remaining chains include InfluxDB, sun events and the
+The refreshed npm audit has 10 affected dependency entries, down from 48: zero
+critical or high and ten moderate. JSONata, protobuf, Handlebars, Axios and Lodash
+are absent from that audit. Remaining chains include sun events and the
 state-machine renderer's other dependencies.
 These counts include parent packages affected by a dependency, not independent
 exploits. Latest node releases do not necessarily contain patched transitive

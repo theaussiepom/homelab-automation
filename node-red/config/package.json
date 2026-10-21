@@ -40,6 +40,9 @@
         },
         "google-tts-api": {
             "axios": "0.34.0"
+        },
+        "node-red-contrib-influxdb": {
+            "lodash": "4.18.1"
         }
     },
     "engines": {
