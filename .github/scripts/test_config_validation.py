@@ -50,6 +50,43 @@ class ComposeInterpolationTests(unittest.TestCase):
 
 
 class ComposeModelTests(unittest.TestCase):
+    def test_unrelated_render_error_cannot_satisfy_required_probe(self):
+        import subprocess
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        import config_validation as validation
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'compose.yaml'
+            path.write_text('services: {app: {image: "${IMAGE:?required}"}}')
+            responses = [subprocess.CompletedProcess([], 0, b'{"services":{"app":{}}}', b''),
+                         subprocess.CompletedProcess([], 1, b'', b'required variable OTHER is missing a value')]
+            with patch.object(validation.subprocess, 'run', side_effect=responses):
+                with self.assertRaisesRegex(ValueError, 'did not fail closed'):
+                    validation.compose(path)
+
+    def test_nested_probe_activates_fallback_without_other_field_masking(self):
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        import config_validation as validation
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'compose.yaml'
+            path.write_text(yaml.safe_dump({'services': {'app': {
+                'image': 'example.invalid/fixture:1',
+                'environment': {'VALUE': '${PRIMARY:-${BACKUP:?required}}',
+                                'OTHER': '${PRIMARY:?independent requirement}'},
+            }}}))
+            with patch.object(validation.subprocess, 'run', wraps=validation.subprocess.run) as run:
+                self.assertEqual(validation.compose(path), 1)
+            probes = [call for call in run.call_args_list[1:]
+                      if not call.kwargs['env'].get('BACKUP')]
+            self.assertEqual(len(probes), 2)
+            for probe in probes:
+                self.assertNotIn('PRIMARY', probe.kwargs['env'])
+                model = yaml.safe_load(probe.kwargs['input'])
+                self.assertNotIn('OTHER', model['services']['app']['environment'])
+
     def test_conditional_requirements_pass_actual_compose(self):
         import tempfile
         from pathlib import Path
@@ -91,6 +128,47 @@ class ComposeModelTests(unittest.TestCase):
                 with patch.object(validation.subprocess, 'run', wraps=validation.subprocess.run) as run:
                     self.assertEqual(validation.compose(path), 1)
                 self.assertEqual([call.kwargs['env'].get('TOKEN') for call in run.call_args_list[1:]], expected)
+
+
+class ComposeBranchTests(unittest.TestCase):
+    def probes(self, value):
+        from config_validation import compose_required_probes
+        return compose_required_probes({'environment': {'VALUE': value}})
+
+    def test_alternative_branch_requires_nonempty_guard(self):
+        for operator in ('+', ':+'):
+            with self.subTest(operator=operator):
+                probes = self.probes('${PRIMARY' + operator + '${BACKUP:?required}}')
+                self.assertEqual([p[2] for p in probes], [
+                    {'PRIMARY': 'fixture-only', 'BACKUP': None},
+                    {'PRIMARY': 'fixture-only', 'BACKUP': ''}])
+
+    def test_repeated_variable_respects_branch_constraints(self):
+        self.assertEqual(self.probes('${TOKEN:+${TOKEN:?required}}'), [])
+        self.assertEqual([p[2] for p in self.probes('${TOKEN+${TOKEN:?required}}')], [{'TOKEN': ''}])
+        self.assertEqual([p[2] for p in self.probes('${TOKEN:-${TOKEN:?required}}')],
+                         [{'TOKEN': None}, {'TOKEN': ''}])
+
+    def test_contradictory_nested_guards_have_no_active_requirement(self):
+        self.assertEqual(self.probes('${TOKEN:+${TOKEN:-${BACKUP:?required}}}'), [])
+
+    def test_error_message_is_not_a_separate_startup_requirement(self):
+        self.assertEqual([p[1] for p in self.probes('${TOKEN?${MESSAGE:?detail}}')], ['TOKEN'])
+
+    def test_escaped_expression_does_not_create_probe(self):
+        self.assertEqual(self.probes('$${TOKEN:?required}'), [])
+
+    def test_multiple_expressions_keep_their_original_context(self):
+        probes = self.probes('${A:?first} ${B?second}')
+        self.assertEqual([(p[0], p[1]) for p in probes],
+                         [('${A:?first}', 'A'), ('${A:?first}', 'A'), ('${B?second}', 'B')])
+
+    def test_depth_limit_refuses_instead_of_skipping_requirement(self):
+        value = '${TOKEN:?required}'
+        for index in range(34):
+            value = '${OPTION_' + str(index) + ':-' + value + '}'
+        with self.assertRaisesRegex(ValueError, 'nesting limit'):
+            self.probes(value)
 
     def test_literals_and_comments_pass_actual_compose(self):
         import tempfile

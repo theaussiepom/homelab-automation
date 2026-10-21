@@ -55,6 +55,77 @@ def compose_variables(value, required=False, reject_empty=False):
         result.update(compose_variables(child, required, reject_empty))
     return result
 
+def interpolation_expressions(text):
+    """Yield complete expressions; escaped dollars never open an expression."""
+    offset = 0
+    pattern = re.compile(r'\$\$|\$\{([_a-zA-Z][_a-zA-Z0-9]*)(:?[-+?])?|\$([_a-zA-Z][_a-zA-Z0-9]*)')
+    while match := pattern.search(text, offset):
+        offset = match.end()
+        if not match[1]:
+            continue
+        depth, end = 1, offset
+        while end < len(text) and depth:
+            if text[end] == '{':
+                depth += 1
+            elif text[end] == '}':
+                depth -= 1
+            end += 1
+        if depth:
+            raise ValueError('Unclosed Compose interpolation')
+        yield match[1], match[2], text[offset:end-1], text[match.start():end]
+        offset = end
+
+def compose_required_probes(value):
+    """Select an active branch for each requirement, including repeated names.
+
+    A probe uses the original expression in a synthetic scalar field so an
+    independent field cannot mask its error when a guard variable is unset.
+    Compose still validates the complete model before these focused probes.
+    """
+    probes = []
+    states = {'unset', 'empty', 'nonempty'}
+    branches = {'-': {'unset'}, ':-': {'unset', 'empty'},
+                '+': {'empty', 'nonempty'}, ':+': {'nonempty'}}
+
+    def constrain(guards, name, allowed):
+        selected = guards.get(name, states) & allowed
+        return {**guards, name: selected} if selected else None
+
+    def visit(expression, guards, root, depth=0):
+        if depth > 32:
+            raise ValueError('Compose interpolation nesting limit exceeded')
+        name, operator, operand, _ = expression
+        if operator in ('?', ':?'):
+            for state in (('unset', 'empty') if operator == ':?' else ('unset',)):
+                selected = constrain(guards, name, {state})
+                if selected is None:
+                    continue  # No failing input can also activate this branch.
+                values = {}
+                for key, allowed in selected.items():
+                    values[key] = ('fixture-only' if 'nonempty' in allowed else
+                                   None if 'unset' in allowed else '')
+                probes.append((root, name, values))
+            # Error-message interpolation is not an input to successful startup.
+        elif operator in branches:
+            selected = constrain(guards, name, branches[operator])
+            if selected is not None:
+                for nested in interpolation_expressions(operand):
+                    visit(nested, selected, root, depth+1)
+
+    def values(item):
+        if isinstance(item, dict):
+            for child in item.values():
+                values(child)
+        elif isinstance(item, list):
+            for child in item:
+                values(child)
+        elif isinstance(item, str):
+            for expression in interpolation_expressions(item):
+                visit(expression, {}, expression[3])
+
+    values(value)
+    return probes
+
 def compose(path):
     text = path.read_text()
     model = yaml.safe_load(text)
@@ -99,19 +170,20 @@ def compose(path):
         parsed = json.loads(output)
         if not parsed.get('services'):
             raise ValueError('Empty Compose model')
-        nonempty = compose_variables(model, required=True, reject_empty=True)
-        for variable in compose_variables(model, required=True):
-            # ${VAR?error} permits an explicitly empty value; ${VAR:?error}
-            # rejects both unset and empty values.
-            for empty in ((False, True) if variable in nonempty else (False,)):
-                missing = dict(env)
-                if empty:
-                    missing[variable] = ''
+        for expression, variable, overrides in compose_required_probes(model):
+            missing = dict(env)
+            for name, value in overrides.items():
+                if value is None:
+                    missing.pop(name, None)
                 else:
-                    missing.pop(variable, None)
-                result = subprocess.run(argv, input=data, env=missing, capture_output=True, timeout=30)
-                if result.returncode == 0:
-                    raise ValueError('Required private input did not fail closed')
+                    missing[name] = value
+            probe = {'services': {'app': {'image': 'example.invalid/fixture:1',
+                                         'environment': {'VALUE': expression}}}}
+            result = subprocess.run(argv, input=yaml.safe_dump(probe).encode(),
+                                    env=missing, capture_output=True, timeout=30)
+            expected = ('required variable ' + variable + ' is missing a value').encode()
+            if result.returncode == 0 or expected not in result.stderr:
+                raise ValueError('Required private input did not fail closed')
         return len(parsed['services'])
 
 def run(root=ROOT):
