@@ -1,0 +1,294 @@
+type: custom:stack-in-card
+view_layout:
+  grid-area: h3
+card_mod:
+  style:
+    hui-vertical-stack-card $: |
+      #root > hui-card:first-child {
+        position: absolute;
+        top: 8px;
+        right: 14px;
+        width: calc(50% - 14px);
+        height: 60px;
+        z-index: 1;
+        opacity: 0;
+      }
+    .: |
+      ha-card {
+        border-color: var(--primary-base-color);
+        border-width: 2px;
+        border-radius: 30px;
+        background: var(--tablet-card-background-color);
+        margin: 4px 0px 0px 0px;
+        position: relative;
+      }
+cards:
+  # Invisible tap target; the original car icon and percentage keep their layout.
+  - type: custom:button-card
+    entity: input_boolean.energy_ev_allow_overnight_fast_charge
+    name: Overnight EV charging
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: toggle
+    hold_action:
+      action: none
+    double_tap_action:
+      action: none
+    styles:
+      card:
+        - height: 60px
+        - padding: 0
+        - margin: 0
+        - border: none
+        - box-shadow: none
+        - background: transparent
+    extra_styles: |
+      :host {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      #aspect-ratio {
+        height: 100%;
+      }
+  - type: markdown
+    content: |
+      <table width=100%>
+        <tr>
+          <td align=left>
+            <b>
+              <font size=6>
+                <span>
+                  {{ states('sensor.energy_battery_soc') | float | round(0) ~ '%' if has_value('sensor.energy_battery_soc') and is_number(states('sensor.energy_battery_soc')) else '—' }}
+                  <ha-icon icon="{{ 'mdi:battery-charging' if is_state('binary_sensor.sg_battery_forced_charging', 'on') else 'mdi:battery' }}"></ha-icon>
+                </span>
+              </font>
+            </b>
+          </td>
+          <td align=right>
+            <b>
+              <font size=6>
+                <span>
+                  <ha-icon icon="mdi:car-electric"></ha-icon>
+                  {{ states['sensor.bennis_battery_level'].state | int(0) | round(0) }}%
+                </span>
+              </font>
+            </b>
+          </td>
+        </tr>
+      </table>
+    card_mod:
+      style:
+        ha-markdown $: |
+          ha-markdown-element table tr:first-child td:first-child span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: {% if is_state('binary_sensor.sg_battery_forced_charging', 'on') %}var(--green, #698F3F){% else %}transparent{% endif %};
+          }
+          ha-markdown-element table tr:first-child td:last-child span {
+            color: {% if is_state('input_boolean.energy_ev_allow_overnight_fast_charge', 'on') %}
+              #000000
+            {% elif is_state('input_boolean.energy_ev_allow_overnight_fast_charge', 'off') %}
+              var(--red, #E3170A)
+            {% else %}
+              var(--primary-text-color)
+            {% endif %};
+          }
+        ha-markdown:
+          $:
+            ha-markdown-element: |
+              table {
+                border-collapse: collapse !important;
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+              }
+
+              tr {
+                border: none !important;
+              }
+
+              td {
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+                padding: 0 4px;
+                vertical-align: middle;
+              }
+
+        .: |
+          ha-card {
+            background: var(--secondary-background-color);
+            border-style: none;
+            margin: -10px 5px 6px 5px;
+          }
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: ls_h1
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 20px;
+          border-color: var(--secondary-base-color);
+          border-width: 2px;
+          background: var(--scene-background-color);
+          margin: -20px 25px 0px 25px;
+        }
+    cards:
+      - type: custom:power-flow-card-plus
+        card_mod:
+          style: |
+            ha-card {
+              border-width: 0px;
+        entities:
+          home:
+            entity: sensor.load_power
+            subtract_individual: false
+            color_icon: true
+            icon: mdi:home-outline
+          fossil_fuel_percentage:
+            entity: sensor.electricity_maps_grid_fossil_fuel_percentage
+            color_icon: true
+            display_zero: false
+            name: Non Fossil
+            state_type: power
+            display_zero_state: false
+          grid:
+            entity:
+              production: sensor.sh10rs_a2392201672_total_export_active_power
+              consumption: sensor.sh10rs_a2392201672_purchased_power
+            display_state: one_way_no_zero
+            color_circle: true
+            color_icon: true
+          solar:
+            icon: mdi:solar-panel-large
+            display_zero_state: false
+            entity: sensor.sh10rs_a2392201672_mppt_total_power
+            color_icon: true
+          individual:
+            - entity: sensor.power_aircon
+              color_icon: true
+              name: Aircon
+              icon: mdi:fan
+            - entity: sensor.kitchen_power
+              color_icon: true
+              name: Kitchen
+              icon: mdi:countertop-outline
+            - entity: sensor.myenergi_zappi_21539112_internal_load_ct1
+              color_icon: true
+              icon: mdi:car
+              display_zero: true
+              name: Car
+            - entity: sensor.laundry_power
+              color_icon: true
+              name: Laundry
+              icon: mdi:washing-machine
+          battery:
+            entity:
+              consumption: sensor.sh10rs_a2392201672_battery_discharging_power
+              production: sensor.sh10rs_a2392201672_battery_charging_power
+            display_state: one_way_no_zero
+            color_circle: true
+            color_icon: true
+            icon: mdi:battery-high
+        w_decimals: 0
+        kw_decimals: 2
+        watt_threshold: 1000
+        clickable_entities: false
+        display_zero_lines:
+          mode: transparency
+          transparency: 80
+          grey_color:
+            - 189
+            - 189
+            - 189
+        use_new_flow_rate_model: true
+        max_flow_rate: 6
+        max_expected_power: 8000
+        min_expected_power: 500
+        min_flow_rate: 2.46
+  - type: markdown
+    content: |
+      <table width=100%>
+        <tr>
+          <td align=left>
+            <b>
+              <font size=6>
+                <span>
+                  {% set price = states('sensor.energy_current_effective_import_rate') | float(0) %}{% if price < 0 %}-{% endif %}${{ "{:.2f}".format(price | abs) }}
+                  <ha-icon icon="mdi:transmission-tower"></ha-icon>
+                </span>
+              </font>
+            </b>
+          </td>
+          <td align=center>
+            <b>
+              <font size=5>kWh</font>
+            </b>
+          </td>
+          <td align=right>
+            <b>
+              <font size=6>
+                <span>
+                  <ha-icon icon="mdi:cash-multiple"></ha-icon>
+                  {% set total = states('sensor.energy_cost_daily_net') | float(0) %}{% if total < 0 %}-{% endif %}${{ "{:.2f}".format(total | abs) }}
+                </span>
+              </font>
+            </b>
+          </td>
+        </tr>
+      </table>
+    card_mod:
+      style:
+        ha-markdown:
+          $:
+            ha-markdown-element: |
+              /* REMOVE TABLE LINES */
+              table {
+                border-collapse: collapse !important;
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+              }
+
+              tr {
+                border: none !important;
+              }
+
+              td {
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+                padding: 0 4px;
+                vertical-align: middle;
+              }
+
+              /* Current price colouring */
+              table tr:first-child td:first-child span {
+                color: {% if is_state('sensor.energy_current_tariff','peak') %}
+                  var(--red)
+                {% elif is_state('sensor.energy_current_tariff','ev') %}
+                  var(--green)
+                {% elif is_state('sensor.energy_current_tariff','offpeak') %}
+                  var(--green)
+                {% else %}
+                  var(--primary-text-color)
+                {% endif %};
+              }
+
+              /* Daily total always neutral */
+              table tr:first-child td:last-child span {
+                color: var(--primary-text-color);
+              }
+
+        .: |
+          ha-card {
+            background: var(--secondary-background-color);
+            border-style: none;
+            margin: -10px 5px -10px 5px;
+          }

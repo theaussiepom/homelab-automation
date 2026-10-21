@@ -1,0 +1,229 @@
+- title: Home health
+  path: house-health
+  icon: mdi:home-heart
+  subview: true
+  back_path: /lovelace-living/house
+  theme: living-tablet
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"'
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    card_mod:
+      style: ha-card { box-sizing:border-box; height:735px; overflow:hidden; border:5px solid var(--primary-base-color); border-radius:30px;
+        background:var(--tablet-card-background-color); box-shadow:none; }
+    cards:
+    - type: custom:stack-in-card
+      card_mod:
+        style: ha-card { height:665px; margin:24px; overflow-y:auto; background:none; border:0; box-shadow:none; color:var(--scene-icon-color);
+          }
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: custom:button-card
+          name: Home health
+          icon: mdi:home-heart
+          show_name: true
+          tap_action:
+            action: none
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          styles:
+            card:
+            - height: 80px
+            - background: none
+            - border: none
+            - box-shadow: none
+            - padding: 0 8px
+            grid:
+            - grid-template-areas: '"i n"'
+            - grid-template-columns: 76px 1fr
+            icon:
+            - width: 58px
+            - color: var(--scene-icon-color)
+            name:
+            - justify-self: start
+            - font-size: 34px
+            - font-weight: '700'
+            - color: var(--scene-icon-color)
+        - type: conditional
+          conditions:
+          - entity: binary_sensor.home_attention
+            state: 'off'
+          card:
+            type: markdown
+            content: '## All clear'
+            card_mod:
+              style: ha-card { background:none; border:0; box-shadow:none; color:var(--green); padding:20px; }
+        - type: custom:auto-entities
+          card:
+            type: entities
+            show_header_toggle: false
+            state_color: true
+          filter:
+            template: '{% set issues=state_attr(''binary_sensor.home_attention'',''issues'') or {} %}{% set n=namespace(rows=[])
+              %}{% for category,ids in issues.items() %}{% for eid in ids %}{% set n.rows=n.rows+[{''entity'':eid,''tap_action'':{''action'':''none''},''hold_action'':{''action'':''none''},''double_tap_action'':{''action'':''none''}}]
+              %}{% endfor %}{% endfor %}{{ n.rows|to_json }}'
+          unique: true
+          show_empty: false
+          card_mod:
+            style: ha-card { background:none; border:0; box-shadow:none; color:var(--scene-icon-color); }
+        - type: conditional
+          conditions:
+          - entity: binary_sensor.home_attention
+            state_not: 'on'
+          - entity: binary_sensor.home_attention
+            state_not: 'off'
+          card:
+            type: markdown
+            content: Home health is unavailable. Check Equipment.
+            card_mod:
+              style: ha-card { background:none; border:0; color:var(--red); }
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Home
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Batteries
+      icon: mdi:battery-heart-variant
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-batteries
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Safety
+      icon: mdi:water-alert-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-safety
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Tasks
+      icon: mdi:clipboard-check-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-tasks
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Equipment
+      icon: mdi:tools
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-equipment
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)

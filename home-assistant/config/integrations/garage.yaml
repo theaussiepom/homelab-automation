@@ -1,0 +1,77 @@
+input_select:
+  garage_door_states:
+    name: Garage Door States
+    options: ["closed", "closing", "open", "opening", "unknown"]
+
+template:
+  - cover:
+    - device_class: garage
+      open_cover:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.garage_door
+      close_cover:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.garage_door
+      stop_cover:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.garage_door
+      unique_id: c04b5eb7-0ddc-5bb6-9ba7-2f7dc6bcdec5
+      default_entity_id: cover.garage_door
+      icon: "{% if is_state('input_select.garage_door_states', 'open') %}\n  mdi:garage-open\n{%
+        elif is_state('input_select.garage_door_states', 'closed') %}\n  mdi:garage\n{%
+        elif is_state('input_select.garage_door_states', 'unknown') %}\n  mdi:help-circle-outline\n{%
+        else %}\n  mdi:garage-alert\n{% endif %}"
+      name: Garage Door
+      state: '{{ states(''input_select.garage_door_states'') }}'
+  - switch:
+    - turn_on:
+      - action: input_boolean.turn_on
+        target:
+          entity_id:
+          - input_boolean.garage_motion_sensor
+      turn_off:
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.garage_motion_sensor
+      unique_id: 8c47de09-07db-5b94-a342-646076d5195b
+      default_entity_id: switch.garage_motion_sensor
+      icon: "{% if is_state('input_boolean.garage_motion_sensor', 'on') %}\n  mdi:motion-sensor\n{%
+        else %}\n  mdi:motion-sensor-off\n{% endif %}"
+      state: '{{ is_state(''input_boolean.garage_motion_sensor'', ''on'') }}'
+      name: garage_motion_sensor
+
+mqtt:
+  - switch:
+      name: Garage Door
+      unique_id: 62d31602-cda5-5ae1-aa85-569af6ca586f
+      default_entity_id: switch.garage_door
+      command_topic: "home/garage/switch/door/cmnd/POWER"
+      state_topic: "home/garage/switch/door/stat/POWER"
+      availability_topic: "home/garage/switch/door/tele/LWT"
+      qos: 1
+      payload_available: "Online"
+      payload_not_available: "Offline"
+      payload_on: "ON"
+      payload_off: "ON"
+      state_on: "ON"
+      state_off: "OFF"
+      icon: mdi:garage
+  - binary_sensor:
+      name: "Garage Door State Closed"
+      unique_id: 92f474e1-31f3-55f1-ad5c-49c6a879ee80
+      default_entity_id: binary_sensor.garage_door_state_closed
+      state_topic: "home/garage/switch/door/stat/status"
+      payload_on: "open"
+      payload_off: "closed"
+      availability_topic: "home/garage/switch/door/tele/LWT"
+      payload_available: "Online"
+      payload_not_available: "Offline"
+      icon: mdi:garage
+      qos: 1

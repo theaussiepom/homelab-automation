@@ -1,0 +1,53 @@
+* text=auto eol=lf
+*.sh text eol=lf
+
+# Preserve captured source bytes during migration (no line-ending rewrite).
+"custom_components/dreame_vacuum/__init__.py" -text
+"custom_components/dreame_vacuum/binary_sensor.py" -text
+"custom_components/dreame_vacuum/button.py" -text
+"custom_components/dreame_vacuum/camera.py" -text
+"custom_components/dreame_vacuum/config_flow.py" -text
+"custom_components/dreame_vacuum/const.py" -text
+"custom_components/dreame_vacuum/coordinator.py" -text
+"custom_components/dreame_vacuum/dreame/__init__.py" -text
+"custom_components/dreame_vacuum/dreame/const.py" -text
+"custom_components/dreame_vacuum/dreame/device.py" -text
+"custom_components/dreame_vacuum/dreame/map.py" -text
+"custom_components/dreame_vacuum/dreame/protocol.py" -text
+"custom_components/dreame_vacuum/dreame/resources.py" -text
+"custom_components/dreame_vacuum/dreame/types.py" -text
+"custom_components/dreame_vacuum/entity.py" -text
+"custom_components/dreame_vacuum/manifest.json" -text
+"custom_components/dreame_vacuum/number.py" -text
+"custom_components/dreame_vacuum/recorder.py" -text
+"custom_components/dreame_vacuum/select.py" -text
+"custom_components/dreame_vacuum/sensor.py" -text
+"custom_components/dreame_vacuum/services.yaml" -text
+"custom_components/dreame_vacuum/strings.json" -text
+"custom_components/dreame_vacuum/switch.py" -text
+"custom_components/dreame_vacuum/time.py" -text
+"custom_components/dreame_vacuum/translations/ca.json" -text
+"custom_components/dreame_vacuum/translations/cs.json" -text
+"custom_components/dreame_vacuum/translations/de.json" -text
+"custom_components/dreame_vacuum/translations/en.json" -text
+"custom_components/dreame_vacuum/translations/es.json" -text
+"custom_components/dreame_vacuum/translations/fr.json" -text
+"custom_components/dreame_vacuum/translations/hu.json" -text
+"custom_components/dreame_vacuum/translations/it.json" -text
+"custom_components/dreame_vacuum/translations/ko.json" -text
+"custom_components/dreame_vacuum/translations/nl.json" -text
+"custom_components/dreame_vacuum/translations/pl.json" -text
+"custom_components/dreame_vacuum/translations/pt-BR.json" -text
+"custom_components/dreame_vacuum/translations/pt.json" -text
+"custom_components/dreame_vacuum/translations/ro.json" -text
+"custom_components/dreame_vacuum/translations/ru.json" -text
+"custom_components/dreame_vacuum/translations/sl.json" -text
+"custom_components/dreame_vacuum/translations/sv.json" -text
+"custom_components/dreame_vacuum/translations/uk.json" -text
+"custom_components/dreame_vacuum/translations/zh-Hans.json" -text
+"custom_components/dreame_vacuum/translations/zh-Hant.json" -text
+"custom_components/dreame_vacuum/vacuum.py" -text
+"custom_components/hacs/hacs_frontend/__init__.py" -text
+"custom_components/nodered/binary_sensor.py" -text
+"custom_components/nodered/sensor.py" -text
+"custom_components/nodered/switch.py" -text

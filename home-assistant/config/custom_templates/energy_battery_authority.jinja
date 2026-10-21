@@ -1,0 +1,34 @@
+{# Read-only validation. Inputs are supplied afresh by every caller; no cached health entity. #}
+{% macro battery_plan_authority(plan, model_available, snapshot, current_time, returns) -%}
+  {%- set t=current_time|float(-1) -%}
+  {%- set m=plan if plan is mapping else {} -%}
+  {%- set s=snapshot if snapshot is mapping else {} -%}
+  {%- set p=m.get('forecast_provenance',{}) -%}
+  {%- set p=p if p is mapping else {} -%}
+  {%- set stamp=m.get('plan_as_of_epoch') -%}
+  {%- set generation=as_timestamp(s.get('source_generation_utc'),none) -%}
+  {%- set planned_generation=as_timestamp(m.get('source_generation_utc'),none) -%}
+  {%- set start=m.get('plan_start') -%}
+  {%- set finish=m.get('horizon_end') -%}
+  {%- set proof=s.get('native_proof_hash') -%}
+  {%- set identity=s.get('snapshot_id') -%}
+  {%- set numbers=is_number(stamp) and is_number(generation) and is_number(planned_generation)
+    and is_number(start) and is_number(finish) and is_number(s.get('fresh_from'))
+    and is_number(s.get('fresh_to')) and is_number(s.get('valid_from')) and is_number(s.get('valid_to')) -%}
+  {%- set valid=model_available and m.get('valid') == true and m.get('usable_inputs') == true
+    and numbers and t >= 0 -%}
+  {%- if valid -%}
+    {%- set begin=[t,start|float]|max -%}
+    {%- set valid=0 <= t-stamp|float <= 180 and 0 <= t-generation|float <= 86400
+      and s.get('state') == 'accepted' and s.get('restored') != true and s.get('provenance_status') == 'proved_native_cycle'
+      and s.get('native_proof_schema') == 1 and s.get('admission') == 'native_acquisition_proof'
+      and identity is string and identity|length == 64 and m.get('source_snapshot_id') == identity
+      and proof is string and proof|length == 64 and p.get('native_proof_hash') == proof
+      and p.get('provenance_status') == 'proved_native_cycle'
+      and generation == planned_generation and s.get('interval_seconds') == 1800
+      and finish|float > begin and s.fresh_from|float <= begin < s.fresh_to|float
+      and s.fresh_to|float >= finish|float and s.valid_from|float <= begin < s.valid_to|float
+      and s.valid_to|float >= finish|float -%}
+  {%- endif -%}
+  {%- do returns(valid == true) -%}
+{%- endmacro %}

@@ -1,0 +1,158 @@
+- title: Music
+  path: music
+  subview: true
+  icon: mdi:piano
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: |
+      "m1 c1 m2 c2 m3"
+    margin: 30px 0px
+  cards:
+    - type: custom:stack-in-card
+      view_layout:
+        grid-area: c1
+      card_mod:
+        style: |
+          ha-card {
+            border-width: 5px;
+            border-color: var(--primary-base-color);
+            border-radius: 30px;
+            background: var(--tablet-card-background-color);
+          }
+      cards:
+        - type: iframe
+          url: !secret ha_4_music_url_1
+          aspect_ratio: "16:12"
+          allow_open_top_navigation: true
+          card_mod:
+            style: |
+              ha-card {
+                border-style: none;
+              }
+    - type: custom:layout-card
+      layout_type: custom:vertical-layout
+      view_layout:
+        grid-area: c2
+      layout:
+        width: 100
+      cards:
+        - type: custom:gap-card
+          height: 45
+        - type: custom:button-card
+          color_type: card
+          color: var(--scene-on-background-color)
+          icon: mdi:arrow-left-bold-outline
+          show_name: false
+          aspect_ratio: 1/1
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace-living/home
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+            icon:
+              - width: 100%
+              - color: var(--scene-icon-color)
+        - type: custom:gap-card
+          height: 40
+        - type: custom:button-card
+          entity: media_player.bennis_a9
+          icon: mdi:play
+          show_name: false
+          aspect_ratio: 1/1
+          tap_action:
+            action: call-service
+            service: >-
+              [[[ return entity.state == "playing"
+                    ? "media_player.media_pause"
+                    : "media_player.media_play"
+              ]]]
+            target:
+              entity_id: media_player.bennis_a9
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+            icon:
+              - width: 100%
+              - color: |
+                  [[[
+                     return entity.state == 'playing'
+                       ? 'var(--scene-on-background-color)'
+                       : 'var(--scene-icon-color)';
+                  ]]]
+          state:
+            - value: playing
+              icon: mdi:pause
+        - type: custom:gap-card
+          height: 15
+        - type: custom:button-card
+          color_type: card
+          color: var(--scene-on-background-color)
+          icon: mdi:skip-next
+          show_name: false
+          aspect_ratio: 1/1
+          tap_action:
+            action: call-service
+            service: media_player.media_next_track
+            target:
+              entity_id: media_player.bennis_a9
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+            icon:
+              - width: 100%
+              - color: var(--scene-icon-color)
+        - type: custom:gap-card
+          height: 15
+        - type: custom:button-card
+          color_type: card
+          color: var(--scene-on-background-color)
+          icon: mdi:volume-plus
+          show_name: false
+          aspect_ratio: 1/1
+          tap_action:
+            action: call-service
+            service: media_player.volume_up
+            target:
+              entity_id: media_player.bennis_a9
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+            icon:
+              - width: 100%
+              - color: var(--scene-icon-color)
+        - type: custom:gap-card
+          height: 15
+        - type: custom:button-card
+          color_type: card
+          color: var(--scene-on-background-color)
+          icon: mdi:volume-minus
+          show_name: false
+          aspect_ratio: 1/1
+          tap_action:
+            action: call-service
+            service: media_player.volume_down
+            target:
+              entity_id: media_player.bennis_a9
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+            icon:
+              - width: 100%
+              - color: var(--scene-icon-color)

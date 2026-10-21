@@ -1,0 +1,65 @@
+custom_hvac_card:
+  color_type: card
+  icon: |
+    [[[
+      switch (variables.climateAction) {
+        case 'increase':
+          return 'mdi:plus-thick';
+        case 'decrease':
+          return 'mdi:minus-thick'
+      }
+    ]]]
+  tap_action:
+    action: call-service
+    service: climate.set_temperature
+    target:
+      entity_id: "[[[ return entity.entity_id ]]]"
+    data:
+      temperature: |
+        [[[
+          switch (variables.climateAction) {
+            case 'decrease':
+              return Math.max(entity.attributes.min_temp, entity.attributes.temperature - 1);
+              break;
+            case 'increase':
+              return Math.min(entity.attributes.max_temp, entity.attributes.temperature + 1);
+              break;
+          }
+        ]]]
+  show_name: false
+  aspect_ratio: 1/1
+  styles:
+    card:
+      - border-radius: 10px
+      - border: none
+      - margin: 22px 0px 0px 0px
+      - background-color: |
+          [[[
+            if (entity.state == undefined ||
+              entity.state == 'unavailable') {
+              return 'var(--secondary-background-color)';
+            }
+
+            let disableTemperature;
+            switch (variables.climateAction) {
+              case 'decrease':
+                disableTemperature = entity.attributes.min_temp;
+                break;
+              case 'increase':
+                disableTemperature = entity.attributes.max_temp;
+                break;
+            }
+
+            if (entity.attributes.temperature == disableTemperature) {
+              return 'var(--primary-off-color)';
+            }
+
+            return 'var(--primary-select-color)';
+          ]]]
+      - visibility: |
+          [[[
+            return (entity.state == 'off') ? 'hidden' : 'visible';
+          ]]]
+    icon:
+      - width: 100%
+      - color: var(--primary-base-color)

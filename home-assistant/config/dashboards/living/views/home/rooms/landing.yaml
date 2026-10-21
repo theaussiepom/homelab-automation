@@ -1,0 +1,400 @@
+type: conditional
+conditions:
+  - entity: input_select.dashboard_living_rooms
+    state: "landing"
+view_layout:
+  grid-area: h1
+card:
+  type: custom:stack-in-card
+  card_mod:
+    style: |
+      ha-card {
+        border-color: var(--primary-base-color);
+        border-width: 2px;
+        border-radius: 30px;
+        background: var(--tablet-card-background-color);
+        width: 504px;
+        margin: 8px 0px 0px 0px;
+      }
+  cards:
+    - type: custom:layout-card
+      layout_type: custom:grid-layout
+      layout:
+        grid-template-rows: 75px
+        grid-template-columns: 130px auto 60px 70px
+        grid-template-areas: >
+          'living_header_a living_header_b living_header_d
+          living_header_c'
+      cards:
+        - type: markdown
+          view_layout:
+            grid-area: living_header_a
+          content: |
+            <center>
+              <b>
+                <font size=6>
+                  {{ states['sensor.landing_weather_weather_landing_apparent_temperature'].state | round(0) }}°C
+                </font>
+              </b>
+            </center>
+          card_mod:
+            style: |
+              ha-card {
+                background: var(--secondary-background-color);
+                border-style: none;
+                margin: -15px 0px -10px -20px;
+              }
+        - type: markdown
+          view_layout:
+            grid-area: living_header_b
+          content: |-
+            <center>
+              <b>
+                <font size=6>
+                  Landing
+                </font>
+              </b>
+            </center>
+          card_mod:
+            style: |
+              ha-card {
+                background: var(--secondary-background-color);
+                border-style: none;
+                margin: -15px 0px 0px 0px;
+              }
+        - type: custom:button-card
+          view_layout:
+            grid-area: living_header_c
+          entity: input_select.options_scene_landing
+          icon: mdi:power
+          template: custom_scene_off_card
+          styles:
+            card:
+              - visibility: '[[[ return entity.state === "off" ? "hidden" : "visible"; ]]]'
+          variables:
+            scene: scene.scene_landing_off
+    - type: custom:layout-card
+      layout_type: custom:grid-layout
+      layout:
+        gridrows: auto
+        grid-template-columns: 15px 100px 20px 100px 20px 100px 20px 100px
+        grid-template-areas: >
+          "ls_pl ls_a1 ls_m2 ls_a2 ls_m3 ls_a3 ls_m4 ls_a4"
+          "ls_pl ls_b1 ls_b1 ls_b1 ls_m3 ls_b2 ls_m4 ls_b3"
+          "ls_pl ls_h1 ls_h1 ls_h1 ls_h1 ls_h1 ls_h1 ls_h1"
+          "ls_pl ls_f1 ls_f1 ls_f1 ls_f1 ls_f1 ls_f1 ls_f1"
+      cards:
+        - type: custom:button-card
+          template: custom_scene_card
+          entity: input_select.options_scene_landing
+          icon: mdi:lightbulb-on-outline
+          state:
+            - value: "bright"
+              color: var(--scene-on-background-color)
+            - operator: default
+              color: var(--scene-off-background-color)
+          variables:
+            scene: scene.landing_bright
+            iconScale: 0.9
+          styles:
+            card:
+              - margin: -30px 0px 0px 0px
+          view_layout:
+            grid-area: ls_a1
+        - type: custom:button-card
+          template: custom_scene_card
+          entity: input_select.options_scene_landing
+          icon: mdi:sofa-single-outline
+          state:
+            - value: "chill"
+              color: var(--scene-on-background-color)
+            - operator: default
+              color: var(--scene-off-background-color)
+          variables:
+            scene: scene.landing_chill
+            iconScale: 0.9
+          styles:
+            card:
+              - margin: -30px 0px 0px 0px
+          view_layout:
+            grid-area: ls_a2
+        - type: custom:button-card
+          template: custom_scene_card
+          entity: input_select.options_scene_landing
+          icon: mdi:weather-sunny
+          state:
+            - value: "morning"
+              color: var(--scene-on-background-color)
+            - operator: default
+              color: var(--scene-off-background-color)
+          variables:
+            scene: scene.landing_morning
+            iconScale: 1
+          styles:
+            card:
+              - margin: -30px 0px 0px 0px
+          view_layout:
+            grid-area: ls_a3
+        - type: custom:button-card
+          template: custom_scene_card
+          entity: input_select.options_scene_landing
+          icon: mdi:weather-pouring
+          state:
+            - value: "rainyday"
+              color: var(--scene-on-background-color)
+            - operator: default
+              color: var(--scene-off-background-color)
+          variables:
+            scene: scene.landing_rainy_day
+            iconScale: 0.9
+          styles:
+            card:
+              - margin: -30px 0px 0px 0px
+          view_layout:
+            grid-area: ls_a4
+        - type: custom:button-card
+          entity: switch.landing_plug_plug_landing_chandelier
+          color_type: card
+          icon: mdi:chandelier
+          tap_action:
+            action: call-service
+            service: switch.toggle
+            target:
+              entity_id: switch.landing_plug_plug_landing_chandelier
+          show_name: false
+          aspect_ratio: 1/1
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color);
+              - border-width: 2px;
+              - margin: -20px 0px 0px 0px
+            icon:
+              - width: 80%
+              - color: var(--scene-icon-color)
+          state:
+            - value: "on"
+              color: var(--scene-on-background-color)
+            - value: "off"
+              color: var(--scene-off-background-color)
+          view_layout:
+            grid-area: ls_b3
+        - type: custom:stack-in-card
+          view_layout:
+            grid-area: ls_b1
+          card_mod:
+            style: |
+              ha-card {
+                border-radius: 20px;
+                border-color: var(--secondary-base-color);
+                border-width: 2px;
+                background: var(--secondary-background-color);
+                margin: -17px -1px 15px 0px;
+              }
+          cards:
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                gridrows: auto
+                grid-template-columns: 10px auto 10px auto 10px auto 10px
+                grid-template-areas: |
+                  "wb_pl wb_a1 wb_m2 wb_a2 wb_m3 wb_a3 wb_pr"
+                padding: 20px 0px 0px 0px
+              cards:
+                - type: custom:button-card
+                  template: custom_cover_card
+                  entity: cover.blind_landing
+                  variables:
+                    coverAction: close_cover
+                  view_layout:
+                    grid-area: wb_a1
+                - type: custom:button-card
+                  template: custom_cover_card
+                  entity: cover.blind_landing
+                  variables:
+                    coverAction: stop_cover
+                  view_layout:
+                    grid-area: wb_a2
+                - type: custom:button-card
+                  template: custom_cover_card
+                  entity: cover.blind_landing
+                  variables:
+                    coverAction: open_cover
+                  view_layout:
+                    grid-area: wb_a3
+        - type: custom:stack-in-card
+          view_layout:
+            grid-area: ls_h1
+          card_mod:
+            style: |
+              ha-card {
+                border-radius: 20px;
+                border-color: var(--secondary-base-color);
+                border-width: 2px;
+                background: var(--secondary-background-color);
+                margin: -9px -2px 15px 0px;
+              }
+          cards:
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                gridrows: auto
+                grid-template-columns: 10px 100px 37px 55px 120px 55px auto
+                grid-template-areas: |
+                  "h_pl h_a1 h_m1 h_a2 h_a3 h_a4 h_pr"
+              cards:
+                - type: custom:button-card
+                  view_layout:
+                    grid-area: h_a1
+                  entity: climate.landing
+                  icon: mdi:air-conditioner
+                  tap_action:
+                    action: call-service
+                    service: climate.set_hvac_mode
+                    target:
+                      entity_id: climate.landing
+                    data:
+                      hvac_mode: |
+                        [[[
+                          return entity.state == 'off'
+                            ? 'fan_only'
+                            : 'off'
+                        ]]]
+                  show_name: false
+                  aspect_ratio: 1/1
+                  styles:
+                    card:
+                      - border-radius: 10px
+                      - border: none
+                      - margin: 0px 0px 0px -10px
+                      - background-color: transparent
+                    icon:
+                      - width: 80%
+                      - transform: 1
+                      - color: |
+                          [[[
+                            return entity.state == 'off'
+                              ? 'var(--primary-base-color)'
+                              : 'var(--primary-on-color)'
+                          ]]]
+                  card_mod:
+                    style: |
+                      ha-card {
+                        border-style: none;
+                      }
+                - type: markdown
+                  view_layout:
+                    grid-area: h_a3
+                  content: |
+                    <center>
+                      <font size=6>
+                        {{ states['climate.landing'].attributes.temperature }}°C
+                      </font>
+                    </center>
+                  card_mod:
+                    style: |
+                      ha-card {
+                        background: var(--secondary-background-color);
+                        border-style: none;
+                        margin: 6px 0px 0px 0px;
+                        visibility: {% if is_state('climate.landing', 'off') %}hidden{% else %}visible{% endif %};
+                      }
+                - type: custom:button-card
+                  template: custom_hvac_card
+                  entity: climate.landing
+                  variables:
+                    climateAction: decrease
+                  view_layout:
+                    grid-area: h_a2
+                - type: custom:button-card
+                  template: custom_hvac_card
+                  entity: climate.landing
+                  variables:
+                    climateAction: increase
+                  view_layout:
+                    grid-area: h_a4
+        - type: custom:stack-in-card
+          view_layout:
+            grid-area: ls_f1
+          card_mod:
+            style: |
+              ha-card {
+                height: 100px;
+                border-radius: 20px;
+                border-color: var(--secondary-base-color);
+                border-width: 2px;
+                background: var(--secondary-background-color);
+                margin: -4px -2px 15px 0px;
+              }
+          cards:
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                gridrows: auto
+                grid-template-columns: 10px 100px auto 10px
+                grid-template-areas: |
+                  "h_pl h_a1 h_a2 h_m1"
+              cards:
+                - type: custom:button-card
+                  view_layout:
+                    grid-area: h_a1
+                  entity: fan.landing_fan
+                  icon: mdi:ceiling-fan
+                  tap_action:
+                    action: call-service
+                    service: |
+                      [[[
+                        return entity.state == 'on'
+                          ? 'fan.turn_off'
+                          : 'fan.turn_on'
+                      ]]]
+                    target:
+                      entity_id: fan.landing_fan
+                  show_name: false
+                  aspect_ratio: 1/1
+                  styles:
+                    card:
+                      - border-radius: 10px
+                      - border: none
+                      - margin: 0px 0px 0px -10px
+                      - background-color: transparent
+                    icon:
+                      - width: 100%
+                      - transform: 1
+                      - color: |
+                          [[[
+                            return entity.state == 'off'
+                              ? 'var(--primary-base-color)'
+                              : 'var(--primary-on-color)'
+                          ]]]
+                  card_mod:
+                    style: |
+                      ha-card {
+                        border-style: none;
+                      }
+                - type: custom:mushroom-fan-card
+                  view_layout:
+                    grid-area: h_a2
+                  entity: fan.landing_fan
+                  icon_type: none
+                  show_percentage_control: true
+                  primary_info: none
+                  secondary_info: none
+                  card_mod:
+                    style:
+                      mushroom-fan-percentage-control$:
+                        mushroom-slider$: |
+                          .slider {
+                            height: 40px !important;
+                            --main-color: var(--ceiling-fan-percentage-color) !important;
+                            --bg-color: var(--ceiling-fan-background-color) !important;
+                          }
+                      .: |
+                        mushroom-fan-percentage-control {
+                          height: 40px;
+                        }
+                        ha-card {
+                          border-style: none;
+                          background: transparent;
+                          margin: 10px 0px 0px 0px;
+                        }

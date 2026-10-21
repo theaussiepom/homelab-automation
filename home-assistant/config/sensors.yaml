@@ -1,0 +1,95 @@
+- platform: time_date
+  display_options:
+    - "time"
+    - "date"
+    - "date_time"
+    - "date_time_utc"
+    - "date_time_iso"
+    - "time_date"
+    - "time_utc"
+
+- platform: integration
+  unique_id: sh10rs_a2392201672_mppt1_energy
+  source: sensor.sh10rs_a2392201672_mppt1_power
+  name: SH10RS MPPT1 Energy
+  method: left
+  round: 4
+- platform: integration
+  unique_id: sh10rs_a2392201672_mppt2_energy
+  source: sensor.sh10rs_a2392201672_mppt2_power
+  name: SH10RS MPPT2 Energy
+  method: left
+  round: 4
+- platform: integration
+  unique_id: sh10rs_a2392201672_mppt3_energy
+  source: sensor.sh10rs_a2392201672_mppt3_power
+  name: SH10RS MPPT3 Energy
+  method: left
+  round: 4
+- platform: integration
+  unique_id: sh10rs_a2392201672_mppt4_energy
+  source: sensor.sh10rs_a2392201672_mppt4_power
+  name: SH10RS MPPT4 Energy
+  method: left
+  round: 4
+
+- platform: apparent_temperature
+  unique_id: living_weather_weather_living_apparent_temperature
+  source:
+    - sensor.living_weather_weather_living_temperature
+    - sensor.living_weather_weather_living_humidity
+- platform: apparent_temperature
+  unique_id: ben_weather_weather_ben_apparent_temperature
+  source:
+    - sensor.master_weather_weather_master_temperature
+    - sensor.master_weather_weather_master_humidity
+- platform: apparent_temperature
+  unique_id: matty_weather_weather_matty_apparent_temperature
+  name: matty_weather_weather_matty_apparent_temperature
+  source:
+    - sensor.guest_weather_weather_guest_temperature
+    - sensor.guest_weather_weather_guest_humidity
+- platform: apparent_temperature
+  unique_id: study_weather_weather_study_apparent_temperature
+  source:
+    - sensor.study_weather_weather_study_temperature
+    - sensor.study_weather_weather_study_humidity
+- platform: apparent_temperature
+  unique_id: landing_weather_weather_landing_apparent_temperature
+  source:
+    - sensor.landing_weather_weather_landing_temperature
+    - sensor.landing_weather_weather_landing_humidity
+- platform: apparent_temperature
+  unique_id: laundry_weather_weather_laundry_apparent_temperature
+  source:
+    - sensor.laundry_weather_weather_laundry_temperature
+    - sensor.laundry_weather_weather_laundry_humidity
+- platform: apparent_temperature
+  unique_id: garage_weather_weather_garage_apparent_temperature
+  source:
+    - sensor.garage_weather_weather_garage_temperature
+    - sensor.garage_weather_weather_garage_humidity
+- platform: apparent_temperature
+  unique_id: frontdoor_weather_weather_frontdoor_apparent_temperature
+  source:
+    - sensor.frontdoor_weather_weather_frontdoor_temperature
+    - sensor.frontdoor_weather_weather_frontdoor_humidity
+- platform: apparent_temperature
+  unique_id: deck_weather_weather_deck_apparent_temperature
+  source:
+    - sensor.deck_weather_weather_deck_temperature
+    - sensor.deck_weather_weather_deck_humidity
+- platform: apparent_temperature
+  source:
+    - sensor.outside_temperature
+    - sensor.outside_humidity
+- platform: apparent_temperature
+  unique_id: bathroom_weather_weather_bathroom_apparent_temperature
+  source:
+    - sensor.bathroom_weather_weather_bathroom_temperature
+    - sensor.bathroom_weather_weather_bathroom_humidity
+- platform: apparent_temperature
+  unique_id: ensuite_weather_weather_ensuite_apparent_temperature
+  source:
+    - sensor.ensuite_weather_weather_ensuite_temperature
+    - sensor.ensuite_weather_weather_ensuite_humidity

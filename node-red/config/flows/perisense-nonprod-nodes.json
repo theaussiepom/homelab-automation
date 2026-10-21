@@ -1,0 +1,442 @@
+[
+    {
+        "id": "e8f4a1b2c3d45678",
+        "type": "tab",
+        "label": "PeriSense Nonprod",
+        "disabled": false,
+        "locked": false,
+        "info": "PER-266: notify on start/stop; 8pm still-running reminder; 1am auto sleep.",
+        "env": []
+    },
+    {
+        "id": "a1b2c3d4e5f60001",
+        "type": "server-state-changed",
+        "z": "e8f4a1b2c3d45678",
+        "name": "platform started",
+        "server": "64bb0343.71dfbc",
+        "version": 6,
+        "outputs": 1,
+        "exposeAsEntityConfig": "",
+        "entities": {
+            "entity": [
+                "sensor.perisense_nonprod_platform"
+            ],
+            "substring": [],
+            "regex": []
+        },
+        "outputInitially": false,
+        "stateType": "str",
+        "ifState": "started",
+        "ifStateType": "str",
+        "ifStateOperator": "is",
+        "outputOnlyOnStateChange": true,
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "ignorePrevStateNull": true,
+        "ignorePrevStateUnknown": true,
+        "ignorePrevStateUnavailable": true,
+        "ignoreCurrentStateUnknown": true,
+        "ignoreCurrentStateUnavailable": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            }
+        ],
+        "x": 170,
+        "y": 100,
+        "wires": [
+            [
+                "a1b2c3d4e5f60003"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60011",
+        "type": "server-state-changed",
+        "z": "e8f4a1b2c3d45678",
+        "name": "platform stopped",
+        "server": "64bb0343.71dfbc",
+        "version": 6,
+        "outputs": 1,
+        "exposeAsEntityConfig": "",
+        "entities": {
+            "entity": [
+                "sensor.perisense_nonprod_platform"
+            ],
+            "substring": [],
+            "regex": []
+        },
+        "outputInitially": false,
+        "stateType": "str",
+        "ifState": "stopped",
+        "ifStateType": "str",
+        "ifStateOperator": "is",
+        "outputOnlyOnStateChange": true,
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "ignorePrevStateNull": true,
+        "ignorePrevStateUnknown": true,
+        "ignorePrevStateUnavailable": true,
+        "ignoreCurrentStateUnknown": true,
+        "ignoreCurrentStateUnavailable": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            }
+        ],
+        "x": 170,
+        "y": 160,
+        "wires": [
+            [
+                "a1b2c3d4e5f60004"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60003",
+        "type": "api-call-service",
+        "z": "e8f4a1b2c3d45678",
+        "name": "notify started",
+        "server": "64bb0343.71dfbc",
+        "version": 7,
+        "debugenabled": false,
+        "action": "notify.notify_phones",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [],
+        "labelId": [],
+        "data": "{\"title\":\"PeriSense Test\",\"message\":\"PeriSense test environment has started\"}",
+        "dataType": "json",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "notify",
+        "service": "notify_phones",
+        "x": 430,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60004",
+        "type": "api-call-service",
+        "z": "e8f4a1b2c3d45678",
+        "name": "notify stopped",
+        "server": "64bb0343.71dfbc",
+        "version": 7,
+        "debugenabled": false,
+        "action": "notify.notify_phones",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [],
+        "labelId": [],
+        "data": "{\"title\":\"PeriSense Test\",\"message\":\"PeriSense test environment has stopped\"}",
+        "dataType": "json",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "notify",
+        "service": "notify_phones",
+        "x": 430,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60005",
+        "type": "inject",
+        "z": "e8f4a1b2c3d45678",
+        "name": "daily 8pm",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "0 20 * * *",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 280,
+        "wires": [
+            [
+                "a1b2c3d4e5f60007"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60007",
+        "type": "api-current-state",
+        "z": "e8f4a1b2c3d45678",
+        "name": "platform state",
+        "server": "64bb0343.71dfbc",
+        "version": 3,
+        "outputs": 1,
+        "halt_if": "",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "entity_id": "sensor.perisense_nonprod_platform",
+        "state_type": "str",
+        "blockInputOverrides": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            }
+        ],
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "override_topic": false,
+        "state_location": "payload",
+        "override_payload": "msg",
+        "entity_location": "data",
+        "override_data": "msg",
+        "x": 340,
+        "y": 280,
+        "wires": [
+            [
+                "a1b2c3d4e5f60008"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60008",
+        "type": "switch",
+        "z": "e8f4a1b2c3d45678",
+        "name": "is running?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "started",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "degraded",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 530,
+        "y": 280,
+        "wires": [
+            [
+                "a1b2c3d4e5f60009"
+            ],
+            [
+                "a1b2c3d4e5f60009"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60009",
+        "type": "api-call-service",
+        "z": "e8f4a1b2c3d45678",
+        "name": "notify still running",
+        "server": "64bb0343.71dfbc",
+        "version": 7,
+        "debugenabled": false,
+        "action": "notify.notify_phones",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [],
+        "labelId": [],
+        "data": "{\"title\":\"PeriSense Test\",\"message\":\"PeriSense is still running\"}",
+        "dataType": "json",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "notify",
+        "service": "notify_phones",
+        "x": 760,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f60006",
+        "type": "inject",
+        "z": "e8f4a1b2c3d45678",
+        "name": "daily 1am sleep",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "0 1 * * *",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 400,
+        "wires": [
+            [
+                "a1b2c3d4e5f6000a"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f6000a",
+        "type": "api-current-state",
+        "z": "e8f4a1b2c3d45678",
+        "name": "platform state",
+        "server": "64bb0343.71dfbc",
+        "version": 3,
+        "outputs": 1,
+        "halt_if": "",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "entity_id": "sensor.perisense_nonprod_platform",
+        "state_type": "str",
+        "blockInputOverrides": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            }
+        ],
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "override_topic": false,
+        "state_location": "payload",
+        "override_payload": "msg",
+        "entity_location": "data",
+        "override_data": "msg",
+        "x": 340,
+        "y": 400,
+        "wires": [
+            [
+                "a1b2c3d4e5f6000b"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f6000b",
+        "type": "switch",
+        "z": "e8f4a1b2c3d45678",
+        "name": "is running?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "started",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "degraded",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 530,
+        "y": 400,
+        "wires": [
+            [
+                "a1b2c3d4e5f6000c"
+            ],
+            [
+                "a1b2c3d4e5f6000c"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f6000c",
+        "type": "api-call-service",
+        "z": "e8f4a1b2c3d45678",
+        "name": "sleep test env",
+        "server": "64bb0343.71dfbc",
+        "version": 7,
+        "debugenabled": false,
+        "action": "script.perisense_nonprod_sleep",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [],
+        "labelId": [],
+        "data": "{}",
+        "dataType": "json",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "script",
+        "service": "perisense_nonprod_sleep",
+        "x": 740,
+        "y": 400,
+        "wires": [
+            [
+                "a1b2c3d4e5f6000d"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4e5f6000d",
+        "type": "api-call-service",
+        "z": "e8f4a1b2c3d45678",
+        "name": "notify auto sleep",
+        "server": "64bb0343.71dfbc",
+        "version": 7,
+        "debugenabled": false,
+        "action": "notify.notify_phones",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [],
+        "labelId": [],
+        "data": "{\"title\":\"PeriSense Test\",\"message\":\"PeriSense test environment was stopped automatically (1am schedule)\"}",
+        "dataType": "json",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "notify",
+        "service": "notify_phones",
+        "x": 980,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    }
+]

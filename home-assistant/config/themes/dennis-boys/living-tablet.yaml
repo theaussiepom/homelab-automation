@@ -1,0 +1,31 @@
+living-tablet:
+  scene-icon-color: var(--primary-base-color)
+  scene-off-background-color: "var(--scene-background-color)"
+  tablet-card-background-color: "var(--scene-background-color)"
+  card-background-color: "var(--opaque-background-color)"
+  primary-background-color: "var(--opaque-background-color)"
+  secondary-background-color: "#00000000"
+  scene-on-background-color: "var(--primary-on-color)"
+  primary-off-color: "#00000000"
+  hvac-off: var(--primary-base-color)
+  green: "#698F3F"
+  red: "#E3170A"
+  yellow: "#E57A44"
+  lovelace-background: center / cover no-repeat url("/local/pictures/background-light.png") fixed
+  primary-base-color: "#1B2432"
+  secondary-base-color: "#1B2432C0"
+  primary-select-color: "#5296A5"
+  primary-on-color: "var(--green)"
+  scene-background-color: "#EDE5D1E0"
+  primary-text-color: "#1B2432"
+  opaque-background-color: "#EDE5D1"
+  hvac-cool: var(--primary-select-color)
+  hvac-heat: "var(--red)"
+  hvac-auto: "var(--yellow)"
+  hvac-dry: "#99582A"
+  energy-source-battery: "var(--green)"
+  energy-source-grid: "var(--red)"
+  energy-source-solar: "var(--yellow)"
+  hvac-fan_only: var(--scene-on-background-color)
+  ceiling-fan-percentage-color: var(--primary-select-color)
+  ceiling-fan-background-color: "#5296A540"

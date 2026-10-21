@@ -1,0 +1,20 @@
+- unique_id: sun_custom
+  sensors:
+    - unique_id: sunrise_start
+      name: Sunrise Start
+      icon: mdi:weather-sunset-up
+      time_at_elevation: -4.5
+    - unique_id: sunrise_end
+      name: Sunrise End
+      time_at_elevation: 4.5
+      icon: mdi:weather-sunset-up
+    - unique_id: sunset_start
+      name: Sunset Start
+      icon: mdi:weather-sunset-down
+      direction: setting
+      time_at_elevation: 4.5
+    - unique_id: sunset_end
+      name: Sunset End
+      icon: mdi:weather-sunset-down
+      direction: setting
+      time_at_elevation: -4.5

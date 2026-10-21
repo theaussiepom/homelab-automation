@@ -1,0 +1,66 @@
+- title: Radar
+  path: radar
+  subview: true
+  icon: mdi:radar
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: |
+      "m1 c1 m2 c2 m3"
+    margin: 30px 0px
+  cards:
+    - type: custom:stack-in-card
+      view_layout:
+        grid-area: c1
+      card_mod:
+        style: |
+          ha-card {
+            border-width: 5px;
+            border-color: var(--primary-base-color);
+            border-radius: 30px;
+            background: var(--tablet-card-background-color);
+          }
+      cards:
+        - type: custom:weather-radar-card
+          frame_count: 12
+          frame_delay: 500
+          show_marker: true
+          show_range: true
+          data_source: RainViewer-NEXRAD
+          map_style: voyager
+          zoom_level: 9
+          restart_delay: 1000
+          static_map: true
+          show_scale: true
+          card_mod:
+            style: |
+              ha-card {
+                border-style: none;
+              }
+    - type: custom:layout-card
+      layout_type: custom:vertical-layout
+      view_layout:
+        grid-area: c2
+      layout:
+        width: 100
+      cards:
+        - type: custom:gap-card
+          height: 45
+        - type: custom:button-card
+          color_type: card
+          color: var(--scene-on-background-color)
+          icon: mdi:arrow-left-bold-outline
+          show_name: false
+          aspect_ratio: 1/1
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace-living/weather
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+            icon:
+              - width: 100%
+              - color: var(--scene-icon-color)

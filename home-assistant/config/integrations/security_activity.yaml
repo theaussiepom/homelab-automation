@@ -1,0 +1,61 @@
+# Private twelve-hour paired Activity history and motion snapshots.
+security_activity:
+  sources:
+    - entity_id: binary_sensor.g4_doorbell_pro_motion_2
+      kind: motion
+      feed: front_door
+      display_name: Front Door motion
+      camera_entity_id: camera.g4_doorbell_pro
+    - entity_id: binary_sensor.g4_doorbell_pro_package_camera_motion
+      kind: motion
+      feed: front_door
+      display_name: Package camera motion
+      camera_entity_id: camera.g4_doorbell_pro_package_camera_2
+    - entity_id: event.g4_doorbell_pro_doorbell_2
+      kind: event
+      feed: front_door
+      display_name: Front Door doorbell
+      motion_entity_id: binary_sensor.g4_doorbell_pro_motion_2
+      event_role: doorbell
+    - entity_id: event.g4_doorbell_pro_object_detected
+      kind: event
+      feed: front_door
+      display_name: Front Door detection
+      motion_entity_id: binary_sensor.g4_doorbell_pro_motion_2
+    - entity_id: event.g4_doorbell_pro_package_camera_object_detected
+      kind: event
+      feed: front_door
+      display_name: Package camera detection
+      motion_entity_id: binary_sensor.g4_doorbell_pro_package_camera_motion
+    - entity_id: binary_sensor.frontdoor_door_door_inside_frontdoor_contact
+      kind: door
+      feed: entrances
+      display_name: Front Door main door
+    - entity_id: binary_sensor.frontdoor_door_door_outside_frontdoor_contact
+      kind: door
+      feed: entrances
+      display_name: Front Door security door
+    - entity_id: binary_sensor.living_door_door_inside_living_contact
+      kind: door
+      feed: entrances
+      display_name: Deck main door
+    - entity_id: binary_sensor.living_door_door_outside_living_contact
+      kind: door
+      feed: entrances
+      display_name: Deck security door
+    - entity_id: binary_sensor.laundry_door_door_inside_laundry_contact
+      kind: door
+      feed: entrances
+      display_name: Laundry main door
+    - entity_id: binary_sensor.laundry_door_door_outside_laundry_contact
+      kind: door
+      feed: entrances
+      display_name: Laundry security door
+    - entity_id: binary_sensor.frontdoor_door_door_gate_deck_contact
+      kind: door
+      feed: entrances
+      display_name: Front gate
+    - entity_id: cover.garage_door
+      kind: door
+      feed: entrances
+      display_name: Garage door

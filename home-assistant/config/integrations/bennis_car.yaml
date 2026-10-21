@@ -1,0 +1,143 @@
+################################################################################
+# Bennis Tesla Charging Cost Tracking
+#
+# Purpose:
+# Tracks the estimated cost of charging the Tesla (Bennis) at home.
+#
+# Billing logic:
+# - Count charging only when the Tesla is charging at home
+# - Use Tesla charger power in kW (not Zappi CT1, to avoid double-counting with Matty)
+# - Multiply by the current effective import rate in $/kWh
+# - Integrate $/hour into accumulated dollars
+# - Use utility meters for daily/weekly/monthly/yearly reset periods
+# - Use text-only display sensors for dashboard-friendly $0.00 formatting
+################################################################################
+
+template:
+  ##############################################################################
+  # Binary sensor
+  ##############################################################################
+
+  - binary_sensor:
+      - name: "Bennis Tesla Plugged In At Home"
+        unique_id: bennis_tesla_plugged_in_at_home
+        icon: mdi:ev-plug-type2
+        state: >
+          {{ is_state('binary_sensor.bennis_located_at_home', 'on')
+             and is_state('binary_sensor.bennis_charge_cable', 'on') }}
+
+      - name: "Bennis Tesla Charging At Home"
+        unique_id: bennis_tesla_charging_at_home
+        icon: mdi:car-electric
+        state: >
+          {{ is_state('binary_sensor.bennis_located_at_home', 'on')
+             and is_state('binary_sensor.bennis_charge_cable', 'on')
+             and states('sensor.bennis_charger_power') | float(0) > 0 }}
+
+  ##############################################################################
+  # Template sensors
+  ##############################################################################
+
+  - sensor:
+      ##########################################################################
+      # Live calculation sensors
+      ##########################################################################
+
+      - name: "Bennis Tesla Charge Power"
+        unique_id: bennis_tesla_charge_power
+        icon: mdi:ev-station
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% if is_state('binary_sensor.bennis_tesla_charging_at_home', 'on') %}
+            {{ states('sensor.bennis_charger_power') | float(0) | round(3) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: "Bennis Tesla Charging Cost Rate"
+        unique_id: bennis_tesla_charging_cost_rate
+        icon: mdi:cash-clock
+        unit_of_measurement: "$/h"
+        state_class: measurement
+        state: >
+          {% set power_kw = states('sensor.bennis_tesla_charge_power') | float(0) %}
+          {% set import_rate = states('sensor.energy_current_effective_import_rate') | float(0) %}
+          {{ (power_kw * import_rate) | round(5) }}
+
+      ##########################################################################
+      # Display-only text sensors
+      ##########################################################################
+
+      - name: "Bennis Tesla Charging Cost Today"
+        unique_id: bennis_tesla_charging_cost_today
+        icon: mdi:cash
+        state: >
+          ${{ '%.2f' | format(states('sensor.bennis_tesla_charging_cost_daily') | float(0)) }}
+
+      - name: "Bennis Tesla Charging Cost This Week"
+        unique_id: bennis_tesla_charging_cost_this_week
+        icon: mdi:cash
+        state: >
+          ${{ '%.2f' | format(states('sensor.bennis_tesla_charging_cost_weekly') | float(0)) }}
+
+      - name: "Bennis Tesla Charging Cost Previous Week"
+        unique_id: bennis_tesla_charging_cost_previous_week
+        icon: mdi:cash-check
+        state: >
+          ${{ '%.2f' | format(state_attr('sensor.bennis_tesla_charging_cost_weekly', 'last_period') | default(0, true) | float(0)) }}
+
+      - name: "Bennis Tesla Charging Cost This Month"
+        unique_id: bennis_tesla_charging_cost_this_month
+        icon: mdi:cash
+        state: >
+          ${{ '%.2f' | format(states('sensor.bennis_tesla_charging_cost_monthly') | float(0)) }}
+
+      - name: "Bennis Tesla Charging Cost This Year"
+        unique_id: bennis_tesla_charging_cost_this_year
+        icon: mdi:cash
+        state: >
+          ${{ '%.2f' | format(states('sensor.bennis_tesla_charging_cost_yearly') | float(0)) }}
+
+################################################################################
+# Integration sensor
+################################################################################
+
+sensor:
+  - platform: integration
+    source: sensor.bennis_tesla_charging_cost_rate
+    name: "Bennis Tesla Charging Cost Total"
+    unique_id: bennis_tesla_charging_cost_total
+    unit_time: h
+    method: left
+    round: 2
+
+################################################################################
+# Utility meters
+################################################################################
+
+utility_meter:
+  bennis_tesla_charging_cost_daily:
+    source: sensor.bennis_tesla_charging_cost_total
+    name: "Bennis Tesla Charging Cost Daily"
+    cycle: daily
+    always_available: true
+
+  bennis_tesla_charging_cost_weekly:
+    source: sensor.bennis_tesla_charging_cost_total
+    name: "Bennis Tesla Charging Cost Weekly"
+    cycle: weekly
+    always_available: true
+
+  bennis_tesla_charging_cost_monthly:
+    source: sensor.bennis_tesla_charging_cost_total
+    name: "Bennis Tesla Charging Cost Monthly"
+    cycle: monthly
+    always_available: true
+
+  bennis_tesla_charging_cost_yearly:
+    source: sensor.bennis_tesla_charging_cost_total
+    name: "Bennis Tesla Charging Cost Yearly"
+    cycle: yearly
+    always_available: true

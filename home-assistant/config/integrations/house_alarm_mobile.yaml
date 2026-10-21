@@ -1,0 +1,32 @@
+# Additive HA package: /config/integrations/house_alarm_mobile.yaml.
+# Secret-bearing action is kept in automation configuration, whose read API is admin-only.
+automation:
+  - id: house_alarm_disarm_trusted_backend
+    alias: House Alarm - trusted account disarm backend
+    description: Accept only actual authenticated Ben or Erin event contexts; direct manual automation triggers cannot bypass this action-level gate.
+    mode: single
+    trace:
+      stored_traces: 0
+    triggers:
+      - trigger: event
+        event_type: house_alarm_trusted_disarm_requested
+        context:
+          user_id:
+            - a9a9e2d41e7b44fab972c064d89f67ce
+            - e68930c0a3314c1b804ac859b1e6a8ec
+    actions:
+      - if:
+          - condition: template
+            value_template: >-
+              {{ not (trigger is defined and trigger.platform == 'event'
+                 and trigger.event is defined
+                 and trigger.event.event_type == 'house_alarm_trusted_disarm_requested'
+                 and trigger.event.context.user_id in ['a9a9e2d41e7b44fab972c064d89f67ce', 'e68930c0a3314c1b804ac859b1e6a8ec']) }}
+        then:
+          - stop: Disarm requires an authenticated Ben or Erin event.
+            error: true
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.house_alarm
+        data:
+          code: !secret house_alarm_code

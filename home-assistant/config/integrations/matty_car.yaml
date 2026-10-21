@@ -1,0 +1,150 @@
+################################################################################
+# Matty Dolphin Charging Cost Tracking
+#
+# Purpose:
+# Tracks the estimated cost of Matty charging the BYD Dolphin at home.
+#
+# Billing logic:
+# - Count charging only when the Dolphin is charging
+# - Count charging only when the Dolphin is at home
+# - Use Zappi CT1 power in watts
+# - Convert watts to kilowatts
+# - Multiply by the current effective import rate in $/kWh
+# - Integrate $/hour into accumulated dollars
+# - Use utility meters for daily/weekly/monthly/yearly reset periods
+# - Use text-only display sensors for dashboard-friendly $0.00 formatting
+#
+# EV charging control helpers:
+# - binary_sensor.matty_dolphin_charge_allowed is on when the Dolphin is at home
+#   and the charger is connected (for Node-RED EV control)
+################################################################################
+
+template:
+  ##############################################################################
+  # Binary sensor
+  ##############################################################################
+
+  - binary_sensor:
+      - name: "Matty Dolphin Charge Allowed"
+        unique_id: matty_dolphin_charge_allowed
+        icon: mdi:ev-plug-type2
+        state: !secret ha_vehicle_state_1
+      - name: "Matty Dolphin Charging At Home"
+        unique_id: matty_dolphin_charging_at_home
+        icon: mdi:car-electric
+        state: !secret ha_vehicle_state_2
+  ##############################################################################
+  # Template sensors
+  ##############################################################################
+
+  - sensor:
+      ##########################################################################
+      # Live calculation sensors
+      ##########################################################################
+
+      - name: "Matty Dolphin Charge Power"
+        unique_id: matty_dolphin_charge_power
+        icon: mdi:ev-station
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% if is_state('binary_sensor.matty_dolphin_charging_at_home', 'on') %}
+            {{ (states('sensor.myenergi_zappi_21539112_internal_load_ct1') | float(0) / 1000) | round(3) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: "Matty Dolphin Charging Cost Rate"
+        unique_id: matty_dolphin_charging_cost_rate
+        icon: mdi:cash-clock
+        unit_of_measurement: "$/h"
+        state_class: measurement
+        state: >
+          {% set power_kw = states('sensor.matty_dolphin_charge_power') | float(0) %}
+          {% set import_rate = states('sensor.energy_current_effective_import_rate') | float(0) %}
+          {{ (power_kw * import_rate) | round(5) }}
+
+      ##########################################################################
+      # Display-only text sensors
+      #
+      # These are intentionally plain text sensors, not monetary sensors.
+      # The utility meters below remain the source of truth for the numbers.
+      ##########################################################################
+
+      - name: "Matty Dolphin Charging Cost Today"
+        unique_id: matty_dolphin_charging_cost_today
+        icon: mdi:cash
+        state: >
+          ${{ '%.2f' | format(states('sensor.matty_dolphin_charging_cost_daily') | float(0)) }}
+
+      - name: "Matty Dolphin Charging Cost This Week"
+        unique_id: matty_dolphin_charging_cost_this_week
+        icon: mdi:cash
+        state: >
+          ${{ '%.2f' | format(states('sensor.matty_dolphin_charging_cost_weekly') | float(0)) }}
+
+      - name: "Matty Dolphin Charging Cost Previous Week"
+        unique_id: matty_dolphin_charging_cost_previous_week
+        icon: mdi:cash-check
+        state: >
+          ${{ '%.2f' | format(state_attr('sensor.matty_dolphin_charging_cost_weekly', 'last_period') | default(0, true) | float(0)) }}
+
+      - name: "Matty Dolphin Charging Cost This Month"
+        unique_id: matty_dolphin_charging_cost_this_month
+        icon: mdi:cash
+        state: >
+          ${{ '%.2f' | format(states('sensor.matty_dolphin_charging_cost_monthly') | float(0)) }}
+
+      - name: "Matty Dolphin Charging Cost This Year"
+        unique_id: matty_dolphin_charging_cost_this_year
+        icon: mdi:cash
+        state: >
+          ${{ '%.2f' | format(states('sensor.matty_dolphin_charging_cost_yearly') | float(0)) }}
+
+################################################################################
+# Integration sensor
+#
+# Converts the live $/h cost rate into accumulated dollars.
+################################################################################
+
+sensor:
+  - platform: integration
+    source: sensor.matty_dolphin_charging_cost_rate
+    name: "Matty Dolphin Charging Cost Total"
+    unique_id: matty_dolphin_charging_cost_total
+    unit_time: h
+    method: left
+    round: 2
+
+################################################################################
+# Utility meters
+#
+# These do the actual daily/weekly/monthly/yearly reset logic.
+# Use the text display sensors above on dashboards.
+################################################################################
+
+utility_meter:
+  matty_dolphin_charging_cost_daily:
+    source: sensor.matty_dolphin_charging_cost_total
+    name: "Matty Dolphin Charging Cost Daily"
+    cycle: daily
+    always_available: true
+
+  matty_dolphin_charging_cost_weekly:
+    source: sensor.matty_dolphin_charging_cost_total
+    name: "Matty Dolphin Charging Cost Weekly"
+    cycle: weekly
+    always_available: true
+
+  matty_dolphin_charging_cost_monthly:
+    source: sensor.matty_dolphin_charging_cost_total
+    name: "Matty Dolphin Charging Cost Monthly"
+    cycle: monthly
+    always_available: true
+
+  matty_dolphin_charging_cost_yearly:
+    source: sensor.matty_dolphin_charging_cost_total
+    name: "Matty Dolphin Charging Cost Yearly"
+    cycle: yearly
+    always_available: true

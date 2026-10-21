@@ -1,0 +1,218 @@
+{# Existing economic/session predicate; intent is independent of temporary actuator recovery. #}
+{% macro battery_session_policy(returns) -%}
+{% from 'energy_battery_authority.jinja' import battery_plan_authority %}
+{% set current_plan_authority=battery_plan_authority|as_function %}
+{% set authority_raw=state_attr('sensor.energy_recovery_forecast_model_cache','model_data') %}
+{% set authority_plan=authority_raw if authority_raw is mapping else authority_raw|from_json({}) if authority_raw is string else {} %}
+{% set authority_source=states.sensor.energy_solcast_planning_snapshot %}
+{% set authority_snapshot=dict(authority_source.attributes,state=authority_source.state) if authority_source is not none else {} %}
+{% set plan_authority_ok=current_plan_authority(authority_plan,has_value('sensor.energy_recovery_forecast_model_cache') and state_attr('sensor.energy_recovery_forecast_model_cache','restored') != true,authority_snapshot,as_timestamp(now())) %}
+{% set raw_plan = state_attr('sensor.energy_recovery_forecast_model_cache', 'model_data') %}
+{% set decoded_plan = raw_plan if raw_plan is mapping else raw_plan | from_json({}) if raw_plan is string else {} %}
+{% set plan = decoded_plan if decoded_plan is mapping else {} %}
+{% set session = states('input_text.energy_battery_charge_session') | from_json({}) %}
+{% set ack = states('input_text.sg_battery_command_ack') | from_json({}) %}
+{% if not (plan_authority_ok and session is mapping and session.get('id') is string and session.get('id') | length > 0
+  and not session.get('done', false)
+  and is_number(session.get('start')) and is_number(session.get('end'))
+  and is_number(session.get('max_end')) and is_number(session.get('targetkwh'))
+  and is_number(session.get('targetsoc')) and is_number(session.get('power'))
+  and is_number(session.get('budget'))
+  and session.start | float <= as_timestamp(now())
+  and session.start | float < session.end | float <= session.max_end | float
+  and 0 < session.targetkwh | float and 0 < session.targetsoc | float <= 90
+  and 0 < session.power | float <= 3000 and 0 < session.budget | float and plan is mapping and plan.get('ready') == true
+  and is_number(states('sensor.battery_level'))
+  and is_number(states('sensor.energy_battery_effective_capacity'))
+  and is_number(plan.get('target_kwh'))
+  and 0 <= states('sensor.battery_level') | float <= 100
+  and states('sensor.energy_battery_effective_capacity') | float > 0
+  and plan.target_kwh | float > 0
+ and has_value('sensor.battery_level') and is_number(states('sensor.battery_level'))
+ and 0 <= states('sensor.battery_level') | float <= 100
+ and 0 <= as_timestamp(now()) - as_timestamp(states.sensor.battery_level.last_reported, 0) <= 180
+ and plan.get('passive_target_met', true) == false and plan.get('passive_dominates_continuation',true)==false and is_state('input_boolean.energy_disable_automation', 'off')
+  and is_state('input_boolean.energy_allow_overnight_battery_charge', 'on')
+  and is_state('input_boolean.sg_battery_control_armed', 'on')
+  
+  and is_state('binary_sensor.energy_tariff_ev', 'on')
+  and is_state('binary_sensor.energy_recovery_target_forecast_available', 'on')) %}{% do returns(false) %}
+{% else %}
+{% set stored = states('sensor.battery_level') | float / 100 * states('sensor.energy_battery_effective_capacity') | float %}
+{% set target = [session.targetkwh | float, plan.get('stop_target_kwh', plan.target_kwh) | float, states('sensor.energy_battery_effective_capacity') | float * 0.9] | min %}
+
+{% do returns(as_timestamp(now()) < session.end | float and stored < target
+ and states('sensor.battery_level') | float < 90) %}{% endif %}
+{%- endmacro %}
+
+{# Reconciliation only. Economic authority is the existing captured-session policy above. #}
+{% macro battery_recovery_decision(returns) -%}
+  {% set t=as_timestamp(now()) %}
+  {% set s0=states('input_text.energy_battery_charge_session')|from_json({}) %}
+  {% set m0=states('input_text.sg_battery_manual_lease')|from_json({}) %}
+  {% set a0=states('input_text.sg_battery_command_ack')|from_json({}) %}
+  {% set r0=states('input_text.energy_battery_recovery')|from_json({}) %}
+  {% set nr0=states('input_text.sg_battery_normal_confirmation')|from_json({}) %}
+  {% set s=s0 if s0 is mapping else {} %}{% set m=m0 if m0 is mapping else {} %}
+  {% set a=a0 if a0 is mapping else {} %}{% set nr=nr0 if nr0 is mapping else {} %}
+  {% set r=r0 if r0 is mapping else {} %}
+  {% set epoch=states('input_text.sg_battery_authority_epoch') %}
+  {% set epoch_ok=epoch not in ['', 'unknown', 'unavailable'] %}
+  {% set sid=s.get('id','') if s.get('id') is string else '' %}
+  {% set mid=m.get('id','') if m.get('id') is string else '' %}
+  {% set s_open=sid|length>0 and s.get('done') == false %}
+  {% set m_open=mid|length>0 and m.get('done') == false %}
+  {% set policy=battery_session_policy|as_function %}
+  {% set auto_ok=s_open and not m_open and policy() %}
+  {% set soc=states('sensor.battery_level')|float(-1) %}
+  {% set soc_age=t-as_timestamp(states.sensor.battery_level.last_reported,0) if states.sensor.battery_level is not none else 999999 %}
+  {% set soc_ok=has_value('sensor.battery_level') and is_number(states('sensor.battery_level')) and 0<=soc<=100 and 0<=soc_age<=180 %}
+  {% from 'energy_battery_manual.jinja' import battery_manual_permitted %}
+  {% set manual_policy=battery_manual_permitted|as_function %}
+  {% set manual_ok=m_open and not s_open and epoch_ok and manual_policy(m) %}
+  {% set pending=is_state('input_boolean.sg_battery_stop_pending','on') %}
+  {% set busy=is_state('script.sg_battery_command_owner','on') %}
+  {% set ingress=is_state('script.sg_battery_request','on') %}
+  {% set ages=namespace(ok=true) %}
+  {% for e in ['sensor.ems_mode_selection_raw','sensor.battery_forced_charge_discharge_cmd_raw'] %}
+    {% set q=states[e] %}
+    {% if q is none or not has_value(e) or not is_number(q.state) or q.state|float!=q.state|int
+      or not (0<=t-as_timestamp(q.last_reported,0)<=180) %}{% set ages.ok=false %}{% endif %}
+  {% endfor %}
+  {% set fresh=ages.ok %}
+  {% set ems=states('sensor.ems_mode_selection_raw')|int(-1) %}
+  {% set cmd=states('sensor.battery_forced_charge_discharge_cmd_raw')|int(-1) %}
+  {% set normal=fresh and ems==0 and cmd==204 %}
+  {% set ps=states.sensor.battery_forced_charge_discharge_power %}
+  {% set power_ok=ps is not none and has_value('sensor.battery_forced_charge_discharge_power')
+      and is_number(ps.state) and 0<=t-as_timestamp(ps.last_reported,0)<=180 %}
+  {% set scope=r.get('id')==sid and sid|length>0 %}
+  {% set count=r.get('starts',0)|int(0) if scope else 0 %}
+  {% set phase=r.get('phase','idle') %}
+  {% set stopping_phase=phase in ['stopping','stop_backoff','stop_escalated'] %}
+  {% set in_setup=auto_ok and is_number(s.get('start')) and t<=s.start|float+60 %}
+  {% set ack_identity=scope and a.get('id')==sid and a.get('authority')=='session'
+     and a.get('op')=='charge' and a.get('power')==s.get('power')
+     and a.get('attempt')==count and count in [1,2,3]
+     and a.get('epoch')==r.get('epoch') and is_number(a.get('ts'))
+     and is_number(s.get('start')) and s.start|float<=a.ts|float<=t %}
+  {% set ack_good=ack_identity and a.get('epoch')==epoch and a.get('status')=='confirmed'
+     and is_number(a.get('started')) and s.start|float<=a.started|float<=a.ts|float<=s.start|float+60 %}
+  {% set failed_pre=ack_identity and a.get('status')=='failed' and 'started' in a and a.started is none %}
+  {% set can_retry=in_setup and failed_pre and count<3 %}
+  {% set manual_ack=manual_ok and a.get('id')==mid and a.get('authority')=='manual' and a.get('op')==m.get('op')
+     and a.get('power')==m.get('power') and a.get('epoch')==epoch and a.get('attempt')==1
+     and a.get('status')=='confirmed' and is_number(a.get('started')) and is_number(a.get('ts'))
+     and m.start|float<=a.started|float<=a.ts|float<=t %}
+  {% set actual_auto=fresh and power_ok and ems==2 and cmd==170 and ps.state|float==s.get('power') %}
+  {% set wanted_manual_cmd=170 if m.get('op')=='charge' else 187 if m.get('op')=='discharge' else 204 %}
+  {% set actual_manual=fresh and power_ok and ems==2 and cmd==wanted_manual_cmd and ps.state|float==m.get('power') %}
+  {% set watts=states.sensor.battery_power_raw %}
+  {% set watts_fresh=watts is not none and has_value('sensor.battery_power_raw') and is_number(watts.state)
+     and 0<=t-as_timestamp(watts.last_reported,0)<=60 %}
+  {% set auto_power_fault=not watts_fresh or (is_number(s.get('start')) and t-s.start|float>120
+     and watts.state|float(0)|abs < [100,s.get('power',0)|float*0.2]|min) %}
+  {% set manual_power_fault=m.get('op') in ['charge','discharge'] and (not watts_fresh
+     or ((m.get('kind')!='target' or m.get('target')!=100 or soc<95) and is_number(m.get('start')) and t-m.start|float>120
+     and watts.state|float(0)|abs < [100,m.get('power',0)|float*0.2]|min)) %}
+  {% set receipt_ok=normal and not pending and not busy and not ingress and epoch_ok
+     and nr.get('epoch')==epoch and nr.get('v')==1 and nr.get('status')=='confirmed' and nr.get('operation')=='normal'
+     and nr.get('ems')==0 and nr.get('command')==204 and is_number(nr.get('read_after')) and is_number(nr.get('confirmed_at'))
+     and 0<nr.read_after|float<=nr.confirmed_at|float<=t and t-nr.confirmed_at|float<=180
+     and nr.read_after|float<=as_timestamp(states.sensor.ems_mode_selection_raw.last_reported,0)
+     and nr.read_after|float<=as_timestamp(states.sensor.battery_forced_charge_discharge_cmd_raw.last_reported,0)
+     and nr.confirmed_at|float>=r.get('last',0)|float(0) %}
+  {% set old_stops=[0,r.get('stops',0)|int(0)]|max %}
+  {% set last=r.get('last',0)|float(0) %}
+  {% set next=r.get('next',0)|float(0) %}
+  {% set n=namespace(action='none',reason='observed_normal',cancel_session=false,cancel_manual=false,recovery_stop=false,
+       out=r,need_stop=false,force_stop=false) %}
+
+  {# Invalid authority cancels immediately, independently of retries and alert throttling. #}
+  {# Failed lease cleanup must not cancel every Stop attempt or flood an already safe device. #}
+  {% set safe_disarmed=normal and epoch_ok and not pending and not busy and not ingress
+       and is_state('input_boolean.sg_battery_control_armed','off') %}
+  {% if s_open and not auto_ok %}{% set n.cancel_session=true %}{% set n.need_stop=not safe_disarmed %}{% set n.force_stop=not stopping_phase %}{% set n.reason='automatic_authority_withdrawn' %}{% endif %}
+  {% if m_open and not manual_ok %}{% set n.cancel_manual=true %}{% set n.need_stop=not safe_disarmed %}{% set n.force_stop=not stopping_phase %}{% set n.reason='manual_authority_withdrawn' %}{% endif %}
+  {% if not n.need_stop and auto_ok %}
+    {% if ack_good and not pending %}
+      {% if busy %}{% set n.reason='owner_finishing' %}
+      {% elif actual_auto and not auto_power_fault %}{% set n.out=dict(r,phase='confirmed',next=0,stops=0,offline=false) %}{% set n.reason='charge_confirmed' %}
+      {% else %}{% set n.need_stop=true %}{% set n.force_stop=true %}{% set n.cancel_session=true %}{% set n.reason='confirmed_charge_feedback_lost' %}{% endif %}
+    {% elif in_setup and count==0 and not pending and not busy and not ingress and normal and epoch_ok %}
+      {% set n.action='start' %}{% set n.reason='initial_attempt' %}
+      {% set n.out={'id':sid,'phase':'starting','starts':1,'stops':0,'next':0,'first':t|int,'last':t|int,'epoch':epoch,'offline':false} %}
+    {% elif can_retry %}
+      {% if pending or (stopping_phase and not receipt_ok) %}
+        {% set n.need_stop=true %}{% set n.recovery_stop=true %}{% set n.reason='verify_stop_before_retry' %}
+      {% elif busy or ingress %}{% set n.reason='wait_for_owner' %}
+      {% elif stopping_phase and receipt_ok %}
+        {% set n.out=dict(r,phase='retry_wait',next=(t+(5 if count==1 else 10))|int,stops=0,offline=false) %}
+        {% set n.reason='start_backoff' %}
+      {% elif phase=='retry_wait' and normal and next<=t and epoch_ok %}
+        {% set n.action='start' %}{% set n.reason='pre_enable_retry' %}
+        {% set n.out=dict(r,phase='starting',starts=count+1,stops=0,next=0,last=t|int,epoch=epoch,offline=false) %}
+      {% elif phase=='retry_wait' %}{% set n.reason='start_backoff' %}
+      {% else %}{% set n.need_stop=true %}{% set n.recovery_stop=true %}{% set n.reason='verify_stop_before_retry' %}{% endif %}
+    {% elif in_setup and busy and phase=='starting' and scope and r.get('epoch')==epoch and not ack_identity %}
+      {% set n.reason='start_in_progress' %}
+    {% elif in_setup and count==0 and (busy or ingress or pending) %}
+      {% set n.need_stop=pending %}{% set n.reason='initial_stop_barrier' %}
+    {% elif in_setup and phase=='starting' and scope and not ack_identity and t-last<10 and not pending %}
+      {% set n.reason='await_owner_ack' %}
+    {% else %}
+      {% set n.need_stop=true %}{% set n.force_stop=true %}{% set n.cancel_session=true %}
+      {% set n.reason='setup_expired' if not in_setup else 'start_attempts_exhausted' if failed_pre and count>=3 else 'ambiguous_or_failed_enable' %}
+    {% endif %}
+  {% elif not n.need_stop and manual_ok %}
+    {% from 'energy_battery_manual.jinja' import battery_target_refresh_permitted %}
+    {% set refresh_permitted=battery_target_refresh_permitted|as_function %}
+    {% set result=states.input_text.sg_battery_control_result %}
+    {% set refreshing=m.get('kind')=='target' and manual_ack and busy and result is not none
+      and result.state.startswith('Refreshing:') and 0<=t-as_timestamp(result.last_reported,0)<=60 %}
+    {% set refresh_ok=m.get('kind')=='target' and manual_ack and refresh_permitted(epoch,mid,m.get('power')) %}
+    {% set refresh_age=t-a.get('ts',t)|float %}
+    {% if refreshing %}{% set n.reason='manual_refreshing' %}
+    {% elif refresh_ok and not busy and not ingress and (refresh_age>=60 or (not actual_manual and refresh_age>=20)) %}
+      {% set n.action='refresh' %}{% set n.reason='target_keepalive_due' if actual_manual else 'target_mode_drift' %}
+    {% elif refresh_ok and (busy or ingress or not actual_manual) %}{% set n.reason='target_refresh_wait' %}
+    {% elif not pending and manual_ack and actual_manual and not manual_power_fault %}{% set n.reason='manual_confirmed' %}
+    {% elif not pending and (busy and t-m.start|float<=60 or t-m.start|float<=10) and a.get('id')!=mid %}{% set n.reason='manual_preparing' %}
+    {% else %}{% set n.need_stop=true %}{% set n.force_stop=true %}{% set n.cancel_manual=true %}{% set n.reason='manual_command_unconfirmed' %}{% endif %}
+  {% elif not n.need_stop and not auto_ok and not manual_ok %}
+    {% if pending or not normal or not epoch_ok %}{% set n.need_stop=true %}{% set n.reason='pending_stop' if pending else 'unowned_or_unverified_mode' %}
+    {% elif stopping_phase %}
+      {% if receipt_ok %}{% set n.out=dict(r,phase='confirmed',next=0,stops=0,epoch=epoch,offline=false) %}{% set n.reason='normal_confirmed' %}
+      {% else %}{% set n.need_stop=true %}{% set n.reason='normal_receipt_required' %}{% endif %}
+    {% else %}
+      {% set n.out={'id':'','phase':'idle','starts':0,'stops':0,'next':0,'first':0,'last':0,'epoch':epoch,'offline':false} %}
+    {% endif %}
+  {% endif %}
+
+  {% if n.need_stop %}
+    {% set n.action='none' %}
+    {% set stop_count=old_stops if stopping_phase else 0 %}
+    {% set first=r.get('first',t)|int(t) if stopping_phase else t|int %}
+    {% set stop_id=sid if sid else mid if mid else r.get('id','') %}
+    {% set base={'id':stop_id,'phase':'stopping','starts':count,'stops':stop_count,'next':0,'first':first,'last':last|int,'epoch':r.get('epoch',epoch),'offline':not fresh} %}
+    {% if ingress %}{% set n.reason='ingress_in_progress' %}
+    {% elif busy and stopping_phase and 0<=t-last<90 and not n.force_stop %}
+      {% set n.out=dict(base,phase='stopping') %}
+    {% elif busy and not stopping_phase and not n.force_stop and not (scope and phase=='starting') %}
+      {# Adopt a startup/manual Normal transaction without cancelling it on every event. #}
+      {% set n.out=dict(base,last=t|int,first=t|int) %}
+    {% elif stopping_phase and phase=='stopping' and not busy and pending and not n.force_stop %}
+      {% set delay=15 if stop_count<=1 else 30 if stop_count==2 else 60 if stop_count==3 else 300 %}
+      {% set n.out=dict(base,phase='stop_escalated' if stop_count>=4 else 'stop_backoff',next=(t+delay)|int) %}
+    {% elif stopping_phase and phase in ['stop_backoff','stop_escalated'] and next>t and next<=t+300 and not n.force_stop
+       and not (r.get('offline')==true and fresh and t-last>=15) %}
+      {% set n.out=dict(base,phase=phase,next=next|int,offline=r.get('offline',false) or not fresh) %}
+    {% else %}
+      {% set n.action='stop' %}
+      {% set n.out=dict(base,phase='stopping',stops=stop_count+1,last=t|int,next=0,offline=not fresh) %}
+    {% endif %}
+  {% endif %}
+  {% do returns({'action':n.action,'reason':n.reason,'state':n.out,'cancel_session':n.cancel_session,
+      'cancel_manual':n.cancel_manual,'recovery_stop':n.recovery_stop and not n.cancel_session and not n.cancel_manual,
+      'epoch':epoch,'session_id':sid,'manual_id':mid}) %}
+{%- endmacro %}

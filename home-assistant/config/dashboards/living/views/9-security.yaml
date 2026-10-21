@@ -1,0 +1,4276 @@
+- title: Security
+  path: security
+  icon: mdi:shield-home-outline
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/home
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:layout-card
+      layout_type: custom:grid-layout
+      layout:
+        grid-template-columns: 230px 1fr
+        grid-gap: 20px
+        margin: '0'
+        padding: '0'
+        card-margin: '0'
+      cards:
+      - type: custom:button-card
+        name: Security
+        icon: mdi:shield-home-outline
+        styles:
+          card:
+          - height: 64px
+          - border: none
+          - background: transparent
+          - box-shadow: none
+          - padding: 0 10px
+          grid:
+          - grid-template-areas: '"i n"'
+          - grid-template-columns: 55px 1fr
+          icon:
+          - width: 39px
+          - color: var(--primary-base-color)
+          name:
+          - font-size: 31px
+          - font-weight: '650'
+          - color: var(--primary-base-color)
+          - justify-self: start
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+        double_tap_action:
+          action: none
+        entity: alarm_control_panel.house_alarm
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0,1fr) 120px
+          grid-gap: 4px
+          margin: '0'
+          padding: '0'
+          card-margin: '0'
+        cards:
+        - type: custom:group-person-pills
+          entity: group.persons
+          variant: card
+          card:
+            type: custom:button-card
+            icon: mdi:account
+            show_label: true
+            label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state===''home''
+              ? ''Home'' : entity.state===''not_home'' ? ''Away'' : entity.state; ]]]'
+            styles:
+              card:
+              - height: 60px
+              - background: transparent
+              - border: none
+              - border-radius: 18px
+              - padding: 8px 4px
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i n" "i l"'
+              - grid-template-columns: 24px 1fr
+              - grid-template-rows: 1fr 1fr
+              icon:
+              - width: 24px
+              - color: '[[[ return [''on'',''home''].includes(entity?.state) ? ''var(--green)'' : ''var(--secondary-base-color)'';
+                  ]]]'
+              name:
+              - justify-self: start
+              - font-size: 16px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              label:
+              - justify-self: start
+              - font-size: 14px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            name: '[[[ return entity?.attributes?.friendly_name || entity?.entity_id?.slice(7) || ''Person''; ]]]'
+        - type: custom:button-card
+          entity: input_boolean.house_alarm_automatic_arming
+          name: Auto Arm
+          icon: mdi:shield-sync
+          show_label: true
+          label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state ===
+            ''on'' ? ''On'' : ''Off''; ]]]'
+          styles:
+            card:
+            - height: 60px
+            - background: var(--opaque-background-color)
+            - border: none
+            - border-radius: 18px
+            - padding: 8px 4px
+            - box-shadow: none
+            - border: 1px solid var(--secondary-base-color)
+            grid:
+            - grid-template-areas: '"i n" "i l"'
+            - grid-template-columns: 24px 1fr
+            - grid-template-rows: 1fr 1fr
+            icon:
+            - width: 24px
+            - color: '[[[ return [''on'',''home''].includes(entity?.state) ? ''var(--green)'' : ''var(--secondary-base-color)'';
+                ]]]'
+            name:
+            - justify-self: start
+            - font-size: 16px
+            - font-weight: '650'
+            - color: var(--primary-base-color)
+            label:
+            - justify-self: start
+            - font-size: 14px
+            - color: var(--secondary-base-color)
+          tap_action:
+            action: toggle
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: custom:stack-in-card
+          keep:
+            background: true
+            border_radius: true
+          cards:
+          - type: conditional
+            conditions:
+            - condition: state
+              entity: alarm_control_panel.house_alarm
+              state: disarmed
+            card:
+              type: grid
+              columns: 2
+              square: false
+              cards:
+              - type: custom:button-card
+                entity: binary_sensor.house_alarm_perimeter_ready
+                name: Arm (Axl)
+                icon: mdi:paw
+                show_name: true
+                show_label: true
+                show_state: false
+                label: '[[[ return !entity || ![''on'',''off''].includes(entity.state) ? ''Unavailable'' : entity.state===''on''
+                  ? "Perimeter" : ''Check sensors''; ]]]'
+                tap_action:
+                  action: call-service
+                  service: alarm_control_panel.alarm_arm_home
+                  target:
+                    entity_id: alarm_control_panel.house_alarm
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 136px
+                  - padding: 16px
+                  - border-radius: 20px
+                  - background: color-mix(in srgb, var(--green) 55%, var(--opaque-background-color))
+                  - border: 1px solid rgba(27,36,50,.18)
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i n" "i l"'
+                  - grid-template-columns: 80px 1fr
+                  - grid-template-rows: 1fr 1fr
+                  - column-gap: 12px
+                  - padding-right: 24px
+                  icon:
+                  - width: 64px
+                  - color: var(--primary-base-color)
+                  name:
+                  - font-size: 28px
+                  - font-weight: '650'
+                  - color: var(--primary-base-color)
+                  - justify-self: start
+                  - align-self: end
+                  label:
+                  - font-size: 17px
+                  - color: var(--primary-base-color)
+                  - justify-self: start
+                  - align-self: start
+                  - padding-top: 7px
+                  custom_fields:
+                    ready:
+                    - position: absolute
+                    - top: 12px
+                    - right: 12px
+                custom_fields:
+                  ready: '[[[ const ok=entity?.state===''on''; const known=[''on'',''off''].includes(entity?.state); return
+                    `<ha-icon icon="${ok?''mdi:check-circle-outline'':known?''mdi:alert-circle-outline'':''mdi:help-circle-outline''}"
+                    style="width:24px;height:24px;color:var(--primary-base-color)" aria-label="${ok?''Ready'':known?''Check
+                    sensors'':''Unavailable''}"></ha-icon>`; ]]]'
+              - type: custom:button-card
+                entity: binary_sensor.house_alarm_away_ready
+                name: Arm
+                icon: mdi:shield-lock-outline
+                show_name: true
+                show_label: true
+                show_state: false
+                label: '[[[ return !entity || ![''on'',''off''].includes(entity.state) ? ''Unavailable'' : entity.state===''on''
+                  ? "Doors + motion" : ''Check sensors''; ]]]'
+                tap_action:
+                  action: call-service
+                  service: alarm_control_panel.alarm_arm_away
+                  target:
+                    entity_id: alarm_control_panel.house_alarm
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 136px
+                  - padding: 16px
+                  - border-radius: 20px
+                  - background: color-mix(in srgb, var(--green) 55%, var(--opaque-background-color))
+                  - border: 1px solid rgba(27,36,50,.18)
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i n" "i l"'
+                  - grid-template-columns: 80px 1fr
+                  - grid-template-rows: 1fr 1fr
+                  - column-gap: 12px
+                  - padding-right: 24px
+                  icon:
+                  - width: 64px
+                  - color: var(--primary-base-color)
+                  name:
+                  - font-size: 28px
+                  - font-weight: '650'
+                  - color: var(--primary-base-color)
+                  - justify-self: start
+                  - align-self: end
+                  label:
+                  - font-size: 17px
+                  - color: var(--primary-base-color)
+                  - justify-self: start
+                  - align-self: start
+                  - padding-top: 7px
+                  custom_fields:
+                    ready:
+                    - position: absolute
+                    - top: 12px
+                    - right: 12px
+                custom_fields:
+                  ready: '[[[ const ok=entity?.state===''on''; const known=[''on'',''off''].includes(entity?.state); return
+                    `<ha-icon icon="${ok?''mdi:check-circle-outline'':known?''mdi:alert-circle-outline'':''mdi:help-circle-outline''}"
+                    style="width:24px;height:24px;color:var(--primary-base-color)" aria-label="${ok?''Ready'':known?''Check
+                    sensors'':''Unavailable''}"></ha-icon>`; ]]]'
+          - type: conditional
+            conditions:
+            - condition: state
+              entity: alarm_control_panel.house_alarm
+              state_not: disarmed
+            card:
+              type: custom:living-alarm-keypad
+              entity: alarm_control_panel.house_alarm
+          card_mod:
+            style: ha-card { background:var(--opaque-background-color); border:1px solid var(--secondary-base-color); border-radius:24px;
+              box-shadow:none; padding:8px; box-sizing:border-box; }
+        - type: conditional
+          conditions:
+          - entity: timer.house_alarm_countdown
+            state: active
+          card:
+            type: entities
+            entities:
+            - type: simple-entity
+              entity: timer.house_alarm_countdown
+              name: Countdown
+              icon: mdi:timer-sand
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+            card_mod:
+              style: ha-card { background:var(--opaque-background-color); border:0; border-radius:20px; box-shadow:none; color:var(--primary-base-color);
+                --primary-text-color:var(--primary-base-color); --secondary-text-color:var(--secondary-base-color); --primary-color:var(--primary-base-color);
+                --paper-item-icon-color:var(--primary-base-color); --state-alarm_control_panel-disarmed-color:var(--green);
+                --state-alarm_control_panel-armed_home-color:var(--yellow); --state-alarm_control_panel-armed_night-color:var(--yellow);
+                --state-alarm_control_panel-armed_away-color:var(--red); --state-alarm_control_panel-triggered-color:var(--red);
+                } .card-header {font-weight:650; font-size:23px;}
+        - type: conditional
+          conditions:
+          - condition: or
+            conditions:
+            - entity: binary_sensor.house_alarm_coverage_problem
+              state: 'on'
+            - entity: input_boolean.house_alarm_front_door_inside_exempt
+              state: 'on'
+            - entity: input_boolean.house_alarm_living_inside_exempt
+              state: 'on'
+            - entity: input_boolean.house_alarm_laundry_inside_exempt
+              state: 'on'
+          card:
+            type: markdown
+            content: '{% if is_state(''binary_sensor.house_alarm_coverage_problem'',''on'') %}<ha-alert alert-type="warning">Check
+              active / unavailable sensors</ha-alert>{% endif %}
+
+              {% for key,name in [(''front_door'',''Front Door''),(''living'',''Deck''),(''laundry'',''Laundry'')] %}{% if
+              is_state(''input_boolean.house_alarm_''+key+''_inside_exempt'',''on'') %}⏸ {{ name }} inside · bypassed until
+              closed
+
+              {% endif %}{% endfor %}'
+            entity_id:
+            - binary_sensor.house_alarm_coverage_problem
+            - input_text.house_alarm_status
+            - input_boolean.house_alarm_front_door_inside_exempt
+            - input_boolean.house_alarm_living_inside_exempt
+            - input_boolean.house_alarm_laundry_inside_exempt
+            card_mod:
+              style: ha-card { background:var(--opaque-background-color); border:0; border-radius:20px; box-shadow:none; color:var(--primary-base-color);
+                --primary-text-color:var(--primary-base-color); --secondary-text-color:var(--secondary-base-color); --primary-color:var(--primary-base-color);
+                --paper-item-icon-color:var(--primary-base-color); --state-alarm_control_panel-disarmed-color:var(--green);
+                --state-alarm_control_panel-armed_home-color:var(--yellow); --state-alarm_control_panel-armed_night-color:var(--yellow);
+                --state-alarm_control_panel-armed_away-color:var(--red); --state-alarm_control_panel-triggered-color:var(--red);
+                } .card-header {font-weight:650; font-size:23px;}
+        - type: custom:button-card
+          entity: input_text.house_alarm_status
+          show_name: false
+          show_icon: true
+          show_label: true
+          icon: mdi:alert-circle-outline
+          label: '[[[ return entity?.state || ''''; ]]]'
+          tap_action:
+            action: none
+          hold_action:
+            action: none
+          styles:
+            card:
+            - display: '[[[ return /^(Not armed:|Coverage check:)/.test(entity?.state||'''') ? ''block'' : ''none''; ]]]'
+            - height: auto
+            - background: var(--opaque-background-color)
+            - border: none
+            - border-radius: 18px
+            - padding: 12px
+            grid:
+            - grid-template-areas: '"i l"'
+            - grid-template-columns: 28px 1fr
+            icon:
+            - color: var(--yellow)
+            - width: 22px
+            label:
+            - white-space: normal
+            - text-align: left
+            - font-size: 16px
+            - color: var(--yellow)
+          double_tap_action:
+            action: none
+        - type: custom:stack-in-card
+          keep:
+            background: true
+            border_radius: true
+          cards:
+          - type: custom:button-card
+            name: Perimeter
+            icon: mdi:door-open
+            label: '[[[ const ids=["binary_sensor.frontdoor_door_door_inside_frontdoor_contact", "binary_sensor.frontdoor_door_door_outside_frontdoor_contact",
+              "binary_sensor.living_door_door_inside_living_contact", "binary_sensor.living_door_door_outside_living_contact",
+              "binary_sensor.laundry_door_door_inside_laundry_contact", "binary_sensor.laundry_door_door_outside_laundry_contact",
+              "binary_sensor.frontdoor_door_door_gate_deck_contact", "cover.garage_door"]; const values=ids.map(id=>states[id]?.state);
+              const u=values.filter(s=>!s||[''unavailable'',''unknown''].includes(s)).length; const n=values.filter(s=>["on",
+              "open", "opening", "closing"].includes(s)).length; return u ? u+'' unavailable'' : n ? n+" open" : "All closed";
+              ]]]'
+            triggers_update:
+            - binary_sensor.frontdoor_door_door_inside_frontdoor_contact
+            - binary_sensor.frontdoor_door_door_outside_frontdoor_contact
+            - binary_sensor.living_door_door_inside_living_contact
+            - binary_sensor.living_door_door_outside_living_contact
+            - binary_sensor.laundry_door_door_inside_laundry_contact
+            - binary_sensor.laundry_door_door_outside_laundry_contact
+            - binary_sensor.frontdoor_door_door_gate_deck_contact
+            - cover.garage_door
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace-living/security-entrances
+            styles:
+              card:
+              - height: 40px
+              - background: transparent
+              - border: none
+              - box-shadow: none
+              - padding: 0 8px
+              grid:
+              - grid-template-areas: '"i n l"'
+              - grid-template-columns: 38px 1fr auto
+              icon:
+              - width: 29px
+              - color: '[[[ const v=["binary_sensor.frontdoor_door_door_inside_frontdoor_contact", "binary_sensor.frontdoor_door_door_outside_frontdoor_contact",
+                  "binary_sensor.living_door_door_inside_living_contact", "binary_sensor.living_door_door_outside_living_contact",
+                  "binary_sensor.laundry_door_door_inside_laundry_contact", "binary_sensor.laundry_door_door_outside_laundry_contact",
+                  "binary_sensor.frontdoor_door_door_gate_deck_contact", "cover.garage_door"].map(id=>states[id]?.state);
+                  return v.some(s=>!s||[''unknown'',''unavailable''].includes(s)) ? ''var(--red)'' : v.some(s=>["on", "open",
+                  "opening", "closing"].includes(s)) ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - justify-self: start
+              - font-size: 22px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              label:
+              - justify-self: end
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            show_name: true
+            show_label: true
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: repeat(5,minmax(0,1fr))
+              grid-gap: 4px
+              margin: '0'
+              padding: '0'
+              card-margin: '0'
+            cards:
+            - type: custom:button-card
+              name: Front Door
+              show_icon: false
+              show_label: true
+              label: '[[[ const ids=["binary_sensor.frontdoor_door_door_inside_frontdoor_contact", "binary_sensor.frontdoor_door_door_outside_frontdoor_contact"];
+                const a=ids.map(id=>states[id]?.state); const bypass=states["input_boolean.house_alarm_front_door_inside_exempt"]?.state===''on'';
+                return a.some(s=>!s||[''unknown'',''unavailable''].includes(s)) ? ''Unavailable'' : a[0]===''on'' && a[1]===''on''
+                ? ''Both open'' : a[1]===''on'' ? ''Screen open'' : a[0]===''on'' ? (bypass ? ''Inside bypassed'' : ''Inside
+                open'') : ''Closed''; ]]]'
+              triggers_update:
+              - binary_sensor.frontdoor_door_door_inside_frontdoor_contact
+              - binary_sensor.frontdoor_door_door_outside_frontdoor_contact
+              - input_boolean.house_alarm_front_door_inside_exempt
+              custom_fields:
+                doors: '[[[ const ids=["binary_sensor.frontdoor_door_door_inside_frontdoor_contact", "binary_sensor.frontdoor_door_door_outside_frontdoor_contact"];
+                  const a=ids.map(id=>states[id]?.state); const bypass=states["input_boolean.house_alarm_front_door_inside_exempt"]?.state===''on'';
+                  return a.map((s,i)=>{ const c=!s||[''unknown'',''unavailable''].includes(s)?''var(--red)'':s===''on''?(i===0&&bypass?''var(--primary-select-color)'':''var(--yellow)''):''var(--green)'';
+                  const icon=i===0?''mdi:door'':''mdi:door-sliding''; return `<span style="display:flex;flex-direction:column;align-items:center;gap:4px"><ha-icon
+                  icon="${icon}" style="width:38px;height:38px;color:${c}"></ha-icon><span style="font-size:11px;color:var(--secondary-base-color)">${i===0?''Inside'':''Screen''}</span></span>`;
+                  }).join(''''); ]]]'
+              styles:
+                card:
+                - height: 132px
+                - padding: 7px 8px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                - border-radius: 18px
+                grid:
+                - grid-template-areas: '"n" "doors" "l"'
+                - grid-template-rows: 24px 62px 25px
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 14px
+                - color: var(--secondary-base-color)
+                custom_fields:
+                  doors:
+                  - display: flex
+                  - justify-content: center
+                  - align-items: center
+                  - gap: 22px
+              tap_action:
+                action: navigate
+                navigation_path: /lovelace-living/security-entrances
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+            - type: custom:button-card
+              name: Deck
+              show_icon: false
+              show_label: true
+              label: '[[[ const ids=["binary_sensor.living_door_door_inside_living_contact", "binary_sensor.living_door_door_outside_living_contact"];
+                const a=ids.map(id=>states[id]?.state); const bypass=states["input_boolean.house_alarm_living_inside_exempt"]?.state===''on'';
+                return a.some(s=>!s||[''unknown'',''unavailable''].includes(s)) ? ''Unavailable'' : a[0]===''on'' && a[1]===''on''
+                ? ''Both open'' : a[1]===''on'' ? ''Screen open'' : a[0]===''on'' ? (bypass ? ''Inside bypassed'' : ''Inside
+                open'') : ''Closed''; ]]]'
+              triggers_update:
+              - binary_sensor.living_door_door_inside_living_contact
+              - binary_sensor.living_door_door_outside_living_contact
+              - input_boolean.house_alarm_living_inside_exempt
+              custom_fields:
+                doors: '[[[ const ids=["binary_sensor.living_door_door_inside_living_contact", "binary_sensor.living_door_door_outside_living_contact"];
+                  const a=ids.map(id=>states[id]?.state); const bypass=states["input_boolean.house_alarm_living_inside_exempt"]?.state===''on'';
+                  return a.map((s,i)=>{ const c=!s||[''unknown'',''unavailable''].includes(s)?''var(--red)'':s===''on''?(i===0&&bypass?''var(--primary-select-color)'':''var(--yellow)''):''var(--green)'';
+                  const icon=i===0?''mdi:door'':''mdi:door-sliding''; return `<span style="display:flex;flex-direction:column;align-items:center;gap:4px"><ha-icon
+                  icon="${icon}" style="width:38px;height:38px;color:${c}"></ha-icon><span style="font-size:11px;color:var(--secondary-base-color)">${i===0?''Inside'':''Screen''}</span></span>`;
+                  }).join(''''); ]]]'
+              styles:
+                card:
+                - height: 132px
+                - padding: 7px 8px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                - border-radius: 18px
+                grid:
+                - grid-template-areas: '"n" "doors" "l"'
+                - grid-template-rows: 24px 62px 25px
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 14px
+                - color: var(--secondary-base-color)
+                custom_fields:
+                  doors:
+                  - display: flex
+                  - justify-content: center
+                  - align-items: center
+                  - gap: 22px
+              tap_action:
+                action: navigate
+                navigation_path: /lovelace-living/security-entrances
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+            - type: custom:button-card
+              name: Laundry
+              show_icon: false
+              show_label: true
+              label: '[[[ const ids=["binary_sensor.laundry_door_door_inside_laundry_contact", "binary_sensor.laundry_door_door_outside_laundry_contact"];
+                const a=ids.map(id=>states[id]?.state); const bypass=states["input_boolean.house_alarm_laundry_inside_exempt"]?.state===''on'';
+                return a.some(s=>!s||[''unknown'',''unavailable''].includes(s)) ? ''Unavailable'' : a[0]===''on'' && a[1]===''on''
+                ? ''Both open'' : a[1]===''on'' ? ''Screen open'' : a[0]===''on'' ? (bypass ? ''Inside bypassed'' : ''Inside
+                open'') : ''Closed''; ]]]'
+              triggers_update:
+              - binary_sensor.laundry_door_door_inside_laundry_contact
+              - binary_sensor.laundry_door_door_outside_laundry_contact
+              - input_boolean.house_alarm_laundry_inside_exempt
+              custom_fields:
+                doors: '[[[ const ids=["binary_sensor.laundry_door_door_inside_laundry_contact", "binary_sensor.laundry_door_door_outside_laundry_contact"];
+                  const a=ids.map(id=>states[id]?.state); const bypass=states["input_boolean.house_alarm_laundry_inside_exempt"]?.state===''on'';
+                  return a.map((s,i)=>{ const c=!s||[''unknown'',''unavailable''].includes(s)?''var(--red)'':s===''on''?(i===0&&bypass?''var(--primary-select-color)'':''var(--yellow)''):''var(--green)'';
+                  const icon=i===0?''mdi:door'':''mdi:door-sliding''; return `<span style="display:flex;flex-direction:column;align-items:center;gap:4px"><ha-icon
+                  icon="${icon}" style="width:38px;height:38px;color:${c}"></ha-icon><span style="font-size:11px;color:var(--secondary-base-color)">${i===0?''Inside'':''Screen''}</span></span>`;
+                  }).join(''''); ]]]'
+              styles:
+                card:
+                - height: 132px
+                - padding: 7px 8px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                - border-radius: 18px
+                grid:
+                - grid-template-areas: '"n" "doors" "l"'
+                - grid-template-rows: 24px 62px 25px
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 14px
+                - color: var(--secondary-base-color)
+                custom_fields:
+                  doors:
+                  - display: flex
+                  - justify-content: center
+                  - align-items: center
+                  - gap: 22px
+              tap_action:
+                action: navigate
+                navigation_path: /lovelace-living/security-entrances
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+            - type: custom:button-card
+              entity: binary_sensor.frontdoor_door_door_gate_deck_contact
+              name: Gate
+              icon: mdi:gate
+              show_label: true
+              label: '[[[ const s=entity?.state; return !s || [''unknown'',''unavailable''].includes(s) ? ''Unavailable'' : [''off'',''closed''].includes(s)
+                ? ''Closed'' : s===''opening'' ? ''Opening'' : s===''closing'' ? ''Closing'' : ''Open''; ]]]'
+              styles:
+                card:
+                - height: 132px
+                - padding: 7px 8px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                - border-radius: 18px
+                grid:
+                - grid-template-areas: '"n" "doors" "l"'
+                - grid-template-rows: 24px 62px 25px
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 14px
+                - color: var(--secondary-base-color)
+                custom_fields:
+                  doors:
+                  - display: flex
+                  - justify-content: center
+                  - align-items: center
+                  - gap: 22px
+              tap_action:
+                action: navigate
+                navigation_path: /lovelace-living/security-entrances
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              show_icon: false
+              custom_fields:
+                doors: '[[[ const s=entity?.state; const c=!s || [''unknown'',''unavailable''].includes(s) ? ''var(--red)'' : [''off'',''closed''].includes(s)
+                  ? ''var(--green)'' : ''var(--yellow)''; return `<span style="display:flex;flex-direction:column;align-items:center;gap:4px"><span
+                  style="display:flex;align-items:center;justify-content:center;height:38px;flex:0 0 38px;overflow:visible"><ha-icon icon="mdi:gate"
+                  style="width:47px;height:47px;flex-shrink:0;margin:0;color:${c}"></ha-icon></span><span aria-hidden="true" style="font-size:11px;color:var(--secondary-base-color)">&nbsp;</span></span>`;
+                  ]]]'
+            - type: custom:button-card
+              entity: cover.garage_door
+              name: Garage
+              icon: mdi:garage
+              show_label: true
+              label: '[[[ const s=entity?.state; return !s || [''unknown'',''unavailable''].includes(s) ? ''Unavailable'' : [''off'',''closed''].includes(s)
+                ? ''Closed'' : s===''opening'' ? ''Opening'' : s===''closing'' ? ''Closing'' : ''Open''; ]]]'
+              styles:
+                card:
+                - height: 132px
+                - padding: 7px 8px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                - border-radius: 18px
+                grid:
+                - grid-template-areas: '"n" "doors" "l"'
+                - grid-template-rows: 24px 62px 25px
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 14px
+                - color: var(--secondary-base-color)
+                custom_fields:
+                  doors:
+                  - display: flex
+                  - justify-content: center
+                  - align-items: center
+                  - gap: 22px
+              tap_action:
+                action: navigate
+                navigation_path: /lovelace-living/security-entrances
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              show_icon: false
+              custom_fields:
+                doors: '[[[ const s=entity?.state; const c=!s || [''unknown'',''unavailable''].includes(s) ? ''var(--red)'' : [''off'',''closed''].includes(s)
+                  ? ''var(--green)'' : ''var(--yellow)''; return `<span style="display:flex;flex-direction:column;align-items:center;gap:4px"><span
+                  style="display:flex;align-items:center;justify-content:center;height:38px;flex:0 0 38px;overflow:visible"><ha-icon icon="mdi:garage"
+                  style="width:47px;height:47px;flex-shrink:0;margin:0;color:${c}"></ha-icon></span><span aria-hidden="true" style="font-size:11px;color:var(--secondary-base-color)">&nbsp;</span></span>`;
+                  ]]]'
+          card_mod:
+            style: ha-card { background:var(--opaque-background-color); border:1px solid var(--secondary-base-color); border-radius:24px;
+              box-shadow:none; padding:10px 12px 8px; box-sizing:border-box; }
+        - type: custom:gap-card
+          height: 8
+        - type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: repeat(5,minmax(0,1fr))
+            grid-gap: 12px
+            margin: '0'
+            padding: '0'
+            card-margin: '0'
+          cards:
+          - type: custom:button-card
+            name: Motion
+            icon: mdi:motion-sensor
+            label: '[[[ const rooms=[["binary_sensor.living_motion_motion_living_entry_occupancy", "binary_sensor.bar_motion_motion_bar_occupancy"],
+              ["binary_sensor.powder_motion_motion_powder_occupancy"], ["binary_sensor.laundry_motion_motion_laundry_inside_occupancy"],
+              ["binary_sensor.garage_motion_motion_garage_entrance_occupancy", "binary_sensor.garage_motion_motion_garage_door_occupancy"],
+              ["binary_sensor.master_motion_motion_master_robe_occupancy"], ["binary_sensor.ensuite_motion_motion_ensuite_occupancy",
+              "binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy"], ["binary_sensor.bathroom_motion_motion_bathroom_occupancy",
+              "binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy"], ["binary_sensor.landing_motion_motion_landing_master_occupancy",
+              "binary_sensor.landing_motion_motion_landing_occupancy"], ["binary_sensor.study_motion_motion_study_window_occupancy"]].map(ids=>ids.map(id=>states[id]?.state));
+              const active=rooms.filter(v=>v.includes(''on'')).length; const missing=rooms.flat().filter(s=>![''on'',''off''].includes(s)).length;
+              return active ? active+'' active''+(missing ? '' · ''+missing+'' unavailable'' : '''') : missing ? missing+''
+              unavailable'' : ''All clear''; ]]]'
+            triggers_update:
+            - binary_sensor.living_motion_motion_living_entry_occupancy
+            - binary_sensor.bar_motion_motion_bar_occupancy
+            - binary_sensor.master_motion_motion_master_robe_occupancy
+            - binary_sensor.powder_motion_motion_powder_occupancy
+            - binary_sensor.laundry_motion_motion_laundry_inside_occupancy
+            - binary_sensor.ensuite_motion_motion_ensuite_occupancy
+            - binary_sensor.bathroom_motion_motion_bathroom_occupancy
+            - binary_sensor.landing_motion_motion_landing_master_occupancy
+            - binary_sensor.garage_motion_motion_garage_entrance_occupancy
+            - binary_sensor.study_motion_motion_study_window_occupancy
+            - binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy
+            - binary_sensor.garage_motion_motion_garage_door_occupancy
+            - binary_sensor.landing_motion_motion_landing_occupancy
+            - binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace-living/security-motion
+            styles:
+              card:
+              - height: 140px
+              - background: var(--opaque-background-color)
+              - border: 1px solid var(--secondary-base-color)
+              - border-radius: 20px
+              - box-shadow: none
+              - padding: 12px
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-columns: 1fr
+              - grid-template-rows: 1fr 24px 22px
+              icon:
+              - width: 54px
+              - color: '[[[ const v=["binary_sensor.living_motion_motion_living_entry_occupancy", "binary_sensor.bar_motion_motion_bar_occupancy",
+                  "binary_sensor.master_motion_motion_master_robe_occupancy", "binary_sensor.powder_motion_motion_powder_occupancy",
+                  "binary_sensor.laundry_motion_motion_laundry_inside_occupancy", "binary_sensor.ensuite_motion_motion_ensuite_occupancy",
+                  "binary_sensor.bathroom_motion_motion_bathroom_occupancy", "binary_sensor.landing_motion_motion_landing_master_occupancy",
+                  "binary_sensor.garage_motion_motion_garage_entrance_occupancy", "binary_sensor.study_motion_motion_study_window_occupancy",
+                  "binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy", "binary_sensor.garage_motion_motion_garage_door_occupancy",
+                  "binary_sensor.landing_motion_motion_landing_occupancy", "binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy"].map(id=>states[id]?.state);
+                  return v.some(s=>!s||[''unknown'',''unavailable''].includes(s)) ? ''var(--red)'' : v.some(s=>["on"].includes(s))
+                  ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - justify-self: center
+              label:
+              - font-size: 14px
+              - color: var(--secondary-base-color)
+              - justify-self: center
+            show_name: true
+            show_label: true
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            name: Cameras
+            icon: mdi:cctv
+            label: '[[[ const ids=["binary_sensor.g4_doorbell_pro_online", "binary_sensor.g4_doorbell_pro_package_camera_online"];
+              const values=ids.map(id=>states[id]?.state); const u=values.filter(s=>!s||[''unavailable'',''unknown''].includes(s)).length;
+              const n=values.filter(s=>["off"].includes(s)).length; return u ? u+'' unavailable'' : n ? n+" offline" : "2
+              online"; ]]]'
+            triggers_update:
+            - binary_sensor.g4_doorbell_pro_online
+            - binary_sensor.g4_doorbell_pro_package_camera_online
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace-living/security-cameras
+            styles:
+              card:
+              - height: 140px
+              - background: var(--opaque-background-color)
+              - border: 1px solid var(--secondary-base-color)
+              - border-radius: 20px
+              - box-shadow: none
+              - padding: 12px
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-columns: 1fr
+              - grid-template-rows: 1fr 24px 22px
+              icon:
+              - width: 54px
+              - color: '[[[ const v=["binary_sensor.g4_doorbell_pro_online", "binary_sensor.g4_doorbell_pro_package_camera_online"].map(id=>states[id]?.state);
+                  return v.some(s=>!s||[''unknown'',''unavailable''].includes(s)) ? ''var(--red)'' : v.some(s=>["off"].includes(s))
+                  ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - justify-self: center
+              label:
+              - font-size: 14px
+              - color: var(--secondary-base-color)
+              - justify-self: center
+            show_name: true
+            show_label: true
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            name: Tesla
+            icon: mdi:car-electric-outline
+            label: !secret ha_9_security_label_1
+            triggers_update:
+            - !secret ha_9_security_identity_1
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace-living/security-tesla
+            styles:
+              card:
+              - height: 140px
+              - background: var(--opaque-background-color)
+              - border: 1px solid var(--secondary-base-color)
+              - border-radius: 20px
+              - box-shadow: none
+              - padding: 12px
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-columns: 1fr
+              - grid-template-rows: 1fr 24px 22px
+              icon:
+              - width: 54px
+              - color: !secret ha_9_security_color_1
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - justify-self: center
+              label:
+              - font-size: 14px
+              - color: var(--secondary-base-color)
+              - justify-self: center
+            show_name: true
+            show_label: true
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            name: System
+            icon: mdi:lan-connect
+            label: '[[[ const ids=["binary_sensor.zigbee2mqtt_bridge_connection_state", "binary_sensor.zigbee2mqtt_bridge_connection_state_2",
+              "binary_sensor.upstairs_otbr_connected", "binary_sensor.downstairs_tr_connected", "binary_sensor.unifi_dream_machine_wan_status",
+              "binary_sensor.g4_doorbell_pro_online", "binary_sensor.g4_doorbell_pro_package_camera_online"]; const values=ids.map(id=>states[id]?.state);
+              const u=values.filter(s=>!s||[''unavailable'',''unknown''].includes(s)).length; const n=values.filter(s=>["off"].includes(s)).length;
+              return u ? u+'' unavailable'' : n ? n+" offline" : "All online"; ]]]'
+            triggers_update:
+            - binary_sensor.zigbee2mqtt_bridge_connection_state
+            - binary_sensor.zigbee2mqtt_bridge_connection_state_2
+            - binary_sensor.upstairs_otbr_connected
+            - binary_sensor.downstairs_tr_connected
+            - binary_sensor.unifi_dream_machine_wan_status
+            - binary_sensor.g4_doorbell_pro_online
+            - binary_sensor.g4_doorbell_pro_package_camera_online
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace-living/security-system
+            styles:
+              card:
+              - height: 140px
+              - background: var(--opaque-background-color)
+              - border: 1px solid var(--secondary-base-color)
+              - border-radius: 20px
+              - box-shadow: none
+              - padding: 12px
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-columns: 1fr
+              - grid-template-rows: 1fr 24px 22px
+              icon:
+              - width: 54px
+              - color: '[[[ const v=["binary_sensor.zigbee2mqtt_bridge_connection_state", "binary_sensor.zigbee2mqtt_bridge_connection_state_2",
+                  "binary_sensor.upstairs_otbr_connected", "binary_sensor.downstairs_tr_connected", "binary_sensor.unifi_dream_machine_wan_status",
+                  "binary_sensor.g4_doorbell_pro_online", "binary_sensor.g4_doorbell_pro_package_camera_online"].map(id=>states[id]?.state);
+                  return v.some(s=>!s||[''unknown'',''unavailable''].includes(s)) ? ''var(--red)'' : v.some(s=>["off"].includes(s))
+                  ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - justify-self: center
+              label:
+              - font-size: 14px
+              - color: var(--secondary-base-color)
+              - justify-self: center
+            show_name: true
+            show_label: true
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            name: Activity
+            icon: mdi:history
+            label: '[[[ return ''Recent events''; ]]]'
+            triggers_update:
+            - input_text.house_alarm_last_cause
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace-living/security-activity
+            styles:
+              card:
+              - height: 140px
+              - background: var(--opaque-background-color)
+              - border: 1px solid var(--secondary-base-color)
+              - border-radius: 20px
+              - box-shadow: none
+              - padding: 12px
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-columns: 1fr
+              - grid-template-rows: 1fr 24px 22px
+              icon:
+              - width: 54px
+              - color: '[[[ return ''var(--primary-select-color)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - justify-self: center
+              label:
+              - font-size: 14px
+              - color: var(--secondary-base-color)
+              - justify-self: center
+            show_name: true
+            show_label: true
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Home
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: Perimeter
+  path: security-entrances
+  icon: mdi:door
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/security
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: Perimeter
+      icon: mdi:door
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: grid
+          columns: 3
+          square: false
+          cards:
+          - type: vertical-stack
+            cards:
+            - type: custom:button-card
+              name: Front Door
+              icon: mdi:door
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 38px
+                - padding: 0 6px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: 38px 1fr
+                icon:
+                - width: 27px
+                - color: var(--primary-base-color)
+                name:
+                - font-size: 21px
+                - font-weight: '650'
+                - justify-self: start
+                - color: var(--primary-base-color)
+            - type: grid
+              columns: 2
+              square: false
+              cards:
+              - entity: binary_sensor.frontdoor_door_door_inside_frontdoor_contact
+                name: Inside
+                icon: '[[[ return entity?.state===''on''?''mdi:door-open'':''mdi:door-closed''; ]]]'
+                label: '[[[ if(!entity || [''unknown'',''unavailable''].includes(entity.state))return ''Unavailable'';return
+                  entity.state===''on'' ? states[''input_boolean.house_alarm_front_door_inside_exempt'']?.state===''on''?''Open
+                  · bypassed'':''Open'' : ''Closed''; ]]]'
+                triggers_update:
+                - binary_sensor.frontdoor_door_door_inside_frontdoor_contact
+                - input_boolean.house_alarm_front_door_inside_exempt
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 130px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+              - entity: binary_sensor.frontdoor_door_door_outside_frontdoor_contact
+                name: Security
+                icon: mdi:door-sliding
+                label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                  === ''on'' ? "Open" : "Closed"; ]]]'
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 130px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+          - type: vertical-stack
+            cards:
+            - type: custom:button-card
+              name: Deck
+              icon: mdi:door
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 38px
+                - padding: 0 6px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: 38px 1fr
+                icon:
+                - width: 27px
+                - color: var(--primary-base-color)
+                name:
+                - font-size: 21px
+                - font-weight: '650'
+                - justify-self: start
+                - color: var(--primary-base-color)
+            - type: grid
+              columns: 2
+              square: false
+              cards:
+              - entity: binary_sensor.living_door_door_inside_living_contact
+                name: Inside
+                icon: '[[[ return entity?.state===''on''?''mdi:door-open'':''mdi:door-closed''; ]]]'
+                label: '[[[ if(!entity || [''unknown'',''unavailable''].includes(entity.state))return ''Unavailable'';return
+                  entity.state===''on'' ? states[''input_boolean.house_alarm_living_inside_exempt'']?.state===''on''?''Open
+                  · bypassed'':''Open'' : ''Closed''; ]]]'
+                triggers_update:
+                - binary_sensor.living_door_door_inside_living_contact
+                - input_boolean.house_alarm_living_inside_exempt
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 130px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+              - entity: binary_sensor.living_door_door_outside_living_contact
+                name: Security
+                icon: mdi:door-sliding
+                label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                  === ''on'' ? "Open" : "Closed"; ]]]'
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 130px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+          - type: vertical-stack
+            cards:
+            - type: custom:button-card
+              name: Laundry
+              icon: mdi:door
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 38px
+                - padding: 0 6px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: 38px 1fr
+                icon:
+                - width: 27px
+                - color: var(--primary-base-color)
+                name:
+                - font-size: 21px
+                - font-weight: '650'
+                - justify-self: start
+                - color: var(--primary-base-color)
+            - type: grid
+              columns: 2
+              square: false
+              cards:
+              - entity: binary_sensor.laundry_door_door_inside_laundry_contact
+                name: Inside
+                icon: '[[[ return entity?.state===''on''?''mdi:door-open'':''mdi:door-closed''; ]]]'
+                label: '[[[ if(!entity || [''unknown'',''unavailable''].includes(entity.state))return ''Unavailable'';return
+                  entity.state===''on'' ? states[''input_boolean.house_alarm_laundry_inside_exempt'']?.state===''on''?''Open
+                  · bypassed'':''Open'' : ''Closed''; ]]]'
+                triggers_update:
+                - binary_sensor.laundry_door_door_inside_laundry_contact
+                - input_boolean.house_alarm_laundry_inside_exempt
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 130px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+              - entity: binary_sensor.laundry_door_door_outside_laundry_contact
+                name: Security
+                icon: mdi:door-sliding
+                label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                  === ''on'' ? "Open" : "Closed"; ]]]'
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 130px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+        - type: custom:gap-card
+          height: 12
+        - type: grid
+          columns: 2
+          square: false
+          cards:
+          - type: vertical-stack
+            cards:
+            - type: custom:button-card
+              name: Outside
+              icon: mdi:home-outline
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 38px
+                - padding: 0 6px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: 38px 1fr
+                icon:
+                - width: 27px
+                - color: var(--primary-base-color)
+                name:
+                - font-size: 21px
+                - font-weight: '650'
+                - justify-self: start
+                - color: var(--primary-base-color)
+            - type: grid
+              columns: 2
+              square: false
+              cards:
+              - entity: binary_sensor.frontdoor_door_door_gate_deck_contact
+                name: Gate
+                icon: '[[[ return entity?.state===''on''?''mdi:gate-open'':''mdi:gate''; ]]]'
+                label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                  === ''on'' ? "Open" : "Closed"; ]]]'
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 122px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+              - entity: cover.garage_door
+                name: Garage
+                icon: '[[[ return entity?.state===''closed''?''mdi:garage'':''mdi:garage-open''; ]]]'
+                label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state.charAt(0).toUpperCase()+entity.state.slice(1);
+                  ]]]'
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 122px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state===''closed'' ? ''var(--green)'' : ''var(--yellow)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+          - type: vertical-stack
+            cards:
+            - type: custom:button-card
+              name: Alarm readiness
+              icon: mdi:shield-check-outline
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 38px
+                - padding: 0 6px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: 38px 1fr
+                icon:
+                - width: 27px
+                - color: var(--primary-base-color)
+                name:
+                - font-size: 21px
+                - font-weight: '650'
+                - justify-self: start
+                - color: var(--primary-base-color)
+            - type: grid
+              columns: 2
+              square: false
+              cards:
+              - entity: binary_sensor.house_alarm_perimeter_ready
+                name: Perimeter
+                icon: mdi:shield-home-outline
+                label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                  === ''on'' ? "Ready" : "Not ready"; ]]]'
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 122px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state === ''on'' ? ''var(--green)'' : ''var(--yellow)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+              - entity: binary_sensor.house_alarm_away_ready
+                name: Away
+                icon: mdi:shield-airplane-outline
+                label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                  === ''on'' ? "Ready" : "Not ready"; ]]]'
+                type: custom:button-card
+                show_name: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                styles:
+                  card:
+                  - height: 122px
+                  - padding: 12px 10px
+                  - background: var(--opaque-background-color)
+                  - border: 1px solid var(--secondary-base-color)
+                  - border-radius: 20px
+                  - box-shadow: none
+                  grid:
+                  - grid-template-areas: '"i" "n" "l"'
+                  - grid-template-rows: 1fr min-content min-content
+                  - row-gap: 5px
+                  icon:
+                  - width: 42px
+                  - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' :
+                      entity.state === ''on'' ? ''var(--green)'' : ''var(--yellow)''; ]]]'
+                  name:
+                  - font-size: 18px
+                  - font-weight: '650'
+                  - white-space: normal
+                  - line-height: '1.15'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 15px
+                  - white-space: normal
+                  - line-height: '1.25'
+                  - color: var(--secondary-base-color)
+        - type: custom:gap-card
+          height: 12
+        - type: conditional
+          conditions:
+          - condition: or
+            conditions:
+            - entity: binary_sensor.house_alarm_coverage_problem
+              state: 'on'
+            - entity: input_boolean.house_alarm_front_door_inside_exempt
+              state: 'on'
+            - entity: input_boolean.house_alarm_living_inside_exempt
+              state: 'on'
+            - entity: input_boolean.house_alarm_laundry_inside_exempt
+              state: 'on'
+          card:
+            type: markdown
+            content: '{% if is_state(''binary_sensor.house_alarm_coverage_problem'',''on'') %}<ha-alert alert-type="warning">Check
+              active / unavailable sensors</ha-alert>{% endif %}
+
+              {% for key,name in [(''front_door'',''Front Door''),(''living'',''Deck''),(''laundry'',''Laundry'')] %}{% if
+              is_state(''input_boolean.house_alarm_''+key+''_inside_exempt'',''on'') %}⏸ {{ name }} inside · bypassed until
+              closed
+
+              {% endif %}{% endfor %}'
+            entity_id:
+            - binary_sensor.house_alarm_coverage_problem
+            - input_text.house_alarm_status
+            - input_boolean.house_alarm_front_door_inside_exempt
+            - input_boolean.house_alarm_living_inside_exempt
+            - input_boolean.house_alarm_laundry_inside_exempt
+            card_mod:
+              style: "ha-card {\n  background: var(--opaque-background-color); color: var(--primary-base-color);\n  border:\
+                \ 1px solid var(--secondary-base-color); border-radius: 20px; box-shadow: none;\n  --primary-text-color: var(--primary-base-color);\n\
+                \  --secondary-text-color: var(--secondary-base-color);\n  --paper-item-icon-color: var(--primary-base-color);\n\
+                }\n.card-header { font-size: 22px; font-weight: 650; }\n"
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Security
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Perimeter
+      icon: mdi:door
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-entrances
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--green)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Motion
+      icon: mdi:motion-sensor
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-motion
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Cameras
+      icon: mdi:cctv
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-cameras
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Activity
+      icon: mdi:history
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-activity
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: Motion
+  path: security-motion
+  icon: mdi:motion-sensor
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/security
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: Motion
+      icon: mdi:motion-sensor
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: vertical-stack
+          cards:
+          - type: custom:button-card
+            name: Downstairs
+            icon: mdi:home-floor-0
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            styles:
+              card:
+              - height: 38px
+              - padding: 0 6px
+              - background: transparent
+              - border: none
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i n"'
+              - grid-template-columns: 38px 1fr
+              icon:
+              - width: 27px
+              - color: var(--primary-base-color)
+              name:
+              - font-size: 21px
+              - font-weight: '650'
+              - justify-self: start
+              - color: var(--primary-base-color)
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+            - entity: binary_sensor.living_motion_motion_living_entry_occupancy
+              name: Living
+              icon: mdi:motion-sensor
+              label: '[[[ const v=["binary_sensor.living_motion_motion_living_entry_occupancy", "binary_sensor.bar_motion_motion_bar_occupancy"].map(id=>states[id]?.state);
+                const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                active ? (missing ? ''Motion · ''+missing+'' unavailable'' : ''Motion'') : missing ? missing+'' unavailable''
+                : ''Clear''; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 104px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 32px
+                - color: '[[[ const v=["binary_sensor.living_motion_motion_living_entry_occupancy", "binary_sensor.bar_motion_motion_bar_occupancy"].map(id=>states[id]?.state);
+                    const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                    missing ? "var(--red)" : active ? "var(--yellow)" : "var(--green)"; ]]]'
+                name:
+                - font-size: 18px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+              triggers_update:
+              - binary_sensor.living_motion_motion_living_entry_occupancy
+              - binary_sensor.bar_motion_motion_bar_occupancy
+            - entity: binary_sensor.powder_motion_motion_powder_occupancy
+              name: Powder
+              icon: mdi:motion-sensor
+              label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                === ''on'' ? "Motion" : "Clear"; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 104px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 32px
+                - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                    === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                name:
+                - font-size: 18px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+            - entity: binary_sensor.laundry_motion_motion_laundry_inside_occupancy
+              name: Laundry
+              icon: mdi:motion-sensor
+              label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                === ''on'' ? "Motion" : "Clear"; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 104px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 32px
+                - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                    === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                name:
+                - font-size: 18px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+            - entity: binary_sensor.garage_motion_motion_garage_entrance_occupancy
+              name: Garage
+              icon: mdi:motion-sensor
+              label: '[[[ const v=["binary_sensor.garage_motion_motion_garage_entrance_occupancy", "binary_sensor.garage_motion_motion_garage_door_occupancy"].map(id=>states[id]?.state);
+                const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                active ? (missing ? ''Motion · ''+missing+'' unavailable'' : ''Motion'') : missing ? missing+'' unavailable''
+                : ''Clear''; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 104px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 32px
+                - color: '[[[ const v=["binary_sensor.garage_motion_motion_garage_entrance_occupancy", "binary_sensor.garage_motion_motion_garage_door_occupancy"].map(id=>states[id]?.state);
+                    const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                    missing ? "var(--red)" : active ? "var(--yellow)" : "var(--green)"; ]]]'
+                name:
+                - font-size: 18px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+              triggers_update:
+              - binary_sensor.garage_motion_motion_garage_entrance_occupancy
+              - binary_sensor.garage_motion_motion_garage_door_occupancy
+        - type: custom:gap-card
+          height: 14
+        - type: vertical-stack
+          cards:
+          - type: custom:button-card
+            name: Upstairs
+            icon: mdi:home-floor-1
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            styles:
+              card:
+              - height: 38px
+              - padding: 0 6px
+              - background: transparent
+              - border: none
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i n"'
+              - grid-template-columns: 38px 1fr
+              icon:
+              - width: 27px
+              - color: var(--primary-base-color)
+              name:
+              - font-size: 21px
+              - font-weight: '650'
+              - justify-self: start
+              - color: var(--primary-base-color)
+          - type: grid
+            columns: 5
+            square: false
+            cards:
+            - entity: binary_sensor.master_motion_motion_master_robe_occupancy
+              name: Master robe
+              icon: mdi:motion-sensor
+              label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                === ''on'' ? "Motion" : "Clear"; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 104px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 32px
+                - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                    === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+            - entity: binary_sensor.ensuite_motion_motion_ensuite_occupancy
+              name: Ensuite
+              icon: mdi:motion-sensor
+              label: '[[[ const v=["binary_sensor.ensuite_motion_motion_ensuite_occupancy", "binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy"].map(id=>states[id]?.state);
+                const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                active ? (missing ? ''Motion · ''+missing+'' unavailable'' : ''Motion'') : missing ? missing+'' unavailable''
+                : ''Clear''; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 104px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 32px
+                - color: '[[[ const v=["binary_sensor.ensuite_motion_motion_ensuite_occupancy", "binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy"].map(id=>states[id]?.state);
+                    const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                    missing ? "var(--red)" : active ? "var(--yellow)" : "var(--green)"; ]]]'
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+              triggers_update:
+              - binary_sensor.ensuite_motion_motion_ensuite_occupancy
+              - binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy
+            - entity: binary_sensor.bathroom_motion_motion_bathroom_occupancy
+              name: Bathroom
+              icon: mdi:motion-sensor
+              label: '[[[ const v=["binary_sensor.bathroom_motion_motion_bathroom_occupancy", "binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy"].map(id=>states[id]?.state);
+                const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                active ? (missing ? ''Motion · ''+missing+'' unavailable'' : ''Motion'') : missing ? missing+'' unavailable''
+                : ''Clear''; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 104px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 32px
+                - color: '[[[ const v=["binary_sensor.bathroom_motion_motion_bathroom_occupancy", "binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy"].map(id=>states[id]?.state);
+                    const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                    missing ? "var(--red)" : active ? "var(--yellow)" : "var(--green)"; ]]]'
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+              triggers_update:
+              - binary_sensor.bathroom_motion_motion_bathroom_occupancy
+              - binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy
+            - entity: binary_sensor.landing_motion_motion_landing_master_occupancy
+              name: Landing
+              icon: mdi:motion-sensor
+              label: '[[[ const v=["binary_sensor.landing_motion_motion_landing_master_occupancy", "binary_sensor.landing_motion_motion_landing_occupancy"].map(id=>states[id]?.state);
+                const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                active ? (missing ? ''Motion · ''+missing+'' unavailable'' : ''Motion'') : missing ? missing+'' unavailable''
+                : ''Clear''; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 104px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 32px
+                - color: '[[[ const v=["binary_sensor.landing_motion_motion_landing_master_occupancy", "binary_sensor.landing_motion_motion_landing_occupancy"].map(id=>states[id]?.state);
+                    const active=v.some(s=>s===''on''); const missing=v.filter(s=>![''on'',''off''].includes(s)).length; return
+                    missing ? "var(--red)" : active ? "var(--yellow)" : "var(--green)"; ]]]'
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+              triggers_update:
+              - binary_sensor.landing_motion_motion_landing_master_occupancy
+              - binary_sensor.landing_motion_motion_landing_occupancy
+            - entity: binary_sensor.study_motion_motion_study_window_occupancy
+              name: Study
+              icon: mdi:motion-sensor
+              label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                === ''on'' ? "Motion" : "Clear"; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 104px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 32px
+                - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                    === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+                name:
+                - font-size: 17px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Security
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Perimeter
+      icon: mdi:door
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-entrances
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Motion
+      icon: mdi:motion-sensor
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-motion
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--green)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Cameras
+      icon: mdi:cctv
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-cameras
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Activity
+      icon: mdi:history
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-activity
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: Cameras
+  path: security-cameras
+  icon: mdi:cctv
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/security
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: Cameras
+      icon: mdi:cctv
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: grid
+          square: false
+          columns: 2
+          cards:
+          - type: vertical-stack
+            cards:
+            - type: custom:button-card
+              name: Front Door
+              icon: mdi:doorbell-video
+              styles:
+                card:
+                - height: 38px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                - padding: 0 8px
+                grid:
+                - grid-template-areas: '"i n l"'
+                - grid-template-columns: 38px 1fr auto
+                icon:
+                - width: 28px
+                - color: var(--primary-base-color)
+                name:
+                - font-size: 22px
+                - font-weight: '650'
+                - justify-self: start
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - justify-self: end
+                - color: '[[[ return entity?.state === ''on'' ? ''var(--green)'' : ''var(--red)''; ]]]'
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              entity: binary_sensor.g4_doorbell_pro_online
+              show_label: true
+              label: '[[[ return entity?.state === ''on'' ? ''Online'' : entity?.state === ''off'' ? ''Offline'' : ''Unavailable'';
+                ]]]'
+            - type: custom:scrypted-nvr-camera
+              id: '91'
+              live: true
+              theme: dark
+              imageClick: popup
+              videoClick: popup
+              speakerOn: false
+              microphoneOn: false
+              aspectRatio: 1.3333333333333333
+              card_mod:
+                style: ':host { display: block; width: 100%; border-radius: 20px; overflow: hidden; border: 2px solid var(--secondary-base-color);
+                  box-sizing: border-box; }'
+          - type: vertical-stack
+            cards:
+            - type: custom:button-card
+              name: Packages
+              icon: mdi:package-variant-closed
+              styles:
+                card:
+                - height: 38px
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                - padding: 0 8px
+                grid:
+                - grid-template-areas: '"i n l"'
+                - grid-template-columns: 38px 1fr auto
+                icon:
+                - width: 28px
+                - color: var(--primary-base-color)
+                name:
+                - font-size: 22px
+                - font-weight: '650'
+                - justify-self: start
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - justify-self: end
+                - color: '[[[ return entity?.state === ''on'' ? ''var(--green)'' : ''var(--red)''; ]]]'
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              entity: binary_sensor.g4_doorbell_pro_package_camera_online
+              show_label: true
+              label: '[[[ return entity?.state === ''on'' ? ''Online'' : entity?.state === ''off'' ? ''Offline'' : ''Unavailable'';
+                ]]]'
+            - type: custom:scrypted-nvr-camera
+              id: '92'
+              live: true
+              theme: dark
+              imageClick: popup
+              videoClick: popup
+              speakerOn: false
+              microphoneOn: false
+              aspectRatio: 1.3333333333333333
+              card_mod:
+                style: ':host { display: block; width: 100%; border-radius: 20px; overflow: hidden; border: 2px solid var(--secondary-base-color);
+                  box-sizing: border-box; }'
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Security
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Perimeter
+      icon: mdi:door
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-entrances
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Motion
+      icon: mdi:motion-sensor
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-motion
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Cameras
+      icon: mdi:cctv
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-cameras
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--green)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Activity
+      icon: mdi:history
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-activity
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: Tesla
+  path: security-tesla
+  icon: mdi:car-electric-outline
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/security
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: Tesla
+      icon: mdi:car-electric-outline
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: grid
+          square: false
+          columns: 2
+          cards:
+          - type: custom:button-card
+            entity: lock.bennis_lock
+            name: Tesla
+            icon: mdi:car-key
+            label: '[[[ return entity?.state===''locked''?''Locked'':entity?.state===''unlocked''?''Unlocked'':''Unavailable'';
+              ]]]'
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: '[[[ return entity?.state===''locked''?''var(--green)'':entity?.state===''unlocked''?''var(--yellow)'':''var(--red)'';
+                  ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            entity: !secret ha_9_security_identity_1
+            name: Location
+            icon: mdi:home-outline
+            label: !secret ha_9_security_label_1
+            triggers_update:
+            - !secret ha_9_security_identity_1
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: !secret ha_9_security_color_1
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+        - type: markdown
+          content: '{% if not is_state(''binary_sensor.bennis_status'',''on'') %}⏸ Offline · last reported values{% endif
+            %}'
+          entity_id:
+          - binary_sensor.bennis_status
+          card_size: 1
+          card_mod:
+            style: "ha-card {\n  background: transparent; border: none; box-shadow: none;\n  color: var(--secondary-base-color);\
+              \ --primary-text-color: var(--secondary-base-color);\n}\nha-markdown { padding: 5px 12px !important; font-size:\
+              \ 16px; }\n"
+        - type: custom:button-card
+          name: Doors
+          icon: mdi:car-door
+          styles:
+            card:
+            - height: 38px
+            - background: transparent
+            - border: none
+            - box-shadow: none
+            - padding: 0 8px
+            grid:
+            - grid-template-areas: '"i n"'
+            - grid-template-columns: 38px 1fr
+            icon:
+            - width: 28px
+            - color: var(--primary-base-color)
+            name:
+            - font-size: 22px
+            - font-weight: '650'
+            - justify-self: start
+            - color: var(--primary-base-color)
+          tap_action:
+            action: none
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+        - type: grid
+          square: false
+          columns: 4
+          cards:
+          - type: custom:button-card
+            entity: binary_sensor.bennis_front_driver_door
+            name: Driver front
+            icon: mdi:car-door
+            label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+              === ''on'' ? "Open" : "Closed"; ]]]'
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                  === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            entity: binary_sensor.bennis_front_passenger_door
+            name: Passenger front
+            icon: mdi:car-door
+            label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+              === ''on'' ? "Open" : "Closed"; ]]]'
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                  === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            entity: binary_sensor.bennis_rear_driver_door
+            name: Driver rear
+            icon: mdi:car-door
+            label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+              === ''on'' ? "Open" : "Closed"; ]]]'
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                  === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            entity: binary_sensor.bennis_rear_passenger_door
+            name: Passenger rear
+            icon: mdi:car-door
+            label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+              === ''on'' ? "Open" : "Closed"; ]]]'
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                  === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+        - type: custom:button-card
+          name: Windows
+          icon: mdi:car-windshield-outline
+          styles:
+            card:
+            - height: 38px
+            - background: transparent
+            - border: none
+            - box-shadow: none
+            - padding: 0 8px
+            grid:
+            - grid-template-areas: '"i n"'
+            - grid-template-columns: 38px 1fr
+            icon:
+            - width: 28px
+            - color: var(--primary-base-color)
+            name:
+            - font-size: 22px
+            - font-weight: '650'
+            - justify-self: start
+            - color: var(--primary-base-color)
+          tap_action:
+            action: none
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+        - type: grid
+          square: false
+          columns: 4
+          cards:
+          - type: custom:button-card
+            entity: binary_sensor.bennis_front_driver_window
+            name: Driver front
+            icon: mdi:car-windshield-outline
+            label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+              === ''on'' ? "Open" : "Closed"; ]]]'
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                  === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            entity: binary_sensor.bennis_front_passenger_window
+            name: Passenger front
+            icon: mdi:car-windshield-outline
+            label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+              === ''on'' ? "Open" : "Closed"; ]]]'
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                  === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            entity: binary_sensor.bennis_rear_driver_window
+            name: Driver rear
+            icon: mdi:car-windshield-outline
+            label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+              === ''on'' ? "Open" : "Closed"; ]]]'
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                  === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+          - type: custom:button-card
+            entity: binary_sensor.bennis_rear_passenger_window
+            name: Passenger rear
+            icon: mdi:car-windshield-outline
+            label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+              === ''on'' ? "Open" : "Closed"; ]]]'
+            show_name: true
+            show_label: true
+            show_state: false
+            styles:
+              card:
+              - height: 128px
+              - padding: 12px
+              - box-sizing: border-box
+              - border-radius: 20px
+              - border: 2px solid var(--secondary-base-color)
+              - background: var(--opaque-background-color)
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i" "n" "l"'
+              - grid-template-rows: 1fr 25px 22px
+              - row-gap: 3px
+              icon:
+              - width: 44px
+              - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                  === ''on'' ? ''var(--yellow)'' : ''var(--green)''; ]]]'
+              name:
+              - font-size: 18px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              - white-space: normal
+              label:
+              - font-size: 16px
+              - color: var(--secondary-base-color)
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Security
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Perimeter
+      icon: mdi:door
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-entrances
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Motion
+      icon: mdi:motion-sensor
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-motion
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Cameras
+      icon: mdi:cctv
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-cameras
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Activity
+      icon: mdi:history
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-activity
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: System
+  path: security-system
+  icon: mdi:lan-connect
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/security
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: System
+      icon: mdi:lan-connect
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: vertical-stack
+          cards:
+          - type: custom:button-card
+            name: Connections
+            icon: mdi:lan-connect
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            styles:
+              card:
+              - height: 38px
+              - padding: 0 6px
+              - background: transparent
+              - border: none
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i n"'
+              - grid-template-columns: 38px 1fr
+              icon:
+              - width: 27px
+              - color: var(--primary-base-color)
+              name:
+              - font-size: 21px
+              - font-weight: '650'
+              - justify-self: start
+              - color: var(--primary-base-color)
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+            - entity: binary_sensor.upstairs_otbr_connected
+              name: Upstairs
+              icon: mdi:access-point-network
+              label: '[[[ const ids=["binary_sensor.upstairs_otbr_connected", "binary_sensor.zigbee2mqtt_bridge_connection_state"];
+                const names=["Thread", "Zigbee"]; const values=ids.map(id=>states[id]?.state); const bad=values.map((s,i)=>s===''on''?-1:i).filter(i=>i>=0);
+                let status=''Online''; if(bad.length===2) status=values.every(s=>s===''off'')?''Both offline'':''Check both'';
+                else if(bad.length===1){const i=bad[0]; status=names[i]+(values[i]===''off''?'' offline'':'' unavailable'');}
+                return names.join('' · '')+''<br>''+status; ]]]'
+              triggers_update:
+              - binary_sensor.upstairs_otbr_connected
+              - binary_sensor.zigbee2mqtt_bridge_connection_state
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 172px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 58px
+                - color: '[[[ return ["binary_sensor.upstairs_otbr_connected", "binary_sensor.zigbee2mqtt_bridge_connection_state"].every(id=>states[id]?.state===''on'')
+                    ? ''var(--green)'' : ''var(--red)''; ]]]'
+                name:
+                - font-size: 23px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+            - entity: binary_sensor.downstairs_tr_connected
+              name: Downstairs
+              icon: mdi:access-point-network
+              label: '[[[ const ids=["binary_sensor.downstairs_tr_connected", "binary_sensor.zigbee2mqtt_bridge_connection_state_2"];
+                const names=["Thread", "Zigbee"]; const values=ids.map(id=>states[id]?.state); const bad=values.map((s,i)=>s===''on''?-1:i).filter(i=>i>=0);
+                let status=''Online''; if(bad.length===2) status=values.every(s=>s===''off'')?''Both offline'':''Check both'';
+                else if(bad.length===1){const i=bad[0]; status=names[i]+(values[i]===''off''?'' offline'':'' unavailable'');}
+                return names.join('' · '')+''<br>''+status; ]]]'
+              triggers_update:
+              - binary_sensor.downstairs_tr_connected
+              - binary_sensor.zigbee2mqtt_bridge_connection_state_2
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 172px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 58px
+                - color: '[[[ return ["binary_sensor.downstairs_tr_connected", "binary_sensor.zigbee2mqtt_bridge_connection_state_2"].every(id=>states[id]?.state===''on'')
+                    ? ''var(--green)'' : ''var(--red)''; ]]]'
+                name:
+                - font-size: 23px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+            - entity: binary_sensor.unifi_dream_machine_wan_status
+              name: Internet
+              icon: mdi:web
+              label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                === ''on'' ? "Online" : "Offline"; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 172px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 58px
+                - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                    === ''on'' ? ''var(--green)'' : ''var(--red)''; ]]]'
+                name:
+                - font-size: 23px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+        - type: custom:gap-card
+          height: 20
+        - type: vertical-stack
+          cards:
+          - type: custom:button-card
+            name: Cameras
+            icon: mdi:cctv
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            styles:
+              card:
+              - height: 38px
+              - padding: 0 6px
+              - background: transparent
+              - border: none
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i n"'
+              - grid-template-columns: 38px 1fr
+              icon:
+              - width: 27px
+              - color: var(--primary-base-color)
+              name:
+              - font-size: 21px
+              - font-weight: '650'
+              - justify-self: start
+              - color: var(--primary-base-color)
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+            - entity: binary_sensor.g4_doorbell_pro_online
+              name: Front Door
+              icon: mdi:cctv
+              label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                === ''on'' ? "Online" : "Offline"; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 158px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 54px
+                - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                    === ''on'' ? ''var(--green)'' : ''var(--red)''; ]]]'
+                name:
+                - font-size: 23px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+            - entity: binary_sensor.g4_doorbell_pro_package_camera_online
+              name: Packages
+              icon: mdi:package-variant-closed
+              label: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''Unavailable'' : entity.state
+                === ''on'' ? "Online" : "Offline"; ]]]'
+              type: custom:button-card
+              show_name: true
+              show_state: false
+              show_label: true
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              styles:
+                card:
+                - height: 158px
+                - padding: 12px 10px
+                - background: var(--opaque-background-color)
+                - border: 1px solid var(--secondary-base-color)
+                - border-radius: 20px
+                - box-shadow: none
+                grid:
+                - grid-template-areas: '"i" "n" "l"'
+                - grid-template-rows: 1fr min-content min-content
+                - row-gap: 5px
+                icon:
+                - width: 54px
+                - color: '[[[ return !entity || [''unknown'',''unavailable''].includes(entity.state) ? ''var(--red)'' : entity.state
+                    === ''on'' ? ''var(--green)'' : ''var(--red)''; ]]]'
+                name:
+                - font-size: 23px
+                - font-weight: '650'
+                - white-space: normal
+                - line-height: '1.15'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 15px
+                - white-space: normal
+                - line-height: '1.25'
+                - color: var(--secondary-base-color)
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Security
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Perimeter
+      icon: mdi:door
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-entrances
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Motion
+      icon: mdi:motion-sensor
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-motion
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Cameras
+      icon: mdi:cctv
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-cameras
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Activity
+      icon: mdi:history
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-activity
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: Activity
+  path: security-activity
+  icon: mdi:history
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/security
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: Activity
+      icon: mdi:history
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: markdown
+          title: Latest Front Door events
+          content: '{% set rows = [(''Doorbell'', ''event.g4_doorbell_pro_doorbell_2''), (''Front Door detection'', ''event.g4_doorbell_pro_object_detected''),
+            (''Package camera detection'', ''event.g4_doorbell_pro_package_camera_object_detected'')] %}
+
+            {% for name, eid in rows %}
+
+            **{{ name }}:** {% set value = states(eid) %}{% if value == ''unavailable'' %}Unavailable{% elif as_datetime(value,
+            none) is none %}No event recorded{% else %}{{ as_local(as_datetime(value)).strftime(''%d %b, %I:%M %p'') }} ·
+            {{ state_attr(eid, ''event_type'') or ''Event'' }}{% endif %}
+
+
+            {% endfor %}
+
+            '
+          entity_id:
+          - event.g4_doorbell_pro_doorbell_2
+          - event.g4_doorbell_pro_object_detected
+          - event.g4_doorbell_pro_package_camera_object_detected
+          card_size: 5
+          card_mod:
+            style: "ha-card {\n  background: var(--opaque-background-color); color: var(--primary-base-color);\n  border:\
+              \ 1px solid var(--secondary-base-color); border-radius: 20px; box-shadow: none;\n  --primary-text-color: var(--primary-base-color);\n\
+              \  --secondary-text-color: var(--secondary-base-color);\n  --paper-item-icon-color: var(--primary-base-color);\n\
+              }\n.card-header { font-size: 22px; font-weight: 650; }\n"
+        - type: custom:gap-card
+          height: 12
+        - type: grid
+          columns: 2
+          square: false
+          cards:
+          - type: "custom:security-activity-card"
+            feed: "front_door"
+            title: "Front Door activity"
+            layout: "tablet"
+            height: 360
+          - type: "custom:security-activity-card"
+            feed: "entrances"
+            title: "Doors, gate & garage"
+            layout: "tablet"
+            height: 360
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Security
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Perimeter
+      icon: mdi:door
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-entrances
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Motion
+      icon: mdi:motion-sensor
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-motion
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Cameras
+      icon: mdi:cctv
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-cameras
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Activity
+      icon: mdi:history
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/security-activity
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--green)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)

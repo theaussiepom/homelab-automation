@@ -1,0 +1,36 @@
+# The alarm's persisted deadline is authoritative; this timer mirrors it for both dashboards.
+automation:
+  - id: house_alarm_countdown_display
+    alias: House Alarm - countdown display
+    description: Mirror the actual exit or entry deadline without extending it on restart.
+    mode: queued
+    max: 20
+    trace:
+      stored_traces: 0
+    triggers:
+      - trigger: state
+        entity_id: alarm_control_panel.house_alarm
+      - trigger: homeassistant
+        event: start
+      - trigger: event
+        event_type: automation_reloaded
+    actions:
+      - variables:
+          alarm_phase: "{{ states('alarm_control_panel.house_alarm') }}"
+          alarm_deadline: "{{ as_timestamp(state_attr('alarm_control_panel.house_alarm', 'phase_deadline'), 0) }}"
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ alarm_phase in ['arming', 'pending'] and alarm_deadline > as_timestamp(now()) }}"
+            sequence:
+              - action: timer.start
+                target:
+                  entity_id: timer.house_alarm_countdown
+                data:
+                  duration: "{{ [0, (alarm_deadline - as_timestamp(now())) | round(0, 'ceil') | int] | max }}"
+        default:
+          - condition: template
+            value_template: "{{ states('timer.house_alarm_countdown') in ['active', 'paused'] }}"
+          - action: timer.cancel
+            target:
+              entity_id: timer.house_alarm_countdown

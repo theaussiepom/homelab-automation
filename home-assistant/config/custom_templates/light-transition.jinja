@@ -1,0 +1,35 @@
+{% macro calculate_brightness(x, y) %}
+
+  {% set brightnessMin = [[x, 255] | min, 0] | max %}
+  {% set brightnessMax = [[y, 255] | min, 0] | max %}
+
+  {% set transitionSunriseStart = as_timestamp(states("sensor.the_dennis_boys_sun_sunrise_start")) %}
+  {% set transitionSunriseEnd = as_timestamp(states("sensor.the_dennis_boys_sun_sunrise_end")) %}
+
+  {% set transitionSunsetStart = as_timestamp(states("sensor.the_dennis_boys_sun_sunset_start")) %}
+  {% set transitionSunsetEnd = as_timestamp(states("sensor.the_dennis_boys_sun_sunset_end")) %}
+
+  {% set brightnessRange = brightnessMax - brightnessMin %}
+  {% set timestampNow = as_timestamp(now()) %}
+
+  {% if timestampNow >= transitionSunriseStart and timestampNow <= transitionSunriseEnd %}
+    {% set step = brightnessRange / (transitionSunriseEnd - transitionSunriseStart ) | int %}
+    {% set brightness = (brightnessMin + ((timestampNow - transitionSunriseStart) * step)) | round(0) %}
+
+  {% elif timestampNow >= transitionSunsetStart and timestampNow <= transitionSunsetEnd %}
+    {% set step = brightnessRange / (transitionSunsetEnd - transitionSunsetStart) | int %}
+    {% set brightness = (brightnessMax - ((timestampNow - transitionSunsetStart) * step)) | round(0) %}
+
+  {% else %}
+    {% if timestampNow > transitionSunriseEnd and timestampNow < transitionSunsetStart %}
+      {% set brightness = brightnessMax %}
+
+    {% else %}
+      {% set brightness = brightnessMin %}
+
+    {% endif %}
+  {% endif %}
+
+  {{ brightness }}
+
+{% endmacro %}

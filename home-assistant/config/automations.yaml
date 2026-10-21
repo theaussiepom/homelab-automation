@@ -1,0 +1,232 @@
+- id: '1709358090228'
+  alias: Guest lights off select scene
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.helper_light_guest_all
+    to: 'off'
+  conditions: []
+  actions:
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.options_scene_guest
+    data:
+      option: 'off'
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.scene_guest_bright
+      - input_boolean.scene_guest_chill
+      - input_boolean.scene_guest_nightlight
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.scene_guest_off
+  mode: single
+- id: '1709366778589'
+  alias: study-lights-off-select-scene
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.helper_light_study_all
+    to: 'off'
+  conditions: []
+  actions:
+  - action: input_select.select_option
+    data:
+      option: 'off'
+    target:
+      entity_id: input_select.options_scene_study
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.scene_study_bright
+      - input_boolean.scene_study_nightlight
+      - input_boolean.scene_study_chill
+  - action: input_boolean.turn_on
+    target:
+      entity_id:
+      - input_boolean.scene_study_off
+  mode: single
+- id: '1709378737670'
+  alias: garage-lights-off-select-scene
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.helper_garage_light_all
+    to: 'off'
+  conditions: []
+  actions:
+  - action: scene.turn_on
+    target:
+      entity_id: scene.scene_garage_off
+  mode: single
+- id: '1709431217435'
+  alias: Master lights off - select scene
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.helper_light_master_all
+    to: 'off'
+  conditions: []
+  actions:
+  - action: input_select.select_option
+    data:
+      option: 'off'
+    target:
+      entity_id:
+      - input_select.scene_master_current
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.scene_master_bright
+      - input_boolean.scene_master_chill
+      - input_boolean.scene_master_evening
+      - input_boolean.scene_master_nightlight
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.scene_master_off
+  mode: single
+- id: '1709435670586'
+  alias: front-lights-off-slect-scene
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.light_frontdoor_all
+    to: 'off'
+  conditions: []
+  actions:
+  - action: input_select.select_option
+    data:
+      option: 'off'
+    target:
+      entity_id: input_select.scene_front_current
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.scene_front_bright
+      - input_boolean.scene_front_chill
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.scene_front_off
+  mode: single
+- id: '1709437901233'
+  alias: laundry-lights-off-select-scene
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.laundry_light_outside
+    to: 'off'
+  conditions: []
+  actions:
+  - action: input_select.select_option
+    data:
+      option: 'off'
+    target:
+      entity_id: input_select.scene_laundry_current
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.scene_laundry_on
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.scene_laundry_off
+  mode: single
+- id: '1710639438424'
+  alias: deck-lights-off-select-scene
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.helper_deck_light_all
+    to: 'off'
+  conditions: []
+  actions:
+  - action: input_select.select_option
+    target:
+      entity_id:
+      - input_select.options_scene_deck
+    data:
+      option: 'off'
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.scene_deck_bright
+      - input_boolean.scene_deck_chill
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.scene_deck_off
+  mode: single
+- id: '1711799150288'
+  alias: Aircon update ac options
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - climate.ac_0
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: climate.ac_0
+      state: 'off'
+  actions:
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.climate_ac_options
+    data:
+      option: '{{ states(''climate.ac_0'') }}'
+  mode: single
+- id: '1714607609294'
+  alias: kiosks-browser-restart-on-hass-start
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - action: script.display_living_refresh
+  mode: single
+- id: '1734829704574'
+  alias: hass-start-restart-integration-automate
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - action: homeassistant.reload_config_entry
+    data:
+      entry_id: fdae566233a1992c9ac559f18da9fff7
+    alias: Restart study Automate integration
+  - alias: Restart sitting room Automate integration
+    action: homeassistant.reload_config_entry
+    data:
+      entry_id: 01J9QMNN3QR68YHAV936PTCMF4
+  - alias: Restart deck Automate integration
+    action: homeassistant.reload_config_entry
+    data:
+      entry_id: 01J9QMXJ0BR8P388XVMQA8W0NK
+  mode: single
+- id: '1745548487231'
+  alias: Alert Node-RED when Home Assistant starts
+  description: ''
+  triggers:
+  - alias: When Home Assistant starts
+    trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - delay:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - action: button.press
+    target:
+      entity_id: button.nodered_032732103b651fc0
+  mode: single

@@ -1,0 +1,652 @@
+script:
+  fan_off:
+    alias: Turn a fan off
+    fields:
+      fan:
+        description: The fan to turn off
+    sequence:
+      - service: input_number.set_value
+        data:
+          entity_id: input_number.fan_speed_{{ 'master' if fan == 'ben' else 'guest' if fan == 'matty' else fan }}
+          value: 0
+    mode: single
+    icon: mdi:fan-off
+  fan_on:
+    alias: Turn a fan on
+    fields:
+      fan:
+        description: The fan to turn on
+        example: parents_fan
+    sequence:
+      - service: input_number.set_value
+        data:
+          entity_id: input_number.fan_speed_{{ 'master' if fan == 'ben' else 'guest' if fan == 'matty' else fan }}
+          value: 1
+    mode: single
+    icon: mdi:fan
+  fan_set_speed:
+    alias: Set the speed of a fan
+    icon: mdi:fan
+    fields:
+      fan:
+        description: The fan to set the speed of
+      speed:
+        description: The speed of the fan
+      remote:
+        description: The remote to use
+    sequence:
+      - service: remote.send_command
+        data:
+          device: "fan-{{ 'ben' if fan == 'master' else 'matty' if fan == 'guest' else fan }}"
+          command: "speed{{ speed | round (0, 'floor') }}"
+        target:
+          entity_id: remote.{{ 'master_universal_remote' if remote == 'bedroom_universal_remote' else remote }}
+      - if:
+          - condition: template
+            value_template: "{{ (speed | round (0, 'floor')) == 0 }}"
+        then:
+          - service: input_boolean.turn_off
+            data:
+              entity_id: input_boolean.fan_state_{{ 'master' if fan == 'ben' else 'guest' if fan == 'matty' else fan }}
+        else:
+          - service: input_boolean.turn_on
+            data:
+              entity_id: input_boolean.fan_state_{{ 'master' if fan == 'ben' else 'guest' if fan == 'matty' else fan }}
+      - service: input_number.set_value
+        data:
+          entity_id: input_number.fan_speed_{{ 'master' if fan == 'ben' else 'guest' if fan == 'matty' else fan }}
+          value: "{{ speed }}"
+    mode: single
+  fan_set_speed_from_percent:
+    alias: Set the tracking value for the fan speed
+    icon: mdi:fan
+    fields:
+      fan:
+        description: The fan to set the speed of
+      speed:
+        description: The speed of the fan
+      speeds:
+        description: number of available fan speeds
+    sequence:
+      service: input_number.set_value
+      data:
+        entity_id: input_number.fan_speed_{{ 'master' if fan == 'ben' else 'guest' if fan == 'matty' else fan }}
+        value: "{{ (((speed | float(0)) / 100) * (speeds | int(1))) | round(0, 'ceil') | int }}"
+    mode: single
+  ###########################################################################
+  # PER-FAN SPEED SCRIPTS (for HomeKit buttons)
+  ###########################################################################
+
+  # Master (4 speeds)
+  ben_fan_speed_1:
+    alias: "Master Fan Speed 1"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: ben
+          speed: 1
+          remote: bedroom_universal_remote
+
+  ben_fan_speed_2:
+    alias: "Master Fan Speed 2"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: ben
+          speed: 2
+          remote: bedroom_universal_remote
+
+  ben_fan_speed_3:
+    alias: "Master Fan Speed 3"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: ben
+          speed: 3
+          remote: bedroom_universal_remote
+
+  ben_fan_speed_4:
+    alias: "Master Fan Speed 4"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: ben
+          speed: 4
+          remote: bedroom_universal_remote
+
+  # Deck (4 speeds)
+  deck_fan_speed_1:
+    alias: "Deck Fan Speed 1"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: deck
+          speed: 1
+          remote: deck_universal_remote
+
+  deck_fan_speed_2:
+    alias: "Deck Fan Speed 2"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: deck
+          speed: 2
+          remote: deck_universal_remote
+
+  deck_fan_speed_3:
+    alias: "Deck Fan Speed 3"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: deck
+          speed: 3
+          remote: deck_universal_remote
+
+  deck_fan_speed_4:
+    alias: "Deck Fan Speed 4"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: deck
+          speed: 4
+          remote: deck_universal_remote
+
+  # Landing (4 speeds)
+  landing_fan_speed_1:
+    alias: "Landing Fan Speed 1"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: landing
+          speed: 1
+          remote: study_universal_remote
+
+  landing_fan_speed_2:
+    alias: "Landing Fan Speed 2"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: landing
+          speed: 2
+          remote: study_universal_remote
+
+  landing_fan_speed_3:
+    alias: "Landing Fan Speed 3"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: landing
+          speed: 3
+          remote: study_universal_remote
+
+  landing_fan_speed_4:
+    alias: "Landing Fan Speed 4"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: landing
+          speed: 4
+          remote: study_universal_remote
+
+  # Living (4 speeds)
+  living_fan_speed_1:
+    alias: "Living Fan Speed 1"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: living
+          speed: 1
+          remote: living_universal_remote
+
+  living_fan_speed_2:
+    alias: "Living Fan Speed 2"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: living
+          speed: 2
+          remote: living_universal_remote
+
+  living_fan_speed_3:
+    alias: "Living Fan Speed 3"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: living
+          speed: 3
+          remote: living_universal_remote
+
+  living_fan_speed_4:
+    alias: "Living Fan Speed 4"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: living
+          speed: 4
+          remote: living_universal_remote
+
+  # Matty (5 speeds)
+  matty_fan_speed_1:
+    alias: "Guest Fan Speed 1"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: matty
+          speed: 1
+          remote: study_universal_remote
+
+  matty_fan_speed_2:
+    alias: "Guest Fan Speed 2"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: matty
+          speed: 2
+          remote: study_universal_remote
+
+  matty_fan_speed_3:
+    alias: "Guest Fan Speed 3"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: matty
+          speed: 3
+          remote: study_universal_remote
+
+  matty_fan_speed_4:
+    alias: "Guest Fan Speed 4"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: matty
+          speed: 4
+          remote: study_universal_remote
+
+  matty_fan_speed_5:
+    alias: "Guest Fan Speed 5"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: matty
+          speed: 5
+          remote: study_universal_remote
+
+  # Study (5 speeds)
+  study_fan_speed_1:
+    alias: "Study Fan Speed 1"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: study
+          speed: 1
+          remote: study_universal_remote
+
+  study_fan_speed_2:
+    alias: "Study Fan Speed 2"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: study
+          speed: 2
+          remote: study_universal_remote
+
+  study_fan_speed_3:
+    alias: "Study Fan Speed 3"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: study
+          speed: 3
+          remote: study_universal_remote
+
+  study_fan_speed_4:
+    alias: "Study Fan Speed 4"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: study
+          speed: 4
+          remote: study_universal_remote
+
+  study_fan_speed_5:
+    alias: "Study Fan Speed 5"
+    sequence:
+      - service: script.fan_set_speed
+        data:
+          fan: study
+          speed: 5
+          remote: study_universal_remote
+
+automation:
+  - id: set_fan_speed_living_remote
+    alias: "Climate: Set fan speed"
+    trigger:
+      - platform: state
+        entity_id:
+          - input_number.fan_speed_living
+    action:
+      - service: script.fan_set_speed
+        data:
+          fan: "{{ fan }}"
+          speed: "{{ states(trigger.entity_id) }}"
+          remote: living_universal_remote
+    variables:
+      fan:
+        "{{
+            trigger.entity_id |
+            regex_replace(
+              find='input_number.fan_speed_',
+              replace='',
+              ignorecase=False
+            )
+        }}"
+  - id: set_fan_speed_bedroom_remote
+    alias: "Climate: Set fan speed"
+    trigger:
+      - platform: state
+        entity_id:
+          - input_number.fan_speed_master
+    action:
+      - service: script.fan_set_speed
+        data:
+          fan: "{{ fan }}"
+          speed: "{{ states(trigger.entity_id) }}"
+          remote: bedroom_universal_remote
+    variables:
+      fan:
+        "{{
+            trigger.entity_id |
+            regex_replace(
+              find='input_number.fan_speed_',
+              replace='',
+              ignorecase=False
+            )
+        }}"
+  - id: set_fan_speed_deck_remote
+    alias: "Climate: Set fan speed"
+    trigger:
+      - platform: state
+        entity_id:
+          - input_number.fan_speed_deck
+    action:
+      - service: script.fan_set_speed
+        data:
+          fan: "{{ fan }}"
+          speed: "{{ states(trigger.entity_id) }}"
+          remote: deck_universal_remote
+    variables:
+      fan:
+        "{{
+            trigger.entity_id |
+            regex_replace(
+              find='input_number.fan_speed_',
+              replace='',
+              ignorecase=False
+            )
+        }}"
+  - id: set_fan_speed_study_remote
+    alias: "Climate: Set fan speed"
+    trigger:
+      - platform: state
+        entity_id:
+          - input_number.fan_speed_landing
+          - input_number.fan_speed_guest
+          - input_number.fan_speed_study
+    action:
+      - service: script.fan_set_speed
+        data:
+          fan: "{{ fan }}"
+          speed: "{{ states(trigger.entity_id) }}"
+          remote: study_universal_remote
+    variables:
+      fan:
+        "{{
+            trigger.entity_id |
+            regex_replace(
+              find='input_number.fan_speed_',
+              replace='',
+              ignorecase=False
+            )
+        }}"
+
+input_boolean:
+  fan_state_ben:
+    name: "Master fan state"
+    icon: mdi:fan
+  fan_state_deck:
+    name: "Deck: Fan state"
+    icon: mdi:fan
+  fan_state_landing:
+    name: "Landing: Fan state"
+    icon: mdi:fan
+  fan_state_living:
+    name: "Living: Fan state"
+    icon: mdi:fan
+  fan_state_matty:
+    name: "Guest Fan State"
+    icon: mdi:fan
+  fan_state_study:
+    name: "Study: Fan state"
+    icon: mdi:fan
+
+input_number:
+  fan_speed_ben:
+    name: Master fan speed
+    icon: mdi:fan
+    step: 1
+    min: 0
+    max: 4
+    mode: slider
+  fan_speed_deck:
+    name: Deck fan speed
+    icon: mdi:fan
+    step: 1
+    min: 0
+    max: 4
+    mode: slider
+  fan_speed_landing:
+    name: Landing fan speed
+    icon: mdi:fan
+    step: 1
+    min: 0
+    max: 4
+    mode: slider
+  fan_speed_living:
+    name: Living fan speed
+    icon: mdi:fan
+    step: 1
+    min: 0
+    max: 4
+    mode: slider
+  fan_speed_matty:
+    name: Guest Fan Speed
+    icon: mdi:fan
+    step: 1
+    min: 0
+    max: 5
+    mode: slider
+  fan_speed_study:
+    name: Study fan speed
+    icon: mdi:fan
+    step: 1
+    min: 0
+    max: 5
+    mode: slider
+
+template:
+  - fan:
+      - default_entity_id: fan.ben_fan
+        name: "Master fan"
+        unique_id: fan-ben
+        speed_count: 4
+        state: "{{ states('input_boolean.fan_state_master') }}"
+        percentage: "{{ (100 * ((states('input_number.fan_speed_master') | int(0)) / 4)) | round(0) }}"
+        turn_off:
+          - action: script.fan_off
+            data:
+              fan: ben
+        turn_on:
+          - action: script.fan_on
+            data:
+              fan: ben
+        set_percentage:
+          - action: script.fan_set_speed_from_percent
+            data:
+              fan: ben
+              speed: "{{ percentage }}"
+              speeds: 4
+
+      - default_entity_id: fan.deck_fan
+        name: Deck fan
+        unique_id: fan-deck
+        speed_count: 4
+        state: "{{ states('sensor.living_power_fans_power_deck') | float(0) > 1 }}"
+        percentage: >
+          {% set power = states('sensor.living_power_fans_power_deck') | float(0) %}
+          {% if power < 1 %}
+            0
+          {% elif power < 6 %}
+            25
+          {% elif power < 8 %}
+            50
+          {% elif power < 13 %}
+            75
+          {% else %}
+            100
+          {% endif %}
+        turn_off:
+          - action: script.fan_off
+            data:
+              fan: deck
+        turn_on:
+          - action: script.fan_on
+            data:
+              fan: deck
+        set_percentage:
+          - action: script.fan_set_speed_from_percent
+            data:
+              fan: deck
+              speed: "{{ percentage }}"
+              speeds: 4
+
+      - default_entity_id: fan.landing_fan
+        name: Landing fan
+        unique_id: fan-landing
+        speed_count: 4
+        state: "{{ states('sensor.landing_power_fan_power_b') | float(0) > 1 }}"
+        percentage: >
+          {% set power = states('sensor.landing_power_fan_power_b') | float(0) %}
+          {% if power < 1 %}
+            0
+          {% elif power < 9 %}
+            25
+          {% elif power < 15 %}
+            50
+          {% elif power < 30 %}
+            75
+          {% else %}
+            100
+          {% endif %}
+        turn_off:
+          - action: script.fan_off
+            data:
+              fan: landing
+        turn_on:
+          - action: script.fan_on
+            data:
+              fan: landing
+        set_percentage:
+          - action: script.fan_set_speed_from_percent
+            data:
+              fan: landing
+              speed: "{{ percentage }}"
+              speeds: 4
+
+      - default_entity_id: fan.living_fan
+        name: Living fan
+        unique_id: fan-living
+        speed_count: 4
+        state: "{{ states('sensor.living_power_fans_power_living') | float(0) > 1 }}"
+        percentage: >
+          {% set power = states('sensor.living_power_fans_power_living') | float(0) %}
+          {% if power < 1 %}
+            0
+          {% elif power < 7 %}
+            25
+          {% elif power < 10 %}
+            50
+          {% elif power < 12.5 %}
+            75
+          {% else %}
+            100
+          {% endif %}
+        turn_off:
+          - action: script.fan_off
+            data:
+              fan: living
+        turn_on:
+          - action: script.fan_on
+            data:
+              fan: living
+        set_percentage:
+          - action: script.fan_set_speed_from_percent
+            data:
+              fan: living
+              speed: "{{ percentage }}"
+              speeds: 4
+
+      - default_entity_id: fan.matty_fan
+        name: "Guest Fan"
+        unique_id: fan-matty
+        speed_count: 5
+        state: "{{ states('sensor.guest_power_fan_energy_b') | float(0) > 1 }}"
+        percentage: >
+          {% set power = states('sensor.guest_power_fan_energy_b') | float(0) %}
+          {% if power < 1 %}
+            0
+          {% elif power < 6 %}
+            20
+          {% elif power < 9 %}
+            40
+          {% elif power < 13 %}
+            60
+          {% elif power < 22 %}
+            80
+          {% else %}
+            100
+          {% endif %}
+        turn_off:
+          - action: script.fan_off
+            data:
+              fan: matty
+        turn_on:
+          - action: script.fan_on
+            data:
+              fan: matty
+        set_percentage:
+          - action: script.fan_set_speed_from_percent
+            data:
+              fan: matty
+              speed: "{{ percentage }}"
+              speeds: 5
+
+      - default_entity_id: fan.study_fan
+        name: Study fan
+        unique_id: fan-study
+        speed_count: 5
+        state: "{{ states('input_boolean.fan_state_study') }}"
+        percentage: "{{ (100 * ((states('input_number.fan_speed_study') | int(0)) / 5)) | round(0) }}"
+        turn_off:
+          - action: script.fan_off
+            data:
+              fan: study
+        turn_on:
+          - action: script.fan_on
+            data:
+              fan: study
+        set_percentage:
+          - action: script.fan_set_speed_from_percent
+            data:
+              fan: study
+              speed: "{{ percentage }}"
+              speeds: 5

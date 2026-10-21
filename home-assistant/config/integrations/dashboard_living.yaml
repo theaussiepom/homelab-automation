@@ -1,0 +1,5 @@
+input_select:
+  dashboard_living_rooms:
+    name: dashboard-living-rooms
+    options: ["ben", "landing", "living", "matty", "outside", "study"]
+    initial: living

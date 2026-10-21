@@ -1,0 +1,16 @@
+mode: storage
+# Include external resources only add when mode is yaml, otherwise manage in the resources in the dashboard configuration panel.
+# resources:
+#   - url: /local/my-custom-card.js
+#     type: module
+#   - url: /local/my-webfont.css
+#     type: css
+# Add more dashboards
+dashboards:
+  lovelace-living: # Needs to contain a hyphen (-)
+    mode: yaml
+    filename: dashboards/living/living.yaml
+    title: Living
+    icon: mdi:home-outline
+    # show_in_sidebar: true
+    # require_admin: false

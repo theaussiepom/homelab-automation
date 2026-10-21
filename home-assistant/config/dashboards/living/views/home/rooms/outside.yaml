@@ -1,0 +1,537 @@
+type: conditional
+conditions:
+  - entity: input_select.dashboard_living_rooms
+    state: "outside"
+view_layout:
+  grid-area: h1
+card:
+  type: custom:stack-in-card
+  card_mod:
+    style: |
+      ha-card {
+        border-color: var(--primary-base-color);
+        border-width: 2px;
+        border-radius: 30px;
+        background: var(--tablet-card-background-color);
+        width: 504px;
+        margin: 8px 0px 0px 0px;
+      }
+  cards:
+    - type: custom:layout-card
+      layout_type: custom:grid-layout
+      layout:
+        grid-template-columns: 130px auto 60px 70px
+        grid-template-areas: >
+          'living_header_a living_header_b living_header_c
+          living_header_d'
+      cards:
+        - type: markdown
+          view_layout:
+            grid-area: living_header_b
+          content: |-
+            <center>
+              <b>
+                <font size=6>
+                  Outside
+                </font>
+              </b>
+            </center>
+          card_mod:
+            style: |
+              ha-card {
+                background: var(--secondary-background-color);
+                border-style: none;
+                margin: -15px 0px 0px 0px;
+              }
+        - type: custom:button-card
+          view_layout:
+            grid-area: living_header_d
+          entity: input_boolean.scene_deck_off
+          template: custom_scene_off_card
+          variables:
+            scene: scene.deck_off
+    - type: custom:layout-card
+      layout_type: custom:grid-layout
+      layout:
+        gridrows: auto
+        grid-template-columns: 15px 100px 20px 100px 20px 100px 20px 100px
+        grid-template-areas: >
+          "ls_pl ls_a1 ls_m2 ls_a2 ls_m3 ls_a3 ls_m4 ls_a4"
+          "ls_pl ls_b1 ls_b1 ls_b1 ls_m3 ls_b2 ls_b2 ls_b2"
+          "ls_pl ls_c  ls_c  ls_c  ls_c  ls_c  ls_c  ls_c"
+          "ls_pl ls_f  ls_f  ls_f  ls_f  ls_f  ls_f  ls_f"
+          "ls_pl ls_s1 ls_s2 ls_s2 ls_s2 ls_s2 ls_s2 ls_s3"
+      cards:
+        - type: custom:button-card
+          template: custom_scene_card
+          entity: input_boolean.scene_deck_bright
+          variables:
+            scene: scene.deck_bright
+            iconScale: 0.9
+          styles:
+            card:
+              - margin: -35px 0px 0px 0px
+          view_layout:
+            grid-area: ls_a1
+        - type: custom:button-card
+          template: custom_scene_card
+          entity: input_boolean.scene_deck_chill
+          variables:
+            scene: scene.deck_chill
+            iconScale: 0.9
+          styles:
+            card:
+              - margin: -35px 0px 0px 0px
+          view_layout:
+            grid-area: ls_a2
+        - type: custom:button-card
+          color_type: card
+          tap_action:
+            action: call-service
+            service: climate.toggle
+            target:
+              entity_id: climate.heatstrip_elegance_the_ra
+          show_name: false
+          aspect_ratio: 1/1
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color);
+              - border-width: 2px;
+              - margin: -35px 0px 0px 0px
+            icon:
+              - width: 100%
+              - transform: |
+                  [[[ return `scale(0.8)` ]]]
+              - color: var(--scene-icon-color)
+          state:
+            - value: "heat"
+              icon: mdi:radiator
+              color: var(--scene-on-background-color)
+            - value: "off"
+              icon: mdi:radiator-off
+              color: var(--scene-off-background-color)
+          entity: climate.heatstrip_elegance_the_ra
+          view_layout:
+            grid-area: ls_a4
+        - type: custom:stack-in-card
+          view_layout:
+            grid-area: ls_b1
+          card_mod:
+            style: |
+              ha-card {
+                border-radius: 20px;
+                border-color: var(--secondary-base-color);
+                border-width: 2px;
+                background: var(--secondary-background-color);
+                margin: -25px -1px 15px 0px;
+              }
+          cards:
+            - type: markdown
+              view_layout:
+                grid-area: living_header_a
+              content: |-
+                <center>
+                  <b>
+                    <font size=4>
+                      Short
+                    </font>
+                  </b>
+                </center>
+              card_mod:
+                style: |
+                  ha-card {
+                    background: var(--secondary-background-color);
+                    border-style: none;
+                    margin: -10px 0px -10px 0px;
+                  }
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                gridrows: auto
+                grid-template-columns: 10px auto 10px auto 10px auto 10px
+                grid-template-areas: |
+                  "wb_pl wb_a1 wb_m2 wb_a2 wb_m3 wb_a3 wb_pr"
+              cards:
+                - type: custom:button-card
+                  template: custom_cover_card
+                  entity: cover.blind_deck_short
+                  variables:
+                    coverAction: close_cover
+                  view_layout:
+                    grid-area: wb_a1
+                - type: custom:button-card
+                  template: custom_cover_card
+                  entity: cover.blind_deck_short
+                  variables:
+                    coverAction: stop_cover
+                  view_layout:
+                    grid-area: wb_a2
+                - type: custom:button-card
+                  template: custom_cover_card
+                  entity: cover.blind_deck_short
+                  variables:
+                    coverAction: open_cover
+                  view_layout:
+                    grid-area: wb_a3
+        - type: custom:stack-in-card
+          view_layout:
+            grid-area: ls_b2
+          card_mod:
+            style: |
+              ha-card {
+                border-radius: 20px;
+                border-color: var(--secondary-base-color);
+                border-width: 2px;
+                background: var(--secondary-background-color);
+                margin: -25px -1px 15px 0px;
+              }
+          cards:
+            - type: markdown
+              content: |-
+                <center>
+                  <b>
+                    <font size=4>
+                      Long
+                    </font>
+                  </b>
+                </center>
+              card_mod:
+                style: |
+                  ha-card {
+                    background: var(--secondary-background-color);
+                    border-style: none;
+                    margin: -10px 0px -10px 0px;
+                  }
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                gridrows: auto
+                grid-template-columns: 10px auto 10px auto 10px auto 10px
+                grid-template-areas: |
+                  "db_pl db_a1 db_m2 db_a2 db_m3 db_a3 db_pr"
+              cards:
+                - type: custom:button-card
+                  template: custom_cover_card
+                  entity: cover.blind_deck_long
+                  variables:
+                    coverAction: close_cover
+                  hold_action:
+                    action: call-service
+                    service: script.refresh_home_assistant
+                  view_layout:
+                    grid-area: db_a1
+                - type: custom:button-card
+                  template: custom_cover_card
+                  entity: cover.blind_deck_long
+                  variables:
+                    coverAction: stop_cover
+                  hold_action:
+                    action: call-service
+                    service: script.refresh_home_assistant
+                  view_layout:
+                    grid-area: db_a2
+                - type: custom:button-card
+                  template: custom_cover_card
+                  entity: cover.blind_deck_long
+                  variables:
+                    coverAction: open_cover
+                  hold_action:
+                    action: call-service
+                    service: script.refresh_home_assistant
+                  view_layout:
+                    grid-area: db_a3
+        - type: custom:stack-in-card
+          view_layout:
+            grid-area: ls_f
+          card_mod:
+            style: |
+              ha-card {
+                height: 100px;
+                border-radius: 20px;
+                border-color: var(--secondary-base-color);
+                border-width: 2px;
+                background: var(--secondary-background-color);
+                margin: -4px -2px 15px 0px;
+              }
+          cards:
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                gridrows: auto
+                grid-template-columns: 10px 100px auto 10px
+                grid-template-areas: |
+                  "h_pl h_a1 h_a2 h_m1"
+              cards:
+                - type: custom:button-card
+                  view_layout:
+                    grid-area: h_a1
+                  entity: fan.deck_fan
+                  icon: mdi:ceiling-fan
+                  tap_action:
+                    action: call-service
+                    service: |
+                      [[[
+                        return entity.state == 'on'
+                          ? 'fan.turn_off'
+                          : 'fan.turn_on'
+                      ]]]
+                    target:
+                      entity_id: fan.deck_fan
+                  show_name: false
+                  aspect_ratio: 1/1
+                  styles:
+                    card:
+                      - border-radius: 10px
+                      - border: none
+                      - margin: 0px 0px 0px -10px
+                      - background-color: transparent
+                    icon:
+                      - width: 100%
+                      - transform: 1
+                      - color: |
+                          [[[
+                            return entity.state == 'off'
+                              ? 'var(--primary-base-color)'
+                              : 'var(--primary-on-color)'
+                          ]]]
+                  card_mod:
+                    style: |
+                      ha-card {
+                        border-style: none;
+                      }
+                - type: custom:mushroom-fan-card
+                  view_layout:
+                    grid-area: h_a2
+                  entity: fan.deck_fan
+                  icon_type: none
+                  show_percentage_control: true
+                  primary_info: none
+                  secondary_info: none
+                  card_mod:
+                    style:
+                      mushroom-fan-percentage-control$:
+                        mushroom-slider$: |
+                          .slider {
+                            height: 40px !important;
+                            --main-color: var(--ceiling-fan-percentage-color) !important;
+                            --bg-color: var(--ceiling-fan-background-color) !important;
+                          }
+                      .: |
+                        mushroom-fan-percentage-control {
+                          height: 40px;
+                        }
+                        ha-card {
+                          border-style: none;
+                          background: transparent;
+                          margin: 10px 0px 0px 0px;
+                        }
+        - type: custom:button-card
+          entity: input_select.dashboard_living_soil
+          show_icon: false
+          show_name: false
+          show_entity_picture: true
+          aspect_ratio: 1/1
+          tap_action:
+            action: call-service
+            service: input_select.select_next
+            data:
+              cycle: true
+              entity_id: input_select.dashboard_living_soil
+          styles:
+            card:
+              - border-radius: 20px 0px 0px 20px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+              - margin: -5px 0px 0px 0px
+              - width: 95px
+              - height: 95px
+            icon:
+              - width: 80%
+              - margin: 0px 0px 10px 0px
+            img_cell:
+              - margin: 10px 0px 0px 0px
+            grid:
+              - grid-template-areas: '"i"'
+          state:
+            - value: bay
+              entity_picture: /local/pictures/bay-leaf.png
+            - value: chilli
+              entity_picture: /local/pictures/chilli.png
+            - value: lime
+              entity_picture: /local/pictures/lime.png
+          view_layout:
+            grid-area: ls_s1
+        - type: custom:stack-in-card
+          view_layout:
+            grid-area: ls_s2
+          card_mod:
+            style: |
+              ha-card {
+                border-radius: 0px;
+                border-color: var(--secondary-base-color);
+                border-width: 2px;
+                background: var(--secondary-background-color);
+                margin: -5px -10px 15px -7px;
+                height: 95px;
+              }
+          cards:
+            - type: markdown
+              content: |-
+                <center>
+                  <b>
+                    <font size=5>
+                      {% if states["input_select.dashboard_living_soil"].state == "lime" %}{{states["sensor.deck_soil_soil_lime_tree_soil_moisture"].state}}%{% elif states["input_select.dashboard_living_soil"].state == "bay" %}{{states["sensor.deck_soil_soil_bay_tree_soil_moisture"].state}}%{% elif states["input_select.dashboard_living_soil"].state == "chilli" %}{{states["sensor.deck_soil_soil_chilli_plant_soil_moisture"].state}}{% endif %}
+                    </font>
+                  </b>
+                </center>
+              card_mod:
+                style: |
+                  ha-card {
+                    background: var(--secondary-background-color);
+                    border-style: none;
+                    margin: -12px 0px 0px 0px;
+                  }
+            - type: conditional
+              conditions:
+                - entity: input_select.dashboard_living_soil
+                  state: "lime"
+              card:
+                type: custom:mini-graph-card
+                decimals: 0
+                hours_to_show: 12
+                points_per_hour: 10
+                height: 130
+                tap_action: false
+                show:
+                  labels: true
+                  icon: false
+                  labels_secondary: false
+                  name: false
+                  state: false
+                entities:
+                  - entity: sensor.deck_soil_soil_lime_tree_soil_moisture
+                    show_points: false
+                    show_state: false
+                color_thresholds:
+                  - value: 50
+                    color: "#E3170A"
+                  - value: 65
+                    color: "#E57A44"
+                  - value: 92
+                    color: "#698F3F"
+                  - value: 100
+                    color: "#E57A44"
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 0px;
+                      background: var(--secondary-background-color);
+                      border-style: none;
+                      margin: -45px 0px 0px 0px;
+                    }
+            - type: conditional
+              conditions:
+                - entity: input_select.dashboard_living_soil
+                  state: "bay"
+              card:
+                type: custom:mini-graph-card
+                decimals: 0
+                font_size: 80
+                hours_to_show: 12
+                points_per_hour: 10
+                height: 130
+                tap_action: false
+                show:
+                  labels: true
+                  icon: false
+                  labels_secondary: true
+                  name: false
+                  state: false
+                entities:
+                  - entity: sensor.deck_soil_soil_bay_tree_soil_moisture
+                    show_points: false
+                    show_state: false
+                color_thresholds:
+                  - value: 0
+                    color: "#E3170A"
+                  - value: 20
+                    color: "#E57A44"
+                  - value: 78
+                    color: "#698F3F"
+                  - value: 90
+                    color: "#E57A44"
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 0px;
+                      background: var(--secondary-background-color);
+                      border-style: none;
+                      margin: -45px 0px 0px 0px;
+                    }
+            - type: conditional
+              conditions:
+                - entity: input_select.dashboard_living_soil
+                  state: "chilli"
+              card:
+                type: custom:mini-graph-card
+                decimals: 0
+                font_size: 80
+                hours_to_show: 12
+                points_per_hour: 10
+                height: 130
+                tap_action: false
+                show:
+                  labels: true
+                  icon: false
+                  labels_secondary: true
+                  name: false
+                  state: false
+                entities:
+                  - entity: sensor.deck_soil_soil_chilli_plant_soil_moisture
+                    show_points: false
+                    show_state: false
+                color_thresholds:
+                  - value: 0
+                    color: "#E3170A"
+                  - value: 20
+                    color: "#E57A44"
+                  - value: 78
+                    color: "#698F3F"
+                  - value: 90
+                    color: "#E57A44"
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 0px;
+                      background: var(--secondary-background-color);
+                      border-style: none;
+                      margin: -45px 0px 0px 0px;
+                    }
+        - type: custom:button-card
+          entity: valve.deck_irrigation_tap_state
+          icon: mdi:sprinkler-variant
+          show_name: false
+          aspect_ratio: 1/1
+          tap_action:
+            action: toggle
+          styles:
+            card:
+              - border-radius: 0px 20px 20px 0px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+              - margin: -5px 0px 0px 0px
+              - width: 95px
+              - height: 95px
+            icon:
+              - width: 80%
+              - margin: 0px 0px 10px 0px
+          state:
+            - value: closed
+              color: var(--scene-icon-color)
+            - value: open
+              color: var(--scene-on-background-color)
+          view_layout:
+            grid-area: ls_s3

@@ -1,0 +1,22 @@
+# Read-only health polling for the two existing Thread routers.
+# A responding HTTP service alone is insufficient: the radio must be attached
+# as a router or leader. REST marks the entity unavailable on request failure.
+rest:
+  - resource: !secret ha_home_network_resource_1
+    method: GET
+    scan_interval: 30
+    timeout: 5
+    binary_sensor:
+      - name: Upstairs OTBR Connected
+        unique_id: home_network_upstairs_otbr_connected
+        device_class: connectivity
+        value_template: "{{ value_json is defined and value_json in ['leader', 'router'] }}"
+  - resource: !secret ha_home_network_resource_2
+    method: GET
+    scan_interval: 30
+    timeout: 5
+    binary_sensor:
+      - name: Downstairs TR Connected
+        unique_id: home_network_downstairs_tr_connected
+        device_class: connectivity
+        value_template: "{{ value_json is defined and value_json in ['leader', 'router'] }}"

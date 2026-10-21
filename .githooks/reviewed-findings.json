@@ -1,0 +1,16 @@
+[
+  {
+    "path": "home-assistant/config/integrations/energy.yaml",
+    "sha256": "ebf7be63a2ae19d798fe593d2729174c2aae6c4ac9aa4676266e2fc05374fb3a",
+    "rule": "generic-api-key",
+    "line": 3595,
+    "reason": "Previously reviewed unchanged HA template expression or PEM formatting literal; not credential material."
+  },
+  {
+    "path": "home-assistant/config/integrations/energy.yaml",
+    "sha256": "ebf7be63a2ae19d798fe593d2729174c2aae6c4ac9aa4676266e2fc05374fb3a",
+    "rule": "generic-api-key",
+    "line": 3605,
+    "reason": "Previously reviewed unchanged HA template expression or PEM formatting literal; not credential material."
+  }
+]

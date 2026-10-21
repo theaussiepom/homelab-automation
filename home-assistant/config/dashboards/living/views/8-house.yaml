@@ -1,0 +1,504 @@
+- title: Home
+  path: house
+  icon: mdi:home-heart
+  subview: true
+  back_path: /lovelace-living/home
+  theme: living-tablet
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"'
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    card_mod:
+      style: ha-card { box-sizing:border-box; height:735px; overflow:hidden; border:5px solid var(--primary-base-color); border-radius:30px;
+        background:var(--tablet-card-background-color); box-shadow:none; }
+    cards:
+    - type: custom:layout-card
+      layout_type: custom:grid-layout
+      layout:
+        margin: 22px
+        padding: 0px
+        card-margin: 0px
+        grid-template-columns: repeat(4, minmax(0,1fr))
+        grid-template-rows: 80px 220px 180px 74px 60px
+        grid-gap: 16px
+        grid-template-areas: '"heading heading heading heading" "upstairs upstairs downstairs downstairs" "care care care
+          care" "study study guest guest" "health health health health"'
+      cards:
+      - type: custom:button-card
+        name: Home
+        icon: mdi:home-heart
+        show_name: true
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+        double_tap_action:
+          action: none
+        view_layout:
+          grid-area: heading
+        styles:
+          card:
+          - height: 80px
+          - background: none
+          - border: none
+          - box-shadow: none
+          - padding: 0 8px
+          grid:
+          - grid-template-areas: '"i n"'
+          - grid-template-columns: 76px 1fr
+          icon:
+          - width: 58px
+          - color: var(--scene-icon-color)
+          name:
+          - justify-self: start
+          - font-size: 34px
+          - font-weight: '700'
+          - color: var(--scene-icon-color)
+      - type: custom:button-card
+        name: Upstairs
+        icon: mdi:robot-vacuum
+        show_name: true
+        show_label: true
+        tap_action:
+          action: navigate
+          navigation_path: /lovelace-living/house-vacuum-upstairs
+        hold_action:
+          action: none
+        double_tap_action:
+          action: none
+        triggers_update:
+        - binary_sensor.home_attention
+        - vacuum.upstairs_robot
+        view_layout:
+          grid-area: upstairs
+        styles:
+          card:
+          - border-radius: 20px
+          - border: 2px solid var(--secondary-base-color)
+          - box-shadow: none
+          - background: var(--opaque-background-color)
+          - color: var(--scene-icon-color)
+          - height: 220px
+          - padding: 16px
+          grid:
+          - grid-template-areas: '"i" "n" "l"'
+          - grid-template-rows: 1fr 30px 24px
+          icon:
+          - width: 108px
+          - color: '[[[ const h=states[''binary_sensor.home_attention''];const a=h?.attributes.issues?.[''upstairs''];return
+              h && [''on'',''off''].includes(h.state) && Array.isArray(a) && !a.length ? ''var(--green)'' : ''var(--red)'';
+              ]]]'
+          name:
+          - font-size: 26px
+          - font-weight: '600'
+          - color: var(--scene-icon-color)
+          label:
+          - font-size: 15px
+          - color: var(--secondary-base-color)
+        label: '[[[ const s=states[''vacuum.upstairs_robot'']?.state;return ''Matrix10 Ultra · ''+(s ? s.charAt(0).toUpperCase()+s.slice(1).replaceAll(''_'',''
+          '') : ''Unavailable''); ]]]'
+      - type: custom:button-card
+        name: Downstairs
+        icon: mdi:robot-vacuum
+        show_name: true
+        show_label: true
+        tap_action:
+          action: navigate
+          navigation_path: /lovelace-living/house-vacuum-downstairs
+        hold_action:
+          action: none
+        double_tap_action:
+          action: none
+        triggers_update:
+        - binary_sensor.home_attention
+        - vacuum.downstairs_robot
+        view_layout:
+          grid-area: downstairs
+        styles:
+          card:
+          - border-radius: 20px
+          - border: 2px solid var(--secondary-base-color)
+          - box-shadow: none
+          - background: var(--opaque-background-color)
+          - color: var(--scene-icon-color)
+          - height: 220px
+          - padding: 16px
+          grid:
+          - grid-template-areas: '"i" "n" "l"'
+          - grid-template-rows: 1fr 30px 24px
+          icon:
+          - width: 108px
+          - color: '[[[ const h=states[''binary_sensor.home_attention''];const a=h?.attributes.issues?.[''downstairs''];return
+              h && [''on'',''off''].includes(h.state) && Array.isArray(a) && !a.length ? ''var(--green)'' : ''var(--red)'';
+              ]]]'
+          name:
+          - font-size: 26px
+          - font-weight: '600'
+          - color: var(--scene-icon-color)
+          label:
+          - font-size: 15px
+          - color: var(--secondary-base-color)
+        label: '[[[ const s=states[''vacuum.downstairs_robot'']?.state;return ''X40 Ultra · ''+(s ? s.charAt(0).toUpperCase()+s.slice(1).replaceAll(''_'',''
+          '') : ''Unavailable''); ]]]'
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        view_layout:
+          grid-area: care
+        layout:
+          margin: 0px
+          padding: 0px
+          card-margin: 0px
+          grid-template-columns: repeat(5, minmax(0,1fr))
+          grid-template-rows: 180px
+          grid-gap: 16px
+        cards:
+        - type: custom:button-card
+          name: Batteries
+          icon: mdi:battery-heart-variant
+          show_name: true
+          show_label: true
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace-living/home-batteries
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          triggers_update:
+          - binary_sensor.home_attention
+          styles:
+            card:
+            - border-radius: 20px
+            - border: 2px solid var(--secondary-base-color)
+            - box-shadow: none
+            - background: var(--opaque-background-color)
+            - color: var(--scene-icon-color)
+            - height: 180px
+            - padding: 16px 10px
+            grid:
+            - grid-template-areas: '"i" "n" "l"'
+            - grid-template-rows: 1fr 30px 24px
+            icon:
+            - width: 76px
+            - color: '[[[ const h=states[''binary_sensor.home_attention''];const a=h?.attributes.issues?.[''batteries''];return
+                h && [''on'',''off''].includes(h.state) && Array.isArray(a) && !a.length ? ''var(--green)'' : ''var(--red)'';
+                ]]]'
+            name:
+            - font-size: 18px
+            - font-weight: '600'
+            - color: var(--scene-icon-color)
+            label:
+            - font-size: 14px
+            - color: var(--secondary-base-color)
+          label: '[[[ const h=states[''binary_sensor.home_attention''];const a=h?.attributes.issues?.[''batteries''];return
+            !h || ![''on'',''off''].includes(h.state) || !Array.isArray(a) ? ''Not reported'' : a.length ? a.length+'' need
+            attention'' : ''All good''; ]]]'
+        - type: custom:button-card
+          name: Leaks & smoke
+          icon: mdi:water-alert-outline
+          show_name: true
+          show_label: true
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace-living/home-safety
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          triggers_update:
+          - binary_sensor.home_attention
+          styles:
+            card:
+            - border-radius: 20px
+            - border: 2px solid var(--secondary-base-color)
+            - box-shadow: none
+            - background: var(--opaque-background-color)
+            - color: var(--scene-icon-color)
+            - height: 180px
+            - padding: 16px 10px
+            grid:
+            - grid-template-areas: '"i" "n" "l"'
+            - grid-template-rows: 1fr 30px 24px
+            icon:
+            - width: 76px
+            - color: '[[[ const h=states[''binary_sensor.home_attention''];const a=h?.attributes.issues?.[''leaks''];return
+                h && [''on'',''off''].includes(h.state) && Array.isArray(a) && !a.length ? ''var(--green)'' : ''var(--red)'';
+                ]]]'
+            name:
+            - font-size: 18px
+            - font-weight: '600'
+            - color: var(--scene-icon-color)
+            label:
+            - font-size: 14px
+            - color: var(--secondary-base-color)
+          label: '[[[ const h=states[''binary_sensor.home_attention''];const a=h?.attributes.issues?.[''leaks''];return !h
+            || ![''on'',''off''].includes(h.state) || !Array.isArray(a) ? ''Not reported'' : a.length ? a.length+'' need attention''
+            : ''All clear''; ]]]'
+        - type: custom:button-card
+          name: Vacuum care
+          icon: mdi:broom
+          show_name: true
+          show_label: true
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace-living/home-vacuum-care
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          styles:
+            card:
+            - border-radius: 20px
+            - border: 2px solid var(--secondary-base-color)
+            - box-shadow: none
+            - background: var(--opaque-background-color)
+            - color: var(--scene-icon-color)
+            - height: 180px
+            - padding: 16px 10px
+            grid:
+            - grid-template-areas: '"i" "n" "l"'
+            - grid-template-rows: 1fr 30px 24px
+            icon:
+            - width: 76px
+            - color: var(--scene-icon-color)
+            name:
+            - font-size: 18px
+            - font-weight: '600'
+            - color: var(--scene-icon-color)
+            label:
+            - font-size: 14px
+            - color: var(--secondary-base-color)
+          label: Service life
+        - type: custom:button-card
+          name: Tasks
+          icon: mdi:clipboard-check-outline
+          show_name: true
+          show_label: true
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace-living/home-tasks
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          triggers_update:
+          - binary_sensor.home_attention
+          - todo.house_maintenance
+          styles:
+            card:
+            - border-radius: 20px
+            - border: 2px solid var(--secondary-base-color)
+            - box-shadow: none
+            - background: var(--opaque-background-color)
+            - color: var(--scene-icon-color)
+            - height: 180px
+            - padding: 16px 10px
+            grid:
+            - grid-template-areas: '"i" "n" "l"'
+            - grid-template-rows: 1fr 30px 24px
+            icon:
+            - width: 76px
+            - color: var(--scene-icon-color)
+            name:
+            - font-size: 18px
+            - font-weight: '600'
+            - color: var(--scene-icon-color)
+            label:
+            - font-size: 14px
+            - color: var(--secondary-base-color)
+          label: '[[[ const s=states[''todo.house_maintenance'']?.state;return !s || isNaN(Number(s)) ? ''Unavailable'' :
+            Number(s) ? s+'' to do'' : ''All done''; ]]]'
+        - type: custom:button-card
+          name: Equipment
+          icon: mdi:tools
+          show_name: true
+          show_label: true
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace-living/home-equipment
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          triggers_update:
+          - binary_sensor.home_attention
+          styles:
+            card:
+            - border-radius: 20px
+            - border: 2px solid var(--secondary-base-color)
+            - box-shadow: none
+            - background: var(--opaque-background-color)
+            - color: var(--scene-icon-color)
+            - height: 180px
+            - padding: 16px 10px
+            grid:
+            - grid-template-areas: '"i" "n" "l"'
+            - grid-template-rows: 1fr 30px 24px
+            icon:
+            - width: 76px
+            - color: '[[[ const h=states[''binary_sensor.home_attention''];const a=h?.attributes.issues?.[''equipment''];return
+                h && [''on'',''off''].includes(h.state) && Array.isArray(a) && !a.length ? ''var(--green)'' : ''var(--red)'';
+                ]]]'
+            name:
+            - font-size: 18px
+            - font-weight: '600'
+            - color: var(--scene-icon-color)
+            label:
+            - font-size: 14px
+            - color: var(--secondary-base-color)
+          label: '[[[ const h=states[''binary_sensor.home_attention''];const a=h?.attributes.issues?.[''equipment''];return
+            !h || ![''on'',''off''].includes(h.state) || !Array.isArray(a) ? ''Not reported'' : a.length ? a.length+'' need
+            attention'' : ''All online''; ]]]'
+      - type: custom:button-card
+        entity: input_boolean.guest_in_study
+        icon: mdi:desktop-classic
+        name: Study in use
+        show_label: true
+        label: '[[[ return entity?.state === ''on'' ? ''On'' : entity?.state === ''off'' ? ''Off'' : ''Unavailable''; ]]]'
+        tap_action:
+          action: toggle
+        hold_action:
+          action: none
+        double_tap_action:
+          action: none
+        view_layout:
+          grid-area: study
+        styles:
+          card:
+          - border-radius: 20px
+          - border: 2px solid var(--secondary-base-color)
+          - box-shadow: none
+          - background: var(--opaque-background-color)
+          - color: var(--scene-icon-color)
+          - height: 74px
+          - padding: 8px 18px
+          - background: '[[[ return entity?.state === ''on'' ? ''var(--scene-on-background-color)'' : ''var(--opaque-background-color)'';
+              ]]]'
+          grid:
+          - grid-template-areas: '"i n l"'
+          - grid-template-columns: 52px 1fr 70px
+          icon:
+          - width: 42px
+          - color: var(--scene-icon-color)
+          name:
+          - justify-self: start
+          - font-size: 20px
+          - color: var(--scene-icon-color)
+          label:
+          - font-size: 15px
+          - color: var(--scene-icon-color)
+      - type: custom:button-card
+        entity: input_boolean.guest_room_in_use
+        icon: mdi:bed-outline
+        name: Guest in use
+        show_label: true
+        label: '[[[ return entity?.state === ''on'' ? ''On'' : entity?.state === ''off'' ? ''Off'' : ''Unavailable''; ]]]'
+        tap_action:
+          action: toggle
+        hold_action:
+          action: none
+        double_tap_action:
+          action: none
+        view_layout:
+          grid-area: guest
+        styles:
+          card:
+          - border-radius: 20px
+          - border: 2px solid var(--secondary-base-color)
+          - box-shadow: none
+          - background: var(--opaque-background-color)
+          - color: var(--scene-icon-color)
+          - height: 74px
+          - padding: 8px 18px
+          - background: '[[[ return entity?.state === ''on'' ? ''var(--scene-on-background-color)'' : ''var(--opaque-background-color)'';
+              ]]]'
+          grid:
+          - grid-template-areas: '"i n l"'
+          - grid-template-columns: 52px 1fr 70px
+          icon:
+          - width: 42px
+          - color: var(--scene-icon-color)
+          name:
+          - justify-self: start
+          - font-size: 20px
+          - color: var(--scene-icon-color)
+          label:
+          - font-size: 15px
+          - color: var(--scene-icon-color)
+      - type: custom:button-card
+        name: '[[[ if(entity?.state === ''off'')return ''All clear'';if(entity?.state !== ''on'')return ''Home health unavailable'';
+          const n=entity.attributes.issue_count;return Number.isFinite(Number(n)) ? n+'' need attention'' : ''Needs attention'';
+          ]]]'
+        icon: '[[[ return entity?.state === ''off'' ? ''mdi:check-circle-outline'' : ''mdi:alert-circle-outline''; ]]]'
+        show_name: true
+        show_label: false
+        tap_action:
+          action: navigate
+          navigation_path: /lovelace-living/house-health
+        hold_action:
+          action: none
+        double_tap_action:
+          action: none
+        triggers_update:
+        - binary_sensor.home_attention
+        view_layout:
+          grid-area: health
+        styles:
+          card:
+          - border-radius: 20px
+          - border: 2px solid var(--secondary-base-color)
+          - box-shadow: none
+          - background: var(--opaque-background-color)
+          - color: var(--scene-icon-color)
+          - height: 60px
+          - padding: 8px 18px
+          grid:
+          - grid-template-areas: '"i n"'
+          - grid-template-columns: 40px 1fr
+          icon:
+          - width: 30px
+          - color: '[[[ return states[''binary_sensor.home_attention'']?.state === ''off'' ? ''var(--green)'' : ''var(--red)'';
+              ]]]'
+          name:
+          - font-size: 18px
+          - justify-self: start
+          - color: var(--scene-icon-color)
+          label:
+          - font-size: 15px
+          - color: var(--secondary-base-color)
+        entity: binary_sensor.home_attention
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - box-shadow: none
+        - background: var(--opaque-background-color)
+        - color: var(--scene-icon-color)
+        icon:
+        - width: 80%
+        - color: var(--scene-icon-color)

@@ -1,0 +1,501 @@
+# Target charging uses the existing manual lease and verified command owner.
+input_select:
+  sg_battery_charge_target:
+    name: Battery charge target
+    icon: mdi:battery-arrow-up
+    options: ['50', '60', '70', '80', '90', '100']
+
+input_boolean:
+  sg_battery_target_preparing:
+    name: Battery target charge preparing
+    initial: false
+
+input_text:
+  sg_battery_target_charge_status:
+    name: Battery charge now status
+    max: 255
+    initial: Idle
+    icon: mdi:battery-clock
+
+template:
+  - binary_sensor:
+      - name: Sungrow battery forced charging
+        unique_id: sg_battery_forced_charging
+        default_entity_id: binary_sensor.sg_battery_forced_charging
+        icon: mdi:battery-charging
+        availability: >-
+          {{ has_value('sensor.ems_mode_selection_raw') and is_number(states('sensor.ems_mode_selection_raw'))
+            and has_value('sensor.battery_forced_charge_discharge_cmd_raw') and is_number(states('sensor.battery_forced_charge_discharge_cmd_raw'))
+            and 0<=as_timestamp(now())-as_timestamp(states.sensor.ems_mode_selection_raw.last_reported,0)<=180
+            and 0<=as_timestamp(now())-as_timestamp(states.sensor.battery_forced_charge_discharge_cmd_raw.last_reported,0)<=180 }}
+        state: >-
+          {{ states('sensor.ems_mode_selection_raw')|int(-1) in [2,4]
+             and states('sensor.battery_forced_charge_discharge_cmd_raw')|int(-1)==170 }}
+  - switch:
+      - name: Battery charge now
+        unique_id: sg_battery_charge_now
+        default_entity_id: switch.sg_battery_charge_now
+        icon: mdi:battery-arrow-up
+        state: >-
+          {% from 'energy_battery_manual.jinja' import battery_target_override_active %}
+          {% set active=battery_target_override_active|as_function %}
+          {{ active() }}
+        turn_on:
+          - action: script.sg_start_target_battery_charge
+        turn_off:
+          - action: script.sg_cancel_target_battery_charge
+
+script:
+  sg_charge_battery_to_target:
+    alias: Select battery target and start charge
+    mode: single
+    max_exceeded: silent
+    fields:
+      target_soc:
+        name: Charge to
+        required: true
+        selector:
+          select:
+            options: ['50', '60', '70', '80', '90', '100']
+    sequence:
+      - variables:
+          chosen_target: "{{ target_soc|default(-1)|float(-1) }}"
+          current_lease: "{{ states('input_text.sg_battery_manual_lease')|from_json({}) }}"
+          restore_arm: "{{ is_state('input_boolean.sg_battery_control_armed','on') or (current_lease.get('kind')=='target' and current_lease.get('finished')!=true and current_lease.get('rearm')==true) }}"
+      - condition: template
+        value_template: "{{ chosen_target in [50,60,70,80,90,100] }}"
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.sg_battery_charge_target
+        data:
+          option: "{{ chosen_target|int|string }}"
+      - if:
+          - condition: template
+            value_template: >-
+              {% from 'energy_battery_manual.jinja' import battery_target_override_active %}
+              {% set active=battery_target_override_active|as_function %}
+              {{ active() }}
+        then:
+          - if:
+              - condition: template
+                value_template: "{{ current_lease.get('done')==false and current_lease.get('target')==chosen_target }}"
+            then:
+              - stop: The selected target is already charging
+          - action: script.sg_stop_target_battery_charge
+            data:
+              reason: Changing charge target
+          - wait_template: >-
+              {% from 'energy_battery_manual.jinja' import battery_target_override_active %}
+              {% set active=battery_target_override_active|as_function %}
+              {{ not active() and is_state('input_boolean.sg_battery_stop_pending','off')
+                 and is_state('script.sg_battery_command_owner','off') }}
+            timeout: '00:00:45'
+            continue_on_timeout: true
+          - if:
+              - condition: template
+                value_template: "{{ not wait.completed }}"
+            then:
+              - action: input_text.set_value
+                target:
+                  entity_id: input_text.sg_battery_target_charge_status
+                data:
+                  value: Cannot change target; Stop could not be verified
+              - stop: New target was not started; existing Stop recovery continues
+          - if:
+              - condition: template
+                value_template: "{{ restore_arm and is_state('input_boolean.energy_disable_automation','off') }}"
+            then:
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.sg_battery_control_armed
+      - action: script.sg_start_target_battery_charge
+        data:
+          target_soc: "{{ chosen_target|int }}"
+
+  sg_start_target_battery_charge:
+    alias: Battery charge now to target
+    mode: single
+    max_exceeded: silent
+    fields:
+      target_soc:
+        name: Target SOC
+        description: Optional; otherwise capture the Battery charge target selector.
+        selector:
+          select:
+            options: ['50', '60', '70', '80', '90', '100']
+    sequence:
+      - variables:
+          target: "{{ target_soc|default(states('input_select.sg_battery_charge_target'))|float(-1) }}"
+          prior_arm: "{{ is_state('input_boolean.sg_battery_control_armed','on') }}"
+      - if:
+          - condition: template
+            value_template: >-
+              {% from 'energy_battery_manual.jinja' import battery_target_override_active %}
+              {% set active=battery_target_override_active|as_function %}
+              {{ active() }}
+        then:
+          - stop: A target charge is already active; cancel it before choosing another target
+      - if:
+          - condition: template
+            value_template: >-
+              {% from 'energy_battery_manual.jinja' import battery_manual_charge_tariff_permitted %}
+              {% set permitted=battery_manual_charge_tariff_permitted|as_function %}
+              {{ not permitted(now()) }}
+        then:
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.sg_battery_target_charge_status
+            data:
+              value: Cannot start; peak tariff or tariff helpers unavailable
+          - stop: Charging blocked by peak tariff; no command sent
+      - if:
+          - condition: template
+            value_template: >-
+              {{ not (target in [50,60,70,80,90,100]
+                and is_state('input_boolean.energy_disable_automation','off')
+                and has_value('sensor.sungrow_device_type_code')
+                and is_number(states('sensor.sungrow_device_type_code'))
+                and states('sensor.sungrow_device_type_code')|float==3355
+                and 0<=as_timestamp(now())-as_timestamp(states.sensor.sungrow_device_type_code.last_reported,0)<=900
+                and has_value('sensor.battery_level') and is_number(states('sensor.battery_level'))
+                and 0<=states('sensor.battery_level')|float<=100
+                and 0<=as_timestamp(now())-as_timestamp(states.sensor.battery_level.last_reported,0)<=180
+                and has_value('sensor.max_soc') and is_number(states('sensor.max_soc'))
+                and 0<=as_timestamp(now())-as_timestamp(states.sensor.max_soc.last_reported,0)<=900
+                and target<=states('sensor.max_soc')|float) }}
+        then:
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.sg_battery_target_charge_status
+            data:
+              value: Cannot start; check battery telemetry, target and global disable
+          - stop: Target charge not admitted; no command sent
+      - if:
+          - condition: template
+            value_template: "{{ states('sensor.battery_level')|float>=target }}"
+        then:
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.sg_battery_target_charge_status
+            data:
+              value: "{{ 'Already at or above ' ~ target|int ~ '%' }}"
+          - stop: Target already reached; no command sent
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.sg_battery_target_preparing
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.sg_battery_target_charge_status
+        data:
+          value: "{{ 'Preparing charge to ' ~ target|int ~ '%' }}"
+      # Withdraw automatic intent before the verified handover to manual authority.
+      - if:
+          - condition: template
+            value_template: "{{ not (states('input_text.energy_battery_charge_session')|from_json({})).get('done',true) }}"
+        then:
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.energy_battery_charge_session
+            data:
+              value: >-
+                {% set s=states('input_text.energy_battery_charge_session')|from_json({}) %}
+                {{ dict(s,done=true)|tojson|replace(', ',',')|replace(': ',':') }}
+      - action: script.sg_battery_request
+        data:
+          operation: normal
+      - wait_template: >-
+          {% set n=states('input_text.sg_battery_normal_confirmation')|from_json({}) %}
+          {{ n.get('status')=='confirmed' and n.get('epoch')==states('input_text.sg_battery_authority_epoch')
+             and is_state('input_boolean.sg_battery_stop_pending','off')
+             and is_state('script.sg_battery_command_owner','off') }}
+        timeout: '00:00:45'
+        continue_on_timeout: true
+      - if:
+          - condition: template
+            value_template: "{{ not wait.completed }}"
+        then:
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.sg_battery_target_charge_status
+            data:
+              value: Cannot start; self-consumption/Stop could not be verified
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sg_battery_target_preparing
+          - stop: Handover failed; existing Stop recovery continues
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.sg_battery_control_armed
+      - variables:
+          lease_json: >-
+            {% set t=as_timestamp(now())|int %}
+            {% set peak=today_at(states('input_datetime.energy_time_peak_start')) %}
+            {% set peak=peak if peak>now() else peak+timedelta(days=1) %}
+            {% set end=[t+28800,as_timestamp(peak)|int]|min %}
+            {{ dict(id='t' ~ (as_timestamp(now())*1000000)|int,start=t,end=end,
+              op='charge',power=10000,done=false,kind='target',target=target|int,rearm=prior_arm)
+              |tojson|replace(', ',',')|replace(': ',':') }}
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.sg_battery_manual_lease
+        data:
+          value: "{{ lease_json }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.sg_battery_target_charge_status
+        data:
+          value: "{{ 'Starting charge to ' ~ target|int ~ '%' }}"
+      - action: script.sg_battery_request
+        continue_on_error: true
+        data:
+          operation: charge
+          power_w: 10000
+          authority: manual
+          session_id: "{{ (lease_json|from_json).id }}"
+          authority_epoch: "{{ states('input_text.sg_battery_authority_epoch') }}"
+          attempt: 1
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.sg_battery_target_preparing
+
+  sg_cancel_target_battery_charge:
+    alias: Cancel battery charge now
+    mode: queued
+    max: 5
+    sequence:
+      # A Stop tap must also cancel a pending target change or start.
+      - action: script.turn_off
+        target:
+          entity_id: script.sg_charge_battery_to_target
+      - action: script.sg_stop_target_battery_charge
+        data:
+          reason: Cancelled
+
+  sg_stop_target_battery_charge:
+    alias: Stop target battery charge and verify
+    mode: queued
+    max: 5
+    sequence:
+      - variables:
+          lease: "{{ states('input_text.sg_battery_manual_lease')|from_json({}) }}"
+      - condition: template
+        value_template: "{{ is_state('input_boolean.sg_battery_target_preparing','on') or (lease.get('kind')=='target' and lease.get('finished')!=true) }}"
+      - action: script.turn_off
+        target:
+          entity_id: script.sg_start_target_battery_charge
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.sg_battery_target_preparing
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.sg_battery_target_charge_status
+        data:
+          value: "{{ reason|default('Charging interrupted') ~ '; stopping' }}"
+      - if:
+          - condition: template
+            value_template: "{{ lease.get('kind')=='target' and lease.get('done')==false }}"
+        then:
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.sg_battery_manual_lease
+            data:
+              value: >-
+                {{ dict(lease,done=true,stop_requested=true,stop_at=as_timestamp(now())|int)
+                   |tojson|replace(', ',',')|replace(': ',':') }}
+      - action: script.sg_battery_request
+        data:
+          operation: normal
+
+  sg_reconcile_target_battery_charge:
+    alias: Reconcile battery charge target and completion
+    mode: single
+    max_exceeded: silent
+    sequence:
+      - variables:
+          lease: "{{ states('input_text.sg_battery_manual_lease')|from_json({}) }}"
+          stamp: "{{ as_timestamp(now()) }}"
+          soc_fresh: >-
+            {{ has_value('sensor.battery_level') and is_number(states('sensor.battery_level'))
+              and 0<=states('sensor.battery_level')|float<=100
+              and 0<=as_timestamp(now())-as_timestamp(states.sensor.battery_level.last_reported,0)<=180 }}
+      - if:
+          - condition: template
+            value_template: >-
+              {{ is_state('input_boolean.sg_battery_target_preparing','on')
+                and stamp-as_timestamp(states.input_boolean.sg_battery_target_preparing.last_changed,0)>90 }}
+        then:
+          - action: script.sg_stop_target_battery_charge
+            data:
+              reason: Start timed out
+      - condition: template
+        value_template: "{{ lease.get('kind')=='target' and lease.get('finished')!=true }}"
+      - if:
+          - condition: template
+            value_template: "{{ lease.get('done')==false }}"
+        then:
+          - variables:
+              permitted: >-
+                {% from 'energy_battery_manual.jinja' import battery_manual_permitted %}
+                {% set policy=battery_manual_permitted|as_function %}
+                {{ policy(lease) }}
+          - if:
+              - condition: template
+                value_template: "{{ not permitted }}"
+            then:
+              - action: script.sg_stop_target_battery_charge
+                data:
+                  reason: >-
+                    {% if soc_fresh and states('sensor.battery_level')|float>=lease.get('target',101)|float %}
+                      Target reached ({{ lease.target }}%)
+                    {% elif not has_value('input_datetime.energy_time_peak_start') or not has_value('input_datetime.energy_time_peak_end') %}Tariff helpers unavailable
+                    {% elif is_state('sensor.energy_current_tariff','peak') or now()>=today_at(states('input_datetime.energy_time_peak_start')) and now()<today_at(states('input_datetime.energy_time_peak_end')) %}Peak tariff started
+                    {% elif stamp>=lease.get('end',0)|float %}Maximum runtime reached
+                    {% elif not soc_fresh %}Battery telemetry unavailable
+                    {% else %}Charging permission withdrawn{% endif %}
+            else:
+              - if:
+                  - condition: template
+                    value_template: >-
+                      {% set a=states('input_text.sg_battery_command_ack')|from_json({}) %}
+                      {{ a.get('id')==lease.id and a.get('status')=='confirmed'
+                        and a.get('epoch')==states('input_text.sg_battery_authority_epoch') }}
+                then:
+                  - action: input_text.set_value
+                    target:
+                      entity_id: input_text.sg_battery_target_charge_status
+                    data:
+                      value: "{{ 'Charging to ' ~ lease.target ~ '%' }}"
+        else:
+          - variables:
+              stop_verified: >-
+                {% set n=states('input_text.sg_battery_normal_confirmation')|from_json({}) %}
+                {{ n.get('status')=='confirmed' and n.get('operation')=='normal'
+                  and n.get('ems')==0 and n.get('command')==204
+                  and n.get('epoch')==states('input_text.sg_battery_authority_epoch')
+                  and is_number(n.get('confirmed_at'))
+                  and n.confirmed_at|float>=lease.get('stop_at',lease.start)|float
+                  and 0<=stamp-n.confirmed_at|float<=180
+                  and is_state('input_boolean.sg_battery_stop_pending','off')
+                  and is_state('script.sg_battery_command_owner','off')
+                  and is_state('sensor.ems_mode_selection_raw','0')
+                  and is_state('sensor.battery_forced_charge_discharge_cmd_raw','204')
+                  and 0<=stamp-as_timestamp(states.sensor.ems_mode_selection_raw.last_reported,0)<=180
+                  and 0<=stamp-as_timestamp(states.sensor.battery_forced_charge_discharge_cmd_raw.last_reported,0)<=180 }}
+          - if:
+              - condition: template
+                value_template: "{{ stop_verified }}"
+            then:
+              - action: input_text.set_value
+                target:
+                  entity_id: input_text.sg_battery_manual_lease
+                data:
+                  value: "{{ dict(lease,finished=true)|tojson|replace(', ',',')|replace(': ',':') }}"
+              - action: input_text.set_value
+                target:
+                  entity_id: input_text.sg_battery_target_charge_status
+                data:
+                  value: >-
+                    {% set status=states('input_text.sg_battery_target_charge_status') %}
+                    {% if soc_fresh and states('sensor.battery_level')|float>=lease.get('target',101)|float %}
+                      Target reached ({{ lease.target }}%)
+                    {% elif not has_value('input_datetime.energy_time_peak_start') or not has_value('input_datetime.energy_time_peak_end') %}Tariff helpers unavailable
+                    {% elif is_state('sensor.energy_current_tariff','peak') or now()>=today_at(states('input_datetime.energy_time_peak_start')) and now()<today_at(states('input_datetime.energy_time_peak_end')) %}Peak tariff started
+                    {% elif stamp>=lease.get('end',0)|float %}Maximum runtime reached
+                    {% elif '; stopping' in status %}{{ status|replace('; stopping','') }}
+                    {% else %}Charging interrupted{% endif %}
+              - if:
+                  - condition: template
+                    value_template: "{{ lease.get('rearm')==true and is_state('input_boolean.energy_disable_automation','off')
+                      and (states('input_text.sg_battery_target_charge_status').startswith('Target reached')
+                        or states('input_text.sg_battery_target_charge_status')=='Cancelled') }}"
+                then:
+                  - action: input_boolean.turn_on
+                    target:
+                      entity_id: input_boolean.sg_battery_control_armed
+
+automation:
+  - id: sg_forced_charge_peak_cutoff
+    alias: Stop forced battery charging at peak tariff
+    mode: single
+    max_exceeded: silent
+    triggers:
+      - trigger: time
+        at: input_datetime.energy_time_peak_start
+      - trigger: state
+        entity_id:
+          - input_datetime.energy_time_peak_start
+          - input_datetime.energy_time_peak_end
+        to: null
+    conditions:
+      - condition: template
+        value_template: >-
+          {% from 'energy_battery_manual.jinja' import battery_manual_charge_tariff_permitted %}
+          {% set permitted=battery_manual_charge_tariff_permitted|as_function %}
+          {{ not permitted(now()) }}
+    actions:
+      - action: script.turn_off
+        target:
+          entity_id: script.sg_charge_battery_to_target
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {% set m=states('input_text.sg_battery_manual_lease')|from_json({}) %}
+                  {{ is_state('input_boolean.sg_battery_target_preparing','on')
+                    or (m.get('kind')=='target' and m.get('finished')!=true) }}
+            sequence:
+              - action: script.sg_stop_target_battery_charge
+                data:
+                  reason: Peak tariff started
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {% set m=states('input_text.sg_battery_manual_lease')|from_json({}) %}
+                  {{ m.get('op')=='charge' and m.get('done')==false }}
+            sequence:
+              - action: script.sg_battery_request
+                data:
+                  operation: normal
+
+  - id: sg_target_charge_reconciliation
+    alias: Battery charge now target and completion
+    mode: single
+    max_exceeded: silent
+    triggers:
+      - trigger: time_pattern
+        seconds: /10
+      - trigger: state
+        entity_id:
+          - sensor.battery_level
+          - input_text.sg_battery_manual_lease
+          - input_text.sg_battery_command_ack
+          - input_text.sg_battery_normal_confirmation
+          - input_boolean.sg_battery_stop_pending
+          - script.sg_battery_command_owner
+        to: null
+    actions:
+      - action: script.sg_reconcile_target_battery_charge
+
+  - id: sg_target_charge_reload_cleanup
+    alias: Stop battery charge now on restart or reload
+    mode: single
+    triggers:
+      - trigger: homeassistant
+        event: start
+      - trigger: event
+        event_type: automation_reloaded
+      - trigger: event
+        event_type: call_service
+        event_data:
+          domain: script
+          service: reload
+    conditions:
+      - condition: template
+        value_template: >-
+          {% from 'energy_battery_manual.jinja' import battery_target_override_active %}
+          {% set active=battery_target_override_active|as_function %}
+          {{ active() }}
+    actions:
+      - action: script.sg_stop_target_battery_charge
+        data:
+          reason: Stopped after restart or reload

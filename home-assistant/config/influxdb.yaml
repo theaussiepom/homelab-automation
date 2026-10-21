@@ -1,0 +1,107 @@
+tags:
+  source: HASS
+
+tags_attributes:
+  - friendly_name
+
+default_measurement: state
+
+include:
+  domains:
+    - lock
+    - sensor
+  entity_globs:
+    - sensor.*_energy_current
+
+exclude:
+  entity_globs:
+    - sensor.[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]_[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]_browser_* # browser_mod
+    - sensor.*_battery
+    - sensor.*_battery_low
+    - sensor.*_cpu_*
+    - sensor.*_illuminance_lux
+    - sensor.*_ip
+    - sensor.*_last_restart_time
+    - sensor.*_memory_*
+    - sensor.*_mqtt_connect_count
+    - sensor.*_phone_*
+    - sensor.*_restart_reason
+    - sensor.*_ssid
+    - sensor.*_switch_*
+    - sensor.*_total_*
+    - sensor.*_volume
+    - sensor.*_wifi*
+    - sensor.active_issues
+    - sensor.alarm_control_panels
+    - sensor.brother_mfc_* # printer
+    - sensor.browser_mod_* # browser_mod
+    - sensor.coolangatta_*
+    - sensor.date*
+    - sensor.deck_irrigation_*
+    - sensor.deck_soil_*
+    - sensor.io_series_*
+    - sensor.kiosk_*
+    - sensor.mfc_* # printer
+    - sensor.mobile_tablet*
+    - sensor.plug*
+    - sensor.robina_*
+    - sensor.router_*
+    - sensor.rpi_*
+    - sensor.scrypted_token_*
+    - sensor.sh10rs_a2392201672_total_*
+    - sensor.sun_*
+    - sensor.system_monitor_*
+    - sensor.total*
+    - sensor.yearly*
+
+  entities:
+    - binary_sensor.myenergi_zappi_21539112_update_available
+    - sensor.active_issues
+    - sensor.alarm_control_panels
+    - sensor.areas
+    - sensor.automations
+    - sensor.buttons
+    - sensor.calendars
+    - sensor.cameras
+    - sensor.climate
+    - sensor.covers
+    - sensor.custom_integrations
+    - sensor.date
+    - sensor.dennisboys
+    - sensor.dennisboysguest
+    - sensor.dennisboysinv
+    - sensor.dennisboysiot
+    - sensor.device_trackers
+    - sensor.devices
+    - sensor.humidifiers
+    - sensor.ignored_issues
+    - sensor.images
+    - sensor.input_power
+    - sensor.input_voltage
+    - sensor.integrations
+    - sensor.issues
+    - sensor.lights
+    - sensor.media_players
+    - sensor.persistent_notifications
+    - sensor.persons
+    - sensor.remotes
+    - sensor.running_state
+    - sensor.scenes
+    - sensor.scripts
+    - sensor.selects
+    - sensor.sensors
+    - sensor.sirens
+    - sensor.suns
+    - sensor.switches
+    - sensor.testing
+    - sensor.texts
+    - sensor.time
+    - sensor.time_date
+    - sensor.time_utc
+    - sensor.times
+    - sensor.tts
+    - sensor.update
+    - sensor.vacuums
+    - sensor.water_heaters
+    - sensor.weather
+    - sensor.zones

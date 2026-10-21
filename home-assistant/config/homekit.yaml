@@ -1,0 +1,295 @@
+###########################################################################
+# MAIN AC BRIDGE (whole-house unit)
+###########################################################################
+- name: AC Bridge
+  port: 21060
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      - climate.ac_0
+  entity_config:
+    climate.ac_0:
+      name: "Main Aircon"
+
+###########################################################################
+# LIVING
+###########################################################################
+- name: Living Bridge
+  port: 21061
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      # Living blinds
+      - cover.blinds_living_windows
+      - cover.blinds_living_door
+      - cover.blind_kitchen
+      - vacuum.downstairs_robot
+      - media_player.bennis_a9
+
+      - light.kitchen_switch_light_kitchen_bench
+
+      # Living fan
+      - fan.living_fan
+      - switch.laundry_plug_laundry_plug_fan
+
+      # Living climate zone
+      - climate.living
+
+    include_entity_globs:
+      # Living scenes (scripts like scene_living_chill, scene_living_bright, etc.)
+      - script.scene_living_*
+
+      # Living fan speed scripts (e.g. living_fan_speed_1..4)
+      - script.living_fan_speed_*
+
+  entity_config:
+    script.scene_living_cinema:
+      name: "Cinema"
+    script.scene_living_movie:
+      name: "Movie"
+    climate.living:
+      name: "Living Zone"
+    switch.laundry_plug_laundry_plug_fan:
+      name: "Laundry Fan"
+
+###########################################################################
+# MASTER
+###########################################################################
+- name: Master Bridge
+  port: 21062
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      - cover.blind_master
+      - fan.master_fan
+      - climate.master
+      - light.helper_light_master_all
+
+    include_entity_globs:
+      # Master lighting scenes (scene_ben_bright, scene_ben_chill, etc.)
+      - script.scene_master_*
+
+      # Master fan speed scripts (ben_fan_speed_1..4)
+      - script.ben_fan_speed_*
+
+  entity_config:
+    climate.master:
+      name: "Master Zone"
+
+###########################################################################
+# MATTY
+###########################################################################
+- name: Guest Bridge
+  port: 21063
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      - cover.blind_guest
+      - fan.guest_fan
+      - climate.guest
+      - light.helper_light_guest_all
+      - light.helper_guest_lamp_all
+
+    include_entity_globs:
+      # Matty’s scenes (scene_matty_chill, scene_matty_bright, etc.)
+      - script.scene_guest_*
+
+      # Matty fan speed scripts (matty_fan_speed_1..5)
+      - script.matty_fan_speed_*
+
+  entity_config:
+    climate.guest:
+      name: "Guest Thermostat"
+    light.helper_guest_lamp_all:
+      name: "Guest Lamp"
+
+###########################################################################
+# STUDY
+###########################################################################
+- name: Study Bridge
+  port: 21064
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      - cover.blind_study
+      - fan.study_fan
+      - climate.study
+      - light.helper_light_study_all
+
+    include_entity_globs:
+      # Study scenes (study_bright, study_chill, etc.)
+      - script.scene_study_*
+
+      # Study fan speed scripts (study_fan_speed_1..5)
+      - script.study_fan_speed_*
+
+  entity_config:
+    climate.study:
+      name: "Study Zone"
+
+###########################################################################
+# LANDING / UPSTAIRS COMMON
+###########################################################################
+- name: Landing Bridge
+  port: 21065
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      - fan.landing_fan
+      - climate.landing
+      - switch.landing_plug_plug_landing_chandelier
+      - cover.blind_landing
+      - switch.switchstairrail_stair_rail_switch
+
+    include_entity_globs:
+      # Landing-specific scenes (scene_landing_off etc.)
+      - script.scene_landing_*
+
+      # Landing fan speed scripts
+      - script.landing_fan_speed_*
+
+  entity_config:
+    climate.landing:
+      name: "Landing Zone"
+
+###########################################################################
+# DECK
+###########################################################################
+- name: Deck Bridge
+  port: 21066
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      # Deck fan
+      - fan.deck_fan
+      - cover.blind_deck_long
+      - cover.blind_deck_short
+      - light.deck_light_flood
+      - light.helper_deck_light_all
+      - valve.deck_irrigation_tap_state
+
+    include_entity_globs:
+      # Deck scenes (scene_deck_off, scene_deck_bright, scene_deck_chill)
+      - script.scene_deck_*
+
+      # Deck fan speed scripts (deck_fan_speed_1..4)
+      - script.deck_fan_speed_*
+
+  entity_config:
+    cover.blind_deck_long:
+      name: "Deck Long Blind"
+    cover.blind_deck_short:
+      name: "Deck Short Blind"
+
+###########################################################################
+# GARAGE
+###########################################################################
+- name: Garage Bridge
+  port: 21067
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      - cover.garage_door
+      - light.helper_garage_light_all
+
+    include_entity_globs:
+      # Garage scenes (scene_garage_off, scene_garage_bright, scene_garage_chill)
+      - script.scene_garage_*
+
+###########################################################################
+# ENSUITE
+###########################################################################
+- name: Ensuite Bridge
+  port: 21068
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      - climate.ensuite
+      - switch.ensuite_plug_plug_ensuite_fan
+      - switch.ensuite_switch_ensuite_towel_rails
+
+    include_entity_globs:
+      # Ensuite scenes (scene_ensuite_bright, scene_ensuite_chill, etc.)
+      - script.scene_ensuite_*
+
+  entity_config:
+    climate.ensuite:
+      name: "Ensuite Zone"
+
+###########################################################################
+# BATHROOM
+###########################################################################
+- name: Bathroom Bridge
+  port: 21069
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      - climate.bathroom
+      - switch.bathroom_plug_plug_bathroom_fan
+      - switch.bathroom_switch_bathroom_towel_rails
+
+    include_entity_globs:
+      # Bathroom scenes (scene_bathroom_bright, scene_bathroom_night, etc.)
+      - script.scene_bathroom_*
+
+  entity_config:
+    climate.bathroom:
+      name: "Bathroom Zone"
+
+###########################################################################
+# PERISENSE NONPROD (test environment wake/sleep)
+###########################################################################
+- name: PeriSense Test Bridge
+  port: 21070
+  ip_address: !secret ha_homekit_ip_address_1
+  advertise_ip:
+    - !secret ha_homekit_ip_address_1
+  filter:
+    exclude_entity_globs:
+      - "*"
+    include_entities:
+      - switch.perisense_nonprod_test
+
+  entity_config:
+    switch.perisense_nonprod_test:
+      name: "PeriSense Test"
