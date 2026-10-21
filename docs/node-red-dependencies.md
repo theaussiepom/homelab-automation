@@ -44,9 +44,12 @@ selects 4.7.10. Tests exercise its actual precompiled DOT and state-machine text
 templates, preserve transitions and labels, and confirm invalid input is rejected.
 
 Cast's speech helper also pins Axios 0.21.x. Its scoped override selects the
-[patched 0.33.0 release](https://github.com/axios/axios/releases/tag/v0.33.0).
+[patched 0.34.0 release](https://github.com/axios/axios/releases/tag/v0.34.0).
 The inherited-request-data regression fails against 0.21.4 and passes after the
-update. In-memory adapter tests preserve the speech helper's URL construction,
+update. A second regression reproduces inherited form-serializer behavior on
+0.33.0 and passes on 0.34.0. GitHub dependency review reported this additional
+advisory even though npm audit did not, so both checks remain required.
+In-memory adapter tests preserve the speech helper's URL construction,
 request serialization, audio response parsing and transport-error behavior; they
 contact neither Google nor a speaker.
 
@@ -58,8 +61,8 @@ not prove compatibility with the expression engine bundled in a selected runtime
 
 ## Validation and remaining work
 
-A clean `npm ci --ignore-scripts` and 30 focused Cast, credential-store, JSONata
-and renderer tests pass on Node.js 24. The same 30 tests pass in an isolated
+A clean `npm ci --ignore-scripts` and 31 focused Cast, credential-store, JSONata
+and renderer tests pass on Node.js 24. The same 31 tests pass in an isolated
 Node-RED 5.0.8 image using Node.js 24.21.0. A separate network-disabled safe-mode
 check loads the serial and Modbus modules, registers all 22 node packages and the
 theme plugin, and finds all 23 node types used by the public flow snapshot.
@@ -67,8 +70,8 @@ The HA expression service also passes a binding check using the actual Node-RED 
 utility implementation. Core JSONata resolves to 2.2.2 and rejects the harmless
 function-construction regression.
 
-The refreshed npm audit has 22 affected dependency entries, down from 48: zero
-critical, eleven high and eleven moderate. JSONata, protobuf, Handlebars and Axios
+The refreshed npm audit has 21 affected dependency entries, down from 48: zero
+critical, ten high and eleven moderate. JSONata, protobuf, Handlebars and Axios
 are absent from that audit. Remaining chains include InfluxDB, email and the
 state-machine renderer's other dependencies.
 These counts include parent packages affected by a dependency, not independent

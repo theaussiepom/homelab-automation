@@ -10,7 +10,7 @@ const ttsRequire = createRequire(cast.resolve('google-tts-api/package.json'));
 const axios = ttsRequire('axios');
 
 test('Cast TTS resolves the patched Axios 0.x release', () => {
-    assert.equal(ttsRequire('axios/package.json').version, '0.33.0');
+    assert.equal(ttsRequire('axios/package.json').version, '0.34.0');
 });
 
 test('bodyless requests ignore inherited data', async () => {
@@ -28,6 +28,27 @@ test('bodyless requests ignore inherited data', async () => {
         assert.equal(sent, undefined);
     } finally {
         delete Object.prototype.data;
+    }
+});
+
+test('form serialization ignores an inherited visitor', () => {
+    // GHSA-x97p-jq2g-jp4f: the synthetic visitor must never observe form fields.
+    assert.equal(Object.hasOwn(Object.prototype, 'visitor'), false);
+    let calls = 0;
+    const fields = [];
+    Object.defineProperty(Object.prototype, 'visitor', {
+        configurable: true, writable: true,
+        value(value, key, path, helpers) {
+            calls++;
+            return helpers.defaultVisitor.call(this, value, key, path);
+        },
+    });
+    try {
+        axios.toFormData({nested: {label: 'fixture'}}, {append: (key, value) => fields.push([key, value])});
+        assert.equal(calls, 0);
+        assert.deepEqual(fields, [['nested[label]', 'fixture']]);
+    } finally {
+        delete Object.prototype.visitor;
     }
 });
 

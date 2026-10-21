@@ -40,7 +40,7 @@
             "handlebars": "4.7.10"
         },
         "google-tts-api": {
-            "axios": "0.33.0"
+            "axios": "0.34.0"
         }
     },
     "engines": {
