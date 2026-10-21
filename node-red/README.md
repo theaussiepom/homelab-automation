@@ -14,6 +14,9 @@ The example private-settings file contains placeholders only.
 `config/package.json` and `config/package-lock.json` are maintained dependency
 snapshots. Node-RED's live palette manifests and installed modules remain in
 `/data`; palette updates do not silently update these source snapshots.
+The current upgrade candidate requires Node-RED 5 and Node.js 22.9 or later;
+see [dependency changes and validation limits](../docs/node-red-dependencies.md)
+before selecting a deployment image or installing these packages.
 
 The local ignore policy admits only the reviewed six files. Review and screen
 any additional source before adding an explicit exception. Check the exact
