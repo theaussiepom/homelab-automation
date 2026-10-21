@@ -296,8 +296,6 @@ services:
       ZIGBEELENS_LOG_LEVEL: info
       TZ: ${TZ}
     restart: always
-    ports:
-    - 8377:8377
     volumes:
     - type: volume
       source: retained_zigbeelens_config
