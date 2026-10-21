@@ -9,6 +9,19 @@ Credentials, private settings, module installations, sessions, context, timers,
 and generated state live outside this repository under
 `/mnt/nas/docker/homelab-data/services/node-red/data`, mounted as `/data`.
 Do not add encrypted credentials or private values to a flow or settings file.
+
+Before adopting these settings, the private deployment must provide `/data` as
+an owner-only directory (0700) and `/data/flows_cred.json` as an owner-only regular
+file (0600), accessible by the Node-RED runtime user. Startup refuses other modes
+or symbolic links and never changes private files or permissions automatically.
+After validation, the process uses umask 0077 so subsequent credential saves do
+not recreate a broadly readable file. This also restricts other new runtime
+files and directories to their owner.
+
+Existing installations may have 0644 credential files. Back up and verify their
+ownership, content and directory permissions before a separately reviewed
+deployment; source checks do not establish that a live installation meets this
+contract. Rehearse the changed settings against a private copy before restart.
 The example private-settings file contains placeholders only.
 
 `config/package.json` and `config/package-lock.json` are maintained dependency

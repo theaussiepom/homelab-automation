@@ -19,5 +19,56 @@ class YamlTests(unittest.TestCase):
         with self.assertRaises(yaml.YAMLError):
             yaml.load('item: [', Loader=PublicLoader)
 
+
+
+class ComposeInterpolationTests(unittest.TestCase):
+    def required(self, text):
+        from config_validation import compose_variables
+        return compose_variables(yaml.safe_load(text), required=True)
+
+    def test_yaml_comments_are_not_requirements(self):
+        self.assertEqual(self.required('services: {} # ${TOKEN:?required}'), set())
+
+    def test_escaped_dollars_are_not_requirements(self):
+        self.assertEqual(self.required('command: "$${TOKEN:?required}"'), set())
+        self.assertEqual(self.required('command: "$$$${TOKEN:?required}"'), set())
+
+    def test_unescaped_requirement_after_literal_dollar_is_checked(self):
+        self.assertEqual(self.required('command: "$$${TOKEN:?required}"'), {'TOKEN'})
+
+    def test_mapping_keys_are_not_interpolated(self):
+        self.assertEqual(self.required('labels: {"${TOKEN:?required}": "value"}'), set())
+
+    def test_nested_values_and_list_entries_are_checked(self):
+        self.assertEqual(self.required('services: {app: {environment: ["KEY=${TOKEN:?required}"]}}'), {'TOKEN'})
+
+    def test_optional_values_do_not_become_requirements(self):
+        self.assertEqual(self.required('command: "${OPTIONAL:-default} ${PLAIN}"'), set())
+
+
+class ComposeModelTests(unittest.TestCase):
+    def test_literals_and_comments_pass_actual_compose(self):
+        import tempfile
+        from pathlib import Path
+        from config_validation import compose
+        for value in ('plain', '$${TOKEN:?required}', '$$$${TOKEN:?required}'):
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as temp:
+                path = Path(temp) / 'compose.yaml'
+                path.write_text('services:\n  app:\n    image: example.invalid/fixture:1\n'
+                                '    environment:\n      VALUE: "' + value + '"\n'
+                                '# ${COMMENT_ONLY:?required}\n')
+                self.assertEqual(compose(path), 1)
+
+    def test_required_input_still_checked_with_actual_compose(self):
+        import tempfile
+        from pathlib import Path
+        from config_validation import compose
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'compose.yaml'
+            path.write_text('services:\n  app:\n    image: example.invalid/fixture:1\n'
+                            '    environment:\n      VALUE: "${TOKEN:?required}"\n')
+            self.assertEqual(compose(path), 1)
+
+
 if __name__ == '__main__':
     unittest.main()

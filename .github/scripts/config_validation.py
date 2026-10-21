@@ -36,9 +36,30 @@ def checked(argv, **kwargs):
         raise ValueError('Syntax or model validation failed')
     return result.stdout
 
+def compose_variables(value, required=False):
+    """Inspect YAML values, consuming escaped dollar pairs before variables."""
+    result = set()
+    if isinstance(value, dict):
+        children = value.values()
+    elif isinstance(value, list):
+        children = value
+    elif isinstance(value, str):
+        pattern = r'\$\$|\$\{([_a-zA-Z][_a-zA-Z0-9]*)(:\?)?|\$([_a-zA-Z][_a-zA-Z0-9]*)'
+        for match in re.finditer(pattern, value):
+            name = match[1] or match[3]
+            if name and (not required or match[2]):
+                result.add(name)
+        return result
+    else:
+        return result
+    for child in children:
+        result.update(compose_variables(child, required))
+    return result
+
 def compose(path):
     text = path.read_text()
-    variables = set(re.findall(r'\$\{([A-Z][A-Z0-9_]*)', text))
+    model = yaml.safe_load(text)
+    variables = compose_variables(model)
     with tempfile.TemporaryDirectory(prefix='compose-public-fixture-') as temp:
         scratch = Path(temp)
         dummy = scratch / 'synthetic.env'
@@ -64,7 +85,6 @@ def compose(path):
             else:
                 value = 'fixture-only'
             env[variable] = value
-        model = yaml.safe_load(text)
         for service in model.get('services', {}).values():
             if 'env_file' in service:
                 service['env_file'] = [str(dummy)]
@@ -80,7 +100,7 @@ def compose(path):
         parsed = json.loads(output)
         if not parsed.get('services'):
             raise ValueError('Empty Compose model')
-        for variable in set(re.findall(r'\$\{([A-Z][A-Z0-9_]*):\?[^}]*\}', text)):
+        for variable in compose_variables(model, required=True):
             for empty in (False, True):
                 missing = dict(env)
                 if empty:

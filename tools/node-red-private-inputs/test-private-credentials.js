@@ -6,6 +6,8 @@ const { test } = require('node:test');
 const { requirePrivateCredentials } = require('../../node-red/config/private-inputs');
 
 function fixture(t) {
+    const mask = process.umask();
+    t.after(() => process.umask(mask));
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nodered-private-credentials-'));
     t.after(() => fs.rmSync(root, {recursive: true, force: true}));
     return path.join(root, 'flows_cred.json');
@@ -43,4 +45,31 @@ test('directory and symbolic link cannot replace private credential file', t => 
     const link = file + '.link';
     fs.symlinkSync(target, link);
     assert.throws(() => requirePrivateCredentials(link), /Restore the private/);
+});
+
+for (const mode of [0o644, 0o640, 0o660]) {
+    test('permissive credentials refuse without changing mode: ' + mode.toString(8), t => {
+        const file = fixture(t);
+        fs.writeFileSync(file, '{}', {mode: 0o600});
+        fs.chmodSync(file, mode);
+        assert.throws(() => requirePrivateCredentials(file), /Restore the private/);
+        assert.equal(fs.statSync(file).mode & 0o777, mode);
+    });
+}
+test('credential directory must restrict traversal to its owner', t => {
+    const file = fixture(t);
+    fs.writeFileSync(file, '{}', {mode: 0o600});
+    fs.chmodSync(path.dirname(file), 0o755);
+    assert.throws(() => requirePrivateCredentials(file), /Restore the private/);
+    assert.equal(fs.statSync(path.dirname(file)).mode & 0o777, 0o755);
+});
+test('private startup preserves restrictive modes on subsequent atomic writes', t => {
+    const file = fixture(t);
+    fs.writeFileSync(file, '{}', {mode: 0o600});
+    process.umask(0o022);
+    requirePrivateCredentials(file);
+    const temporary = file + '.temporary';
+    fs.writeFileSync(temporary, '{"$":"synthetic-next-version"}');
+    fs.renameSync(temporary, file);
+    assert.equal(fs.statSync(file).mode & 0o777, 0o600);
 });

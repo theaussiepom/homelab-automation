@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require("fs");
+const path = require("path");
 const prefix = /^HOMELAB_NR_[A-Z0-9_]+$/;
 const reference = /^\$\{(HOMELAB_NR_[A-Z0-9_]+)\}$/;
 
@@ -62,13 +63,22 @@ function load({filePath, flowPath, settingKeys}, environment = process.env) {
 // deployment workflow, using {} only for a deliberately new installation.
 function requirePrivateCredentials(filePath = "/data/flows_cred.json") {
     try {
+        const parent = fs.lstatSync(path.dirname(filePath));
+        if (!parent.isDirectory() || parent.isSymbolicLink() || (parent.mode & 0o7777) !== 0o700) {
+            throw new Error("Invalid private directory");
+        }
         const stat = fs.lstatSync(filePath);
-        if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("Invalid file");
+        if (!stat.isFile() || stat.isSymbolicLink() || (stat.mode & 0o7777) !== 0o600) {
+            throw new Error("Invalid private file");
+        }
         const value = JSON.parse(fs.readFileSync(filePath, "utf8"));
         if (!value || Array.isArray(value) || typeof value !== "object") throw new Error("Invalid JSON");
     } catch (_) {
         throw new Error("Restore the private Node-RED credential store before startup");
     }
+    // Node-RED saves through a new temporary file followed by rename. Restrict
+    // future writes as well as the existing store; do not chmod private inputs.
+    process.umask(0o077);
 }
 
 module.exports = {load, references, validate, requirePrivateCredentials};
