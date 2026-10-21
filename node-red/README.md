@@ -14,6 +14,8 @@ Before adopting these settings, the private deployment must provide `/data` as
 an owner-only directory (0700) and `/data/flows_cred.json` as an owner-only regular
 file (0600), accessible by the Node-RED runtime user. Startup refuses other modes
 or symbolic links and never changes private files or permissions automatically.
+If the writer's pending `flows_cred.json.$$$` file already exists, it must also be
+a regular 0600 file; stale permissive files require reviewed remediation.
 After validation, the process uses umask 0077 so subsequent credential saves do
 not recreate a broadly readable file. This also restricts other new runtime
 files and directories to their owner.

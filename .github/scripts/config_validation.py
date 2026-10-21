@@ -36,7 +36,7 @@ def checked(argv, **kwargs):
         raise ValueError('Syntax or model validation failed')
     return result.stdout
 
-def compose_variables(value, required=False):
+def compose_variables(value, required=False, reject_empty=False):
     """Inspect YAML values, consuming escaped dollar pairs before variables."""
     result = set()
     if isinstance(value, dict):
@@ -44,16 +44,15 @@ def compose_variables(value, required=False):
     elif isinstance(value, list):
         children = value
     elif isinstance(value, str):
-        pattern = r'\$\$|\$\{([_a-zA-Z][_a-zA-Z0-9]*)(:\?)?|\$([_a-zA-Z][_a-zA-Z0-9]*)'
-        for match in re.finditer(pattern, value):
+        for match in re.finditer(r'\$\$|\$\{([_a-zA-Z][_a-zA-Z0-9]*)(:?\?)?|\$([_a-zA-Z][_a-zA-Z0-9]*)', value):
             name = match[1] or match[3]
-            if name and (not required or match[2]):
+            if name and (not required or match[2]) and (not reject_empty or match[2] == ':?'):
                 result.add(name)
         return result
     else:
         return result
     for child in children:
-        result.update(compose_variables(child, required))
+        result.update(compose_variables(child, required, reject_empty))
     return result
 
 def compose(path):
@@ -100,8 +99,11 @@ def compose(path):
         parsed = json.loads(output)
         if not parsed.get('services'):
             raise ValueError('Empty Compose model')
+        nonempty = compose_variables(model, required=True, reject_empty=True)
         for variable in compose_variables(model, required=True):
-            for empty in (False, True):
+            # ${VAR?error} permits an explicitly empty value; ${VAR:?error}
+            # rejects both unset and empty values.
+            for empty in ((False, True) if variable in nonempty else (False,)):
                 missing = dict(env)
                 if empty:
                     missing[variable] = ''

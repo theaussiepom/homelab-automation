@@ -68,8 +68,41 @@ test('private startup preserves restrictive modes on subsequent atomic writes', 
     fs.writeFileSync(file, '{}', {mode: 0o600});
     process.umask(0o022);
     requirePrivateCredentials(file);
-    const temporary = file + '.temporary';
+    const temporary = file + '.$$$';
     fs.writeFileSync(temporary, '{"$":"synthetic-next-version"}');
     fs.renameSync(temporary, file);
     assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+});
+
+for (const mode of [0o644, 0o640, 0o660]) {
+    test('stale credential temporary file refuses without modifying it: ' + mode.toString(8), t => {
+        const file = fixture(t);
+        fs.writeFileSync(file, '{}', {mode: 0o600});
+        const pending = file + '.$$$';
+        fs.writeFileSync(pending, 'synthetic-pending-value', {mode: 0o600});
+        fs.chmodSync(pending, mode);
+        assert.throws(() => requirePrivateCredentials(file), /Restore the private/);
+        assert.equal(fs.readFileSync(pending, 'utf8'), 'synthetic-pending-value');
+        assert.equal(fs.statSync(pending).mode & 0o777, mode);
+    });
+}
+test('private temporary file can be reused by the credential writer', t => {
+    const file = fixture(t);
+    fs.writeFileSync(file, '{}', {mode: 0o600});
+    const pending = file + '.$$$';
+    fs.writeFileSync(pending, 'incomplete', {mode: 0o600});
+    requirePrivateCredentials(file);
+    fs.writeFileSync(pending, '{}');
+    fs.renameSync(pending, file);
+    assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+});
+test('symlink or directory pending credential file refuses startup', t => {
+    const file = fixture(t);
+    fs.writeFileSync(file, '{}', {mode: 0o600});
+    const pending = file + '.$$$';
+    fs.symlinkSync(file, pending);
+    assert.throws(() => requirePrivateCredentials(file), /Restore the private/);
+    fs.unlinkSync(pending);
+    fs.mkdirSync(pending, {mode: 0o700});
+    assert.throws(() => requirePrivateCredentials(file), /Restore the private/);
 });

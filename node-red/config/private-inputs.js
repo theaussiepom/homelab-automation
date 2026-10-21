@@ -73,6 +73,16 @@ function requirePrivateCredentials(filePath = "/data/flows_cred.json") {
         }
         const value = JSON.parse(fs.readFileSync(filePath, "utf8"));
         if (!value || Array.isArray(value) || typeof value !== "object") throw new Error("Invalid JSON");
+        // Node-RED reuses this fixed temporary path before rename. An existing
+        // file keeps its permissions despite umask, so it must also be private.
+        try {
+            const pending = fs.lstatSync(filePath + ".$$$");
+            if (!pending.isFile() || pending.isSymbolicLink() || (pending.mode & 0o7777) !== 0o600) {
+                throw new Error("Invalid pending private file");
+            }
+        } catch (error) {
+            if (error.code !== "ENOENT") throw error;
+        }
     } catch (_) {
         throw new Error("Restore the private Node-RED credential store before startup");
     }

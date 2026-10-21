@@ -45,8 +45,53 @@ class ComposeInterpolationTests(unittest.TestCase):
     def test_optional_values_do_not_become_requirements(self):
         self.assertEqual(self.required('command: "${OPTIONAL:-default} ${PLAIN}"'), set())
 
+    def test_non_colon_required_operator_is_checked(self):
+        self.assertEqual(self.required('command: "${TOKEN?required}"'), {'TOKEN'})
+
 
 class ComposeModelTests(unittest.TestCase):
+    def test_conditional_requirements_pass_actual_compose(self):
+        import tempfile
+        from pathlib import Path
+        from config_validation import compose
+        expressions = (
+            '${TOKEN?required}',
+            '${PRIMARY:-${BACKUP:?required}}',
+            '${PRIMARY-${BACKUP?required}}',
+            '${PRIMARY:+${BACKUP:?required}}',
+            '${PRIMARY+${BACKUP?required}}',
+            '${PRIMARY:-${SECONDARY:-${BACKUP:?required}}}',
+            '${PRIMARY:-${PRIMARY:?required}}',
+            '${PRIMARY:+${PRIMARY:?required}}',
+        )
+        for expression in expressions:
+            for other in (False, True):
+                with self.subTest(expression=expression, other=other), tempfile.TemporaryDirectory() as temp:
+                    path = Path(temp) / 'compose.yaml'
+                    environment = {'VALUE': expression}
+                    if other:
+                        environment['OTHER'] = '${PRIMARY:?also required}'
+                    path.write_text(yaml.safe_dump({'services': {'app': {
+                        'image': 'example.invalid/fixture:1', 'environment': environment,
+                    }}}))
+                    self.assertEqual(compose(path), 1)
+
+    def test_required_operator_probes_distinguish_unset_from_empty(self):
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        import config_validation as validation
+        for operator, expected in [('?', [None]), (':?', [None, ''])]:
+            with self.subTest(operator=operator), tempfile.TemporaryDirectory() as temp:
+                path = Path(temp) / 'compose.yaml'
+                path.write_text(yaml.safe_dump({'services': {'app': {
+                    'image': 'example.invalid/fixture:1',
+                    'environment': {'VALUE': '${TOKEN' + operator + 'required}'},
+                }}}))
+                with patch.object(validation.subprocess, 'run', wraps=validation.subprocess.run) as run:
+                    self.assertEqual(validation.compose(path), 1)
+                self.assertEqual([call.kwargs['env'].get('TOKEN') for call in run.call_args_list[1:]], expected)
+
     def test_literals_and_comments_pass_actual_compose(self):
         import tempfile
         from pathlib import Path
