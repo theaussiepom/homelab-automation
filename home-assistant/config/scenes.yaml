@@ -1,0 +1,1244 @@
+- id: '1709201896201'
+  name: scene-living-dining
+  entities:
+    light.zigbee_group_living_downlights_front_back_3_4:
+      state: 'off'
+    light.zigbee_group_living_downlights_front_back_1_2:
+      brightness: 76
+      color_temp_kelvin: 2611
+      state: 'on'
+    light.zigbee_group_bar_strips_all:
+      color_mode: xy
+      brightness: 64
+      xy_color:
+      - 0.273
+      - 0.189
+      state: 'on'
+    light.living_light_strip_living_tv:
+      color_mode: xy
+      brightness: 15
+      xy_color:
+      - 0.287
+      - 0.175
+      state: 'on'
+    light.zigbee_group_kitchen_downlights_left_middle:
+      state: 'off'
+    light.kitchen_light_light_kitchen_right:
+      state: 'off'
+    light.kitchen_switch_light_kitchen_bench:
+      brightness: 30
+      state: 'on'
+    light.zigbee_group_kitchen_strips_all:
+      color_mode: xy
+      brightness: 64
+      xy_color:
+      - 0.252
+      - 0.184
+      state: 'on'
+    switch.adaptive_lighting_living:
+      state: 'off'
+    switch.tablet_living_kiosk_screen:
+      state: 'on'
+    number.tablet_living_kiosk_screen_brightness:
+      state: '50'
+    light.entrance_light_light_entrance_foyer:
+      brightness: 26
+      color_temp_kelvin: 2597
+      state: 'on'
+    input_select.options_scene_living:
+      state: dining
+    input_boolean.scene_living_bright:
+      state: 'off'
+    input_boolean.scene_living_chill:
+      state: 'off'
+    input_boolean.scene_living_cinema:
+      state: 'off'
+    input_boolean.scene_living_dining:
+      state: 'on'
+    input_boolean.scene_living_morning:
+      state: 'off'
+    input_boolean.scene_living_off:
+      state: 'off'
+    input_boolean.scene_living_rainyday:
+      state: 'off'
+    input_boolean.scene_living_nightlight:
+      state: 'off'
+    input_boolean.living_transition_switch:
+      state: 'off'
+  icon: mdi:food-apple-outline
+- id: '1709202473032'
+  name: scene-living-bright
+  entities:
+    light.zigbee_group_kitchen_downlights_left_middle:
+      brightness: 120
+      state: 'on'
+    light.kitchen_light_light_kitchen_right:
+      brightness: 120
+      state: 'on'
+    light.kitchen_switch_light_kitchen_bench:
+      brightness: 180
+      state: 'on'
+    light.zigbee_group_kitchen_strips_all:
+      color_mode: color_temp
+      brightness: 255
+      color_temp_kelvin: 2646
+      state: 'on'
+    switch.adaptive_lighting_living:
+      state: 'on'
+    switch.tablet_living_kiosk_screen:
+      state: 'on'
+    number.tablet_living_kiosk_screen_brightness:
+      state: '180'
+    light.entrance_light_light_entrance_foyer:
+      state: 'off'
+    input_select.options_scene_living:
+      state: bright
+    input_boolean.scene_living_bright:
+      state: 'on'
+    input_boolean.scene_living_chill:
+      state: 'off'
+    input_boolean.scene_living_cinema:
+      state: 'off'
+    input_boolean.scene_living_dining:
+      state: 'off'
+    input_boolean.scene_living_morning:
+      state: 'off'
+    input_boolean.scene_living_off:
+      state: 'off'
+    input_boolean.scene_living_rainyday:
+      state: 'off'
+    input_boolean.scene_living_nightlight:
+      state: 'off'
+    input_boolean.living_transition_switch:
+      state: 'on'
+  icon: mdi:lightbulb-outline
+- id: '1709202769939'
+  name: living-chill
+  entities:
+    light.zigbee_group_living_downlights_nonchill:
+      state: 'off'
+    light.zigbee_group_living_downlights_chill:
+      brightness: 76
+      state: 'on'
+    light.zigbee_group_bar_strips_all:
+      color_mode: color_temp
+      color_temp_kelvin: 2646
+      brightness: 76
+      state: 'on'
+    light.living_light_strip_living_tv:
+      color_mode: color_temp
+      color_temp_kelvin: 2646
+      brightness: 76
+      state: 'on'
+    light.zigbee_group_kitchen_downlights_left_middle:
+      state: 'off'
+    light.kitchen_light_light_kitchen_right:
+      state: 'off'
+    light.kitchen_switch_light_kitchen_bench:
+      brightness: 50
+      state: 'on'
+    light.zigbee_group_kitchen_strips_all:
+      color_mode: color_temp
+      color_temp_kelvin: 2646
+      brightness: 76
+      state: 'on'
+    switch.adaptive_lighting_living:
+      state: 'on'
+    switch.tablet_living_kiosk_screen:
+      state: 'on'
+    number.tablet_living_kiosk_screen_brightness:
+      state: '140'
+    light.entrance_light_light_entrance_foyer:
+      brightness: 50
+      state: 'on'
+    input_select.options_scene_living:
+      state: chill
+    input_boolean.scene_living_bright:
+      state: 'off'
+    input_boolean.scene_living_chill:
+      state: 'on'
+    input_boolean.scene_living_cinema:
+      state: 'off'
+    input_boolean.scene_living_dining:
+      state: 'off'
+    input_boolean.scene_living_morning:
+      state: 'off'
+    input_boolean.scene_living_off:
+      state: 'off'
+    input_boolean.scene_living_rainyday:
+      state: 'off'
+    input_boolean.scene_living_nightlight:
+      state: 'off'
+    input_boolean.living_transition_switch:
+      state: 'off'
+  icon: mdi:glass-cocktail
+- id: '1709203048669'
+  name: living-cinema
+  entities:
+    light.zigbee_group_living_downlights_all:
+      state: 'off'
+    light.zigbee_group_bar_strips_all:
+      color_mode: xy
+      brightness: 26
+      xy_color:
+      - 0.137
+      - 0.072
+      state: 'on'
+    light.living_light_strip_living_tv:
+      color_mode: xy
+      brightness: 26
+      xy_color:
+      - 0.137
+      - 0.072
+      state: 'on'
+    light.zigbee_group_kitchen_downlights_left_middle:
+      state: 'off'
+    light.kitchen_light_light_kitchen_right:
+      state: 'off'
+    light.kitchen_switch_light_kitchen_bench:
+      state: 'off'
+    switch.adaptive_lighting_living:
+      state: 'off'
+    switch.tablet_living_kiosk_screen:
+      state: 'on'
+    number.tablet_living_kiosk_screen_brightness:
+      state: '30'
+    light.entrance_light_light_entrance_foyer:
+      state: 'off'
+    input_select.options_scene_living:
+      state: cinema
+    input_boolean.scene_living_bright:
+      state: 'off'
+    input_boolean.scene_living_chill:
+      state: 'off'
+    input_boolean.scene_living_cinema:
+      state: 'on'
+    input_boolean.scene_living_dining:
+      state: 'off'
+    input_boolean.scene_living_morning:
+      state: 'off'
+    input_boolean.scene_living_off:
+      state: 'off'
+    input_boolean.scene_living_rainyday:
+      state: 'off'
+    input_boolean.scene_living_nightlight:
+      state: 'off'
+    input_boolean.living_transition_switch:
+      state: 'off'
+  icon: mdi:video-outline
+- id: '1709203258694'
+  name: living-morning
+  entities:
+    light.zigbee_group_living_downlights_back_1_3:
+      brightness: 153
+      state: 'on'
+    light.living_light_light_living_back_4:
+      state: 'off'
+    light.zigbee_group_living_downlights_front:
+      state: 'off'
+    light.zigbee_group_bar_strips_all:
+      state: 'off'
+    light.living_light_strip_living_tv:
+      state: 'off'
+    light.zigbee_group_kitchen_downlights_left_middle:
+      state: 'off'
+    light.kitchen_light_light_kitchen_right:
+      state: 'off'
+    light.kitchen_switch_light_kitchen_bench:
+      state: 'off'
+    light.zigbee_group_kitchen_strips_all:
+      color_mode: color_temp
+      color_temp_kelvin: 4464
+      brightness: 255
+      state: 'on'
+    switch.adaptive_lighting_living:
+      state: 'on'
+    switch.tablet_living_kiosk_screen:
+      state: 'on'
+    number.tablet_living_kiosk_screen_brightness:
+      state: '180'
+    light.entrance_light_light_entrance_foyer:
+      state: 'off'
+    input_select.options_scene_living:
+      state: morning
+    input_boolean.scene_living_bright:
+      state: 'off'
+    input_boolean.scene_living_chill:
+      state: 'off'
+    input_boolean.scene_living_cinema:
+      state: 'off'
+    input_boolean.scene_living_dining:
+      state: 'off'
+    input_boolean.scene_living_morning:
+      state: 'on'
+    input_boolean.scene_living_off:
+      state: 'off'
+    input_boolean.scene_living_rainyday:
+      state: 'off'
+    input_boolean.scene_living_nightlight:
+      state: 'off'
+    input_boolean.living_transition_switch:
+      state: 'off'
+  icon: mdi:weather-sunny
+- id: '1709203376959'
+  name: living-rainy-day
+  entities:
+    light.zigbee_group_living_downlights_back_1_3:
+      brightness: 153
+      state: 'on'
+    light.living_light_light_living_back_4:
+      brightness: 153
+      state: 'on'
+    light.zigbee_group_living_downlights_front:
+      state: 'off'
+    light.zigbee_group_bar_strips_all:
+      color_mode: color_temp
+      color_temp_kelvin: 4464
+      brightness: 64
+      state: 'on'
+    light.living_light_strip_living_tv:
+      color_mode: color_temp
+      color_temp_kelvin: 4464
+      brightness: 128
+      state: 'on'
+    light.kitchen_light_light_kitchen_left:
+      brightness: 76
+      state: 'on'
+    light.kitchen_light_light_kitchen_middle:
+      state: 'off'
+    light.kitchen_light_light_kitchen_right:
+      brightness: 76
+      state: 'on'
+    light.kitchen_switch_light_kitchen_bench:
+      state: 'off'
+    light.zigbee_group_kitchen_strips_all:
+      color_mode: color_temp
+      color_temp_kelvin: 4464
+      brightness: 222
+      state: 'on'
+    switch.adaptive_lighting_living:
+      state: 'on'
+    switch.tablet_living_kiosk_screen:
+      state: 'on'
+    number.tablet_living_kiosk_screen_brightness:
+      state: '180'
+    light.entrance_light_light_entrance_foyer:
+      brightness: 128
+      state: 'on'
+    input_select.options_scene_living:
+      state: rainyday
+    input_boolean.scene_living_bright:
+      state: 'off'
+    input_boolean.scene_living_chill:
+      state: 'off'
+    input_boolean.scene_living_cinema:
+      state: 'off'
+    input_boolean.scene_living_dining:
+      state: 'off'
+    input_boolean.scene_living_morning:
+      state: 'off'
+    input_boolean.scene_living_off:
+      state: 'off'
+    input_boolean.scene_living_rainyday:
+      state: 'on'
+    input_boolean.scene_living_nightlight:
+      state: 'off'
+    input_boolean.living_transition_switch:
+      state: 'off'
+  icon: mdi:weather-pouring
+- id: '1710747152191'
+  name: living-nightlight
+  entities:
+    light.zigbee_group_living_downlights_all:
+      state: 'off'
+    light.zigbee_group_bar_strips_all:
+      color_mode: color_temp
+      color_temp_kelvin: 2611
+      brightness: 15
+      state: 'on'
+    light.living_light_strip_living_tv:
+      color_mode: color_temp
+      color_temp_kelvin: 2611
+      brightness: 15
+      state: 'on'
+    light.zigbee_group_kitchen_downlights_left_middle:
+      state: 'off'
+    light.kitchen_light_light_kitchen_right:
+      state: 'off'
+    light.kitchen_switch_light_kitchen_bench:
+      state: 'on'
+      brightness: 10
+    light.zigbee_group_kitchen_strips_all:
+      color_mode: color_temp
+      color_temp_kelvin: 2611
+      brightness: 15
+      state: 'on'
+    switch.adaptive_lighting_living:
+      state: 'on'
+    switch.tablet_living_kiosk_screen:
+      state: 'on'
+    number.tablet_living_kiosk_screen_brightness:
+      state: '50'
+    light.entrance_light_light_entrance_foyer:
+      brightness: 7
+      state: 'on'
+    input_select.options_scene_living:
+      state: nightlight
+    input_boolean.scene_living_bright:
+      state: 'off'
+    input_boolean.scene_living_chill:
+      state: 'off'
+    input_boolean.scene_living_cinema:
+      state: 'off'
+    input_boolean.scene_living_dining:
+      state: 'off'
+    input_boolean.scene_living_morning:
+      state: 'off'
+    input_boolean.scene_living_off:
+      state: 'off'
+    input_boolean.scene_living_rainyday:
+      state: 'off'
+    input_boolean.scene_living_nightlight:
+      state: 'on'
+    input_boolean.living_transition_switch:
+      state: 'off'
+  icon: mdi:weather-night
+- id: '1709203472535'
+  name: living-off
+  entities:
+    light.entrance_light_light_entrance_foyer:
+      state: 'off'
+    light.living_light_strip_living_tv:
+      state: 'off'
+    light.zigbee_group_living_downlights_all:
+      state: 'off'
+    light.zigbee_group_bar_strips_all:
+      state: 'off'
+    light.zigbee_group_kitchen_downlights_left_middle:
+      state: 'off'
+    light.kitchen_light_light_kitchen_right:
+      state: 'off'
+    light.zigbee_group_kitchen_strips_all:
+      state: 'off'
+    light.kitchen_switch_light_kitchen_bench:
+      state: 'off'
+    switch.adaptive_lighting_living:
+      state: 'on'
+    switch.tablet_living_kiosk_screen:
+      state: 'off'
+    input_select.options_scene_living:
+      state: 'off'
+    input_boolean.scene_living_bright:
+      state: 'off'
+    input_boolean.scene_living_chill:
+      state: 'off'
+    input_boolean.scene_living_cinema:
+      state: 'off'
+    input_boolean.scene_living_dining:
+      state: 'off'
+    input_boolean.scene_living_morning:
+      state: 'off'
+    input_boolean.scene_living_off:
+      state: 'on'
+    input_boolean.scene_living_rainyday:
+      state: 'off'
+    input_boolean.scene_living_nightlight:
+      state: 'off'
+    input_boolean.living_transition_switch:
+      state: 'off'
+  icon: mdi:power
+- id: '1709342837275'
+  name: Guest Chill
+  entities:
+    light.zigbee_group_guest_lamps_all:
+      brightness: 125
+      state: 'on'
+    light.zigbee_group_guest_downlights_all:
+      state: 'off'
+    input_select.options_scene_guest:
+      state: chill
+    input_boolean.scene_guest_bright:
+      state: 'off'
+    input_boolean.scene_guest_chill:
+      state: 'on'
+    input_boolean.scene_guest_nightlight:
+      state: 'off'
+    input_boolean.scene_guest_off:
+      state: 'off'
+  icon: mdi:paw
+- id: '1709342960506'
+  name: Guest Bright
+  entities:
+    light.zigbee_group_guest_lamps_all:
+      brightness: 255
+      state: 'off'
+    light.zigbee_group_guest_downlights_all:
+      brightness: 255
+      state: 'on'
+    input_select.options_scene_guest:
+      state: bright
+    input_boolean.scene_guest_bright:
+      state: 'on'
+    input_boolean.scene_guest_chill:
+      state: 'off'
+    input_boolean.scene_guest_nightlight:
+      state: 'off'
+    input_boolean.scene_guest_off:
+      state: 'off'
+  icon: mdi:lightbulb
+- id: '1709358603089'
+  name: Guest Nightlight
+  entities:
+    input_select.options_scene_guest:
+      state: nightlight
+    light.zigbee_group_guest_lamps_all:
+      state: 'off'
+    light.zigbee_group_guest_downlights_all:
+      brightness: 3
+      state: 'on'
+    input_boolean.scene_guest_bright:
+      state: 'off'
+    input_boolean.scene_guest_chill:
+      state: 'off'
+    input_boolean.scene_guest_nightlight:
+      state: 'off'
+    input_boolean.scene_guest_off:
+      state: 'on'
+  icon: mdi:weather-night
+- id: '1709350845857'
+  name: Guest Off
+  entities:
+    light.zigbee_group_guest_all:
+      state: 'off'
+    input_select.options_scene_guest:
+      state: 'off'
+    input_boolean.scene_guest_bright:
+      state: 'off'
+    input_boolean.scene_guest_chill:
+      state: 'off'
+    input_boolean.scene_guest_nightlight:
+      state: 'off'
+    input_boolean.scene_guest_off:
+      state: 'on'
+  icon: mdi:power
+- id: '1709344310334'
+  name: study-bright
+  entities:
+    light.zigbee_group_study_downlights_all:
+      brightness: 255
+      state: 'on'
+    input_select.options_scene_study:
+      state: bright
+    input_boolean.scene_study_bright:
+      editable: true
+      icon: mdi:weather-sunny
+      friendly_name: scene-study-bright
+      state: 'on'
+    input_boolean.scene_study_chill:
+      state: 'off'
+    input_boolean.scene_study_nightlight:
+      state: 'off'
+    input_boolean.scene_study_off:
+      state: 'off'
+  icon: mdi:lightbulb
+- id: '1709344398520'
+  name: study-chill
+  entities:
+    light.zigbee_group_study_downlights_all:
+      brightness: 76
+      state: 'on'
+    input_select.options_scene_study:
+      state: chill
+    input_boolean.scene_study_bright:
+      state: 'off'
+    input_boolean.scene_study_chill:
+      state: 'on'
+    input_boolean.scene_study_nightlight:
+      state: 'off'
+    input_boolean.scene_study_off:
+      state: 'off'
+  icon: mdi:paw
+- id: '1709366483197'
+  name: study-nightlight
+  entities:
+    light.zigbee_group_study_downlights_all:
+      brightness: 3
+      state: 'on'
+    input_select.options_scene_study:
+      state: nightlight
+    input_boolean.scene_study_bright:
+      state: 'off'
+    input_boolean.scene_study_chill:
+      state: 'off'
+    input_boolean.scene_study_nightlight:
+      state: 'on'
+    input_boolean.scene_study_off:
+      state: 'off'
+  icon: mdi:weather-night
+- id: '1709350916528'
+  name: study-off
+  entities:
+    light.zigbee_group_study_downlights_all:
+      state: 'off'
+    input_select.options_scene_study:
+      state: 'off'
+    input_boolean.scene_study_off:
+      state: 'on'
+    input_boolean.scene_study_bright:
+      state: 'off'
+    input_boolean.scene_study_chill:
+      state: 'off'
+    input_boolean.scene_study_nightlight:
+      state: 'off'
+  icon: mdi:power
+- id: '1709423073685'
+  name: scene-garage-off
+  entities:
+    light.zigbee_group_garage_downlights_all:
+      state: 'off'
+    input_select.scene_garage_current:
+      state: 'off'
+    input_boolean.scene_garage_bright:
+      state: 'off'
+    input_boolean.scene_garage_chill:
+      state: 'off'
+    input_boolean.scene_garage_off:
+      state: 'on'
+    input_boolean.garage_motion_sensor:
+      state: 'on'
+  icon: mdi:power
+- id: '1709423309357'
+  name: scene-garage-bright
+  entities:
+    light.zigbee_group_garage_downlights_all:
+      brightness: 255
+      state: 'on'
+    input_select.scene_garage_current:
+      state: bright
+    input_boolean.scene_garage_bright:
+      state: 'on'
+    input_boolean.scene_garage_chill:
+      state: 'off'
+    input_boolean.scene_garage_off:
+      state: 'off'
+  icon: mdi:lightbulb
+- id: '1709423427681'
+  name: scene-garage-chill
+  entities:
+    light.zigbee_group_garage_downlights_all:
+      brightness: 153
+      state: 'on'
+    input_select.scene_garage_current:
+      state: chill
+    input_boolean.scene_garage_bright:
+      state: 'off'
+    input_boolean.scene_garage_chill:
+      state: 'on'
+    input_boolean.scene_garage_off:
+      state: 'off'
+  icon: mdi:paw
+- id: '1709431656740'
+  name: Master Bright
+  entities:
+    light.zigbee_group_master_downlights_all:
+      brightness: 255
+      state: 'on'
+    light.zigbee_group_master_pendants_all:
+      state: 'off'
+    input_boolean.scene_master_bright:
+      state: 'on'
+    input_boolean.scene_master_chill:
+      state: 'off'
+    input_select.scene_master_current:
+      state: bright
+    input_boolean.scene_master_evening:
+      state: 'off'
+    input_boolean.scene_master_nightlight:
+      state: 'off'
+    input_boolean.scene_master_off:
+      state: 'off'
+  icon: mdi:weather-sunny
+- id: '1709431753384'
+  name: Master Chill
+  entities:
+    light.zigbee_group_master_downlights_back:
+      brightness: 55
+      state: 'on'
+    light.zigbee_group_master_downlights_front:
+      brightness: 76
+      state: 'on'
+    light.master_light_light_master_entrance:
+      brightness: 51
+      state: 'on'
+    light.zigbee_group_master_pendants_all:
+      brightness: 1
+      state: 'on'
+    input_boolean.scene_master_bright:
+      state: 'off'
+    input_boolean.scene_master_chill:
+      state: 'on'
+    input_select.scene_master_current:
+      state: chill
+    input_boolean.scene_master_evening:
+      state: 'off'
+    input_boolean.scene_master_nightlight:
+      state: 'off'
+    input_boolean.scene_master_off:
+      state: 'off'
+  icon: mdi:paw
+- id: '1709431877210'
+  name: Master Evening
+  entities:
+    light.zigbee_group_master_downlights_main:
+      brightness: 26
+      state: 'on'
+    light.master_light_light_master_entrance:
+      brightness: 13
+      state: 'on'
+    light.zigbee_group_master_pendants_all:
+      state: 'off'
+    input_boolean.scene_master_bright:
+      state: 'off'
+    input_boolean.scene_master_chill:
+      state: 'off'
+    input_select.scene_master_current:
+      state: evening
+    input_boolean.scene_master_evening:
+      state: 'on'
+    input_boolean.scene_master_nightlight:
+      state: 'off'
+    input_boolean.scene_master_off:
+      state: 'off'
+  icon: mdi:weather-sunset
+- id: '1709431944825'
+  name: Master Nightlight
+  entities:
+    light.zigbee_group_master_downlights_main:
+      state: 'off'
+    light.master_light_light_master_entrance:
+      brightness: 3
+      state: 'on'
+    light.zigbee_group_master_pendants_all:
+      state: 'off'
+    input_boolean.scene_master_bright:
+      state: 'off'
+    input_boolean.scene_master_chill:
+      state: 'off'
+    input_select.scene_master_current:
+      state: nightlight
+    input_boolean.scene_master_evening:
+      state: 'off'
+    input_boolean.scene_master_nightlight:
+      state: 'on'
+    input_boolean.scene_master_off:
+      state: 'off'
+  icon: mdi:weather-night
+- id: '1709431997226'
+  name: Master Off
+  entities:
+    light.zigbee_group_master_downlights_all:
+      state: 'off'
+    light.zigbee_group_master_pendants_all:
+      state: 'off'
+    input_boolean.scene_master_bright:
+      state: 'off'
+    input_boolean.scene_master_chill:
+      state: 'off'
+    input_select.scene_master_current:
+      state: 'off'
+    input_boolean.scene_master_evening:
+      state: 'off'
+    input_boolean.scene_master_nightlight:
+      state: 'off'
+    input_boolean.scene_master_off:
+      state: 'on'
+  icon: mdi:power
+- id: '1709434391062'
+  name: scene-landing-off
+  entities:
+    input_select.options_scene_landing:
+      state: 'off'
+    light.zigbee_group_landing_downlights_all:
+      state: 'off'
+    switch.landing_plug_plug_landing_chandelier:
+      state: 'off'
+    switch.switchstairrail_stair_rail_switch:
+      state: 'off'
+    switch.switchstairwall_stair_wall_switch:
+      state: 'off'
+    switch.adaptive_lighting_landing:
+      state: 'on'
+  icon: mdi:power
+- id: scene_landing_desk
+  name: scene-landing-desk
+  entities:
+    light.zigbee_group_landing_downlights_right:
+      brightness: 153
+      state: 'on'
+  icon: mdi:power
+- id: '1709434771649'
+  name: scene-downstairs-off
+  entities:
+    light.living_light_strip_living_tv:
+      state: 'off'
+    light.zigbee_group_bar_strips_all:
+      state: 'off'
+    light.zigbee_group_kitchen_strips_all:
+      state: 'off'
+    light.zigbee_group_living_downlights_all:
+      state: 'off'
+    light.entrance_light_light_entrance_foyer:
+      state: 'off'
+    switch.landing_plug_plug_landing_chandelier:
+      state: 'off'
+  icon: mdi:power
+- id: '1709435817520'
+  name: scene-front-off
+  entities:
+    input_boolean.scene_front_bright:
+      state: 'off'
+    input_boolean.scene_front_chill:
+      state: 'off'
+    input_select.scene_front_current:
+      state: 'off'
+    input_boolean.scene_front_off:
+      state: 'on'
+    light.zigbee_group_frontdoor_all:
+      state: 'off'
+  icon: mdi:power
+- id: '1709436398663'
+  name: scene-front-bright
+  entities:
+    input_boolean.scene_front_bright:
+      state: 'on'
+    input_boolean.scene_front_chill:
+      state: 'off'
+    input_select.scene_front_current:
+      state: bright
+    input_boolean.scene_front_off:
+      state: 'off'
+    light.zigbee_group_frontdoor_all:
+      color_mode: xy
+      brightness: 128
+      xy_color:
+      - 0.477
+      - 0.4
+      state: 'on'
+  icon: mdi:lightbulb
+- id: '1709437231455'
+  name: scene-front-chill
+  entities:
+    input_boolean.scene_front_bright:
+      state: 'off'
+    input_boolean.scene_front_chill:
+      state: 'on'
+    input_select.scene_front_current:
+      state: chill
+    input_boolean.scene_front_off:
+      state: 'off'
+    light.zigbee_group_frontdoor_all:
+      color_mode: xy
+      brightness: 26
+      xy_color:
+      - 0.563
+      - 0.401
+      state: 'on'
+  icon: mdi:lightbulb
+- id: '1710637749516'
+  name: scene-deck-off
+  entities:
+    light.zigbee_group_deck_all:
+      state: 'off'
+    climate.heatstrip_elegance_the_ra:
+      state: 'off'
+    input_boolean.deck_transition_switch:
+      state: 'off'
+    input_boolean.scene_deck_bright:
+      state: 'off'
+    input_boolean.scene_deck_chill:
+      state: 'off'
+    input_select.options_scene_deck:
+      state: 'off'
+    input_boolean.scene_deck_off:
+      state: 'on'
+  icon: mdi:power
+- id: '1710638057280'
+  name: scene-deck-bright
+  entities:
+    light.deck_light_flood:
+      color_mode: xy
+      brightness: 172
+      xy_color:
+      - 0.341
+      - 0.345
+      state: 'on'
+    light.zigbee_group_deck_downlights_all:
+      color_mode: color_temp
+      brightness: 255
+      color_temp_kelvin: 2755
+      state: 'on'
+    light.zigbee_group_deck_strips_all:
+      color_mode: xy
+      brightness: 255
+      xy_color:
+      - 0.309
+      - 0.169
+      state: 'on'
+    input_boolean.deck_transition_switch:
+      state: 'off'
+    input_boolean.scene_deck_bright:
+      state: 'on'
+    input_boolean.scene_deck_chill:
+      state: 'off'
+    input_select.options_scene_deck:
+      state: bright
+    input_boolean.scene_deck_off:
+      state: 'off'
+  icon: mdi:lightbulb
+- name: scene-deck-chill
+  id: '1710638142237'
+  entities:
+    input_boolean.deck_transition_switch:
+      state: 'on'
+    input_boolean.scene_deck_bright:
+      state: 'off'
+    input_boolean.scene_deck_chill:
+      state: 'on'
+    input_select.options_scene_deck:
+      state: chill
+    input_boolean.scene_deck_off:
+      state: 'off'
+  icon: mdi:glass-cocktail
+  metadata: {}
+- name: scene-laundry-off
+  id: '1709438211370'
+  entities:
+    light.laundry_light_outside:
+      state: 'off'
+    input_select.scene_laundry_current:
+      state: 'off'
+    input_boolean.scene_laundry_off:
+      state: 'on'
+    input_boolean.scene_laundry_on:
+      state: 'off'
+  icon: mdi:power
+- name: scene-laundry-on
+  id: '1709438553276'
+  entities:
+    light.laundry_light_outside:
+      color_mode: xy
+      brightness: 102
+      xy_color:
+      - 0.423
+      - 0.172
+      state: 'on'
+    input_select.scene_laundry_current:
+      state: 'on'
+    input_boolean.scene_laundry_off:
+      state: 'off'
+    input_boolean.scene_laundry_on:
+      state: 'on'
+  icon: mdi:power-plug
+- id: scene_ensuite_bright
+  name: scene-ensuite-bright
+  entities:
+    light.zigbee_group_ensuite_downlights_all:
+      color_mode: color_temp
+      brightness: 65
+      color_temp_kelvin: 4000
+      state: 'on'
+    light.master_light_light_master_robe:
+      color_mode: color_temp
+      brightness: 191
+      color_temp_kelvin: 3559
+      state: 'on'
+    light.ensuite_switch_switch_ensuite_mirrors:
+      state: 'on'
+    input_select.scene_ensuite_current:
+      state: bright
+    input_boolean.scene_ensuite_bright:
+      state: 'on'
+    input_boolean.scene_ensuite_chill:
+      state: 'off'
+    input_boolean.scene_ensuite_night:
+      state: 'off'
+    input_boolean.scene_ensuite_off:
+      state: 'off'
+  icon: mdi:paw-outline
+- id: scene_ensuite_chill
+  name: scene-ensuite-chill
+  entities:
+    light.zigbee_group_ensuite_downlights_all:
+      color_mode: color_temp
+      brightness: 70
+      color_temp_kelvin: 3125
+      state: 'on'
+    light.master_light_light_master_robe:
+      color_mode: color_temp
+      brightness: 26
+      color_temp_kelvin: 3559
+      state: 'on'
+    light.ensuite_switch_switch_ensuite_mirrors:
+      state: 'off'
+    input_select.scene_ensuite_current:
+      state: chill
+    input_boolean.scene_ensuite_bright:
+      state: 'off'
+    input_boolean.scene_ensuite_chill:
+      state: 'on'
+    input_boolean.scene_ensuite_night:
+      state: 'off'
+    input_boolean.scene_ensuite_off:
+      state: 'off'
+  icon: mdi:paw-outline
+- name: scene-ensuite-night
+  id: scene_ensuite_night
+  entities:
+    light.ensuite_light_light_ensuite_left:
+      state: 'off'
+    light.ensuite_light_light_ensuite_middle:
+      state: 'off'
+    light.ensuite_light_light_ensuite_right:
+      color_mode: color_temp
+      brightness: 1
+      color_temp_kelvin: 2778
+      state: 'on'
+    light.master_light_light_master_robe:
+      color_mode: color_temp
+      brightness: 3
+      color_temp_kelvin: 3559
+      state: 'on'
+    light.ensuite_switch_switch_ensuite_mirrors:
+      state: 'off'
+    input_select.scene_ensuite_current:
+      state: night
+    input_boolean.scene_ensuite_bright:
+      state: 'off'
+    input_boolean.scene_ensuite_chill:
+      state: 'off'
+    input_boolean.scene_ensuite_night:
+      state: 'on'
+    input_boolean.scene_ensuite_off:
+      state: 'off'
+  icon: mdi:weather-night
+- id: scene_ensuite_off
+  name: scene-ensuite-off
+  entities:
+    light.zigbee_group_ensuite_downlights_all:
+      state: 'off'
+    light.master_light_light_master_robe:
+      state: 'off'
+    light.ensuite_switch_switch_ensuite_mirrors:
+      state: 'off'
+    input_select.scene_ensuite_current:
+      state: 'off'
+    input_boolean.scene_ensuite_bright:
+      state: 'off'
+    input_boolean.scene_ensuite_chill:
+      state: 'off'
+    input_boolean.scene_ensuite_night:
+      state: 'off'
+    input_boolean.scene_ensuite_off:
+      state: 'on'
+  icon: mdi:power-plug
+- id: scene_bathroom_bright
+  name: scene-bathroom-bright
+  entities:
+    light.zigbee_group_bathroom_downlights_all:
+      color_mode: color_temp
+      brightness: 204
+      color_temp_kelvin: 2732
+      state: 'on'
+    switch.plugmirrorbathroom_bathroom_mirror:
+      state: 'off'
+    input_select.scene_bathroom_current:
+      state: bright
+    input_boolean.scene_bathroom_bright:
+      state: 'on'
+    input_boolean.scene_bathroom_bright2:
+      state: 'off'
+    input_boolean.scene_bathroom_chill:
+      state: 'off'
+    input_boolean.scene_bathroom_night:
+      state: 'off'
+    input_boolean.scene_bathroom_off:
+      state: 'off'
+  icon: mdi:paw-outline
+- id: scene_bathroom_bright2
+  name: scene-bathroom-bright2
+  entities:
+    light.zigbee_group_bathroom_downlights_all:
+      color_mode: color_temp
+      brightness: 100
+      color_temp_kelvin: 2732
+      state: 'on'
+    switch.plugmirrorbathroom_bathroom_mirror:
+      state: 'on'
+    input_select.scene_bathroom_current:
+      state: bright2
+    input_boolean.scene_bathroom_bright:
+      state: 'off'
+    input_boolean.scene_bathroom_bright2:
+      state: 'on'
+    input_boolean.scene_bathroom_chill:
+      state: 'off'
+    input_boolean.scene_bathroom_night:
+      state: 'off'
+    input_boolean.scene_bathroom_off:
+      state: 'off'
+  icon: mdi:paw-outline
+- id: scene_bathroom_chill
+  name: scene-bathroom-chill
+  entities:
+    light.zigbee_group_bathroom_downlights_all:
+      state: 'off'
+    switch.plugmirrorbathroom_bathroom_mirror:
+      state: 'on'
+    input_select.scene_bathroom_current:
+      state: chill
+    input_boolean.scene_bathroom_bright:
+      state: 'off'
+    input_boolean.scene_bathroom_bright2:
+      state: 'off'
+    input_boolean.scene_bathroom_chill:
+      state: 'on'
+    input_boolean.scene_bathroom_night:
+      state: 'off'
+    input_boolean.scene_bathroom_off:
+      state: 'off'
+  icon: mdi:paw-outline
+- name: scene-bathroom-night
+  id: scene_bathroom_night
+  entities:
+    light.bathroom_light_light_bathroom_left:
+      color_mode: color_temp
+      brightness: 1
+      color_temp_kelvin: 2732
+      state: 'on'
+    light.bathroom_light_light_bathroom_right:
+      state: 'off'
+    light.bathroom_light_light_bathroom_middle:
+      state: 'off'
+    switch.plugmirrorbathroom_bathroom_mirror:
+      state: 'off'
+    input_select.scene_bathroom_current:
+      state: night
+    input_boolean.scene_bathroom_bright:
+      state: 'off'
+    input_boolean.scene_bathroom_bright2:
+      state: 'off'
+    input_boolean.scene_bathroom_chill:
+      state: 'off'
+    input_boolean.scene_bathroom_night:
+      state: 'on'
+    input_boolean.scene_bathroom_off:
+      state: 'off'
+  icon: mdi:weather-night
+- id: scene_bathroom_off
+  name: scene-bathroom-off
+  entities:
+    light.zigbee_group_bathroom_downlights_all:
+      state: 'off'
+    light.bathroom_switchmirrorbathroom_bathroom_mirror:
+      state: 'off'
+    switch.plugmirrorbathroom_bathroom_mirror:
+      state: 'off'
+    input_select.scene_bathroom_current:
+      state: 'off'
+    input_boolean.scene_bathroom_bright:
+      state: 'off'
+    input_boolean.scene_bathroom_bright2:
+      state: 'off'
+    input_boolean.scene_bathroom_chill:
+      state: 'off'
+    input_boolean.scene_bathroom_night:
+      state: 'off'
+    input_boolean.scene_bathroom_off:
+      state: 'on'
+  icon: mdi:power-plug
+- id: landing_bright
+  name: Landing Bright
+  entities:
+    light.zigbee_group_landing_downlights_all:
+      state: 'on'
+      brightness: 128
+    input_select.options_scene_landing:
+      state: bright
+    switch.landing_plug_plug_landing_chandelier:
+      state: 'on'
+    switch.switchstairrail_stair_rail_switch:
+      state: 'off'
+    switch.switchstairwall_stair_wall_switch:
+      state: 'on'
+    switch.adaptive_lighting_landing:
+      state: 'on'
+  icon: mdi:lightbulb-outline
+- id: landing_chill
+  name: Landing Chill
+  entities:
+    input_select.options_scene_landing:
+      state: chill
+    light.zigbee_group_landing_downlights_all:
+      state: 'on'
+      brightness: 76
+    switch.landing_plug_plug_landing_chandelier:
+      state: 'off'
+    switch.switchstairrail_stair_rail_switch:
+      state: 'off'
+    switch.switchstairwall_stair_wall_switch:
+      state: 'on'
+    switch.adaptive_lighting_landing:
+      state: 'on'
+  icon: mdi:glass-cocktail
+- id: landing_morning
+  name: Landing Morning
+  entities:
+    input_select.options_scene_landing:
+      state: morning
+    light.zigbee_group_landing_downlights_all:
+      state: 'off'
+    switch.landing_plug_plug_landing_chandelier:
+      state: 'off'
+    switch.switchstairrail_stair_rail_switch:
+      state: 'off'
+    switch.switchstairwall_stair_wall_switch:
+      state: 'off'
+    switch.adaptive_lighting_landing:
+      state: 'on'
+  icon: mdi:weather-sunny
+- id: landing_rainy_day
+  name: Landing Rainy Day
+  entities:
+    input_select.options_scene_landing:
+      state: rainyday
+    light.zigbee_group_landing_downlights_all:
+      brightness: 153
+      state: 'on'
+    switch.landing_plug_plug_landing_chandelier:
+      state: 'off'
+    switch.switchstairrail_stair_rail_switch:
+      state: 'on'
+    switch.switchstairwall_stair_wall_switch:
+      state: 'off'
+    switch.adaptive_lighting_landing:
+      state: 'on'
+  icon: mdi:weather-pouring
+- id: landing_nightlight
+  name: Landing Nightlight
+  entities:
+    input_select.options_scene_landing:
+      state: nightlight
+    light.zigbee_group_landing_downlights_back:
+      state: 'off'
+    light.zigbee_group_landing_downlights_front:
+      brightness: 7
+      state: 'on'
+    switch.landing_plug_plug_landing_chandelier:
+      state: 'off'
+    switch.switchstairrail_stair_rail_switch:
+      state: 'on'
+    switch.switchstairwall_stair_wall_switch:
+      state: 'off'
+    switch.adaptive_lighting_landing:
+      state: 'on'
+  icon: mdi:weather-night

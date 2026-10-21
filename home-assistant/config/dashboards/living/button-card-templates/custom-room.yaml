@@ -1,0 +1,27 @@
+custom_room_card:
+  color_type: card
+  entity: input_select.dashboard_living_rooms
+  color: var(--scene-off-background-color)
+  icon: "[[[ return variables.icon ]]]"
+  tap_action:
+    action: call-service
+    service: input_select.select_option
+    target:
+      entity_id: input_select.dashboard_living_rooms
+    data:
+      option: "[[[ return variables.room ]]]"
+  show_name: false
+  aspect_ratio: 1/1
+  styles:
+    card:
+      - border-radius: 20px
+      - border-color: var(--secondary-base-color);
+      - border-width: 2px;
+    icon:
+      - width: 100%
+      - transform: |
+          [[[ return `scale(${variables.iconScale})` ]]]
+      - color: var(--scene-icon-color)
+  state:
+    - value: "[[[ return variables.room ]]]"
+      color: var(--scene-on-background-color)

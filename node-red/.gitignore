@@ -1,0 +1,18 @@
+# Retained originals, private runtime, and migration fixtures never enter new commits.
+/data/
+/.nodered-*/
+# New live configuration files require review before admission.
+/config/*
+!/config/flows.json
+!/config/settings.js
+!/config/settings.private.json.example
+!/config/package.json
+!/config/package-lock.json
+!/config/flows/
+/config/flows/*
+!/config/flows/perisense-nonprod-nodes.json
+
+# Reusable private-input loader and empty example; populated inputs stay outside Git.
+!/config/private-inputs.js
+!/config/deployment.private.json.example
+/config/deployment.private.json

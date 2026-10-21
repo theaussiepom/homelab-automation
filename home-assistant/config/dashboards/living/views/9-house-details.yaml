@@ -1,0 +1,1725 @@
+- title: Battery health
+  path: home-batteries
+  icon: mdi:battery-heart-variant
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/house
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: Battery health
+      icon: mdi:battery-heart-variant
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: custom:auto-entities
+          card:
+            type: entities
+            title: Battery health
+            show_header_toggle: false
+            state_color: true
+            card_mod:
+              style: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+                \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n\
+                \  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color: var(--red);\n\
+                \  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650; font-size: 23px;\
+                \ padding-top: 14px; }\n"
+          filter:
+            template: '{% set names = {"binary_sensor.bathroom_leak_sink_water_leak": "Bathroom sink", "binary_sensor.ensuite_leak_sink_left_water_leak":
+              "En Suite left sink", "binary_sensor.ensuite_leak_sink_right_water_leak": "En Suite right sink", "binary_sensor.kitchen_leak_fridge_water_leak":
+              "Kitchen fridge", "binary_sensor.kitchen_leak_sink_water_leak": "Kitchen sink", "binary_sensor.laundry_leak_floor_water_leak":
+              "Laundry floor", "binary_sensor.laundry_leak_sink_water_leak": "Laundry sink", "binary_sensor.smoke_detector_smoke_detected":
+              "Smoke detector", "binary_sensor.zigbee2mqtt_bridge_connection_state": "Zigbee1 bridge", "binary_sensor.zigbee2mqtt_bridge_connection_state_2":
+              "Zigbee2 bridge", "sensor.tablet_living_kiosk_battery": "Living tablet", "binary_sensor.bathroom_vibration_shower_vibration":
+              "Bathroom vibration sensor", "binary_sensor.ensuite_vibration_sensor_vibration": "En Suite vibration sensor"}
+              %}
+
+              {% set ns = namespace(rows=[]) %}
+
+              {% for eid in label_entities(''low_battery'') | sort if eid not in (state_attr(''sensor.notify_battery_ignore'',''entity_id'')
+              or []) %}
+
+              {% set value = states(eid) %}
+
+              {% set dc = state_attr(eid, ''device_class'') %}
+
+              {% if not (false) and (true) %}
+
+              {% set ns.rows = ns.rows + [{''entity'': eid, ''name'': names.get(eid, state_attr(eid, ''friendly_name'') or
+              eid), ''secondary_info'': ''last-changed'', ''tap_action'': {''action'':''none''}, ''hold_action'': {''action'':''none''},
+              ''double_tap_action'': {''action'':''none''}}] %}
+
+              {% endif %}
+
+              {% endfor %}
+
+              {{ ns.rows | to_json }}'
+          unique: true
+          else:
+            type: custom:button-card
+            name: All clear
+            label: No low-battery alerts
+            icon: mdi:battery-check-outline
+            show_label: true
+            styles:
+              card:
+              - background: transparent
+              - border: none
+              - box-shadow: none
+              - height: 175px
+              - padding: 20px
+              icon:
+              - width: 54px
+              - color: var(--green)
+              name:
+              - font-size: 23px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              label:
+              - font-size: 17px
+              - color: var(--secondary-base-color)
+              grid:
+              - grid-template-rows: 64px 34px 28px
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Home
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Batteries
+      icon: mdi:battery-heart-variant
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-batteries
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--scene-on-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Safety
+      icon: mdi:water-alert-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-safety
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Tasks
+      icon: mdi:clipboard-check-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-tasks
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Equipment
+      icon: mdi:tools
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-equipment
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: Leaks & smoke
+  path: home-safety
+  icon: mdi:water-alert-outline
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/house
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: Leaks & smoke
+      icon: mdi:water-alert-outline
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+        - type: vertical-stack
+          cards:
+          - type: custom:auto-entities
+            card:
+              type: entities
+              title: Leak detectors
+              show_header_toggle: false
+              state_color: true
+              card_mod:
+                style: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+                  \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n\
+                  \  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color: var(--red);\n\
+                  \  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650; font-size: 23px;\
+                  \ padding-top: 14px; }\n"
+            filter:
+              template: '{% set names = {"binary_sensor.bathroom_leak_sink_water_leak": "Bathroom sink", "binary_sensor.ensuite_leak_sink_left_water_leak":
+                "En Suite left sink", "binary_sensor.ensuite_leak_sink_right_water_leak": "En Suite right sink", "binary_sensor.kitchen_leak_fridge_water_leak":
+                "Kitchen fridge", "binary_sensor.kitchen_leak_sink_water_leak": "Kitchen sink", "binary_sensor.laundry_leak_floor_water_leak":
+                "Laundry floor", "binary_sensor.laundry_leak_sink_water_leak": "Laundry sink", "binary_sensor.smoke_detector_smoke_detected":
+                "Smoke detector", "binary_sensor.zigbee2mqtt_bridge_connection_state": "Zigbee1 bridge", "binary_sensor.zigbee2mqtt_bridge_connection_state_2":
+                "Zigbee2 bridge", "sensor.tablet_living_kiosk_battery": "Living tablet", "binary_sensor.bathroom_vibration_shower_vibration":
+                "Bathroom vibration sensor", "binary_sensor.ensuite_vibration_sensor_vibration": "En Suite vibration sensor"}
+                %}
+
+                {% set ns = namespace(rows=[]) %}
+
+                {% for eid in label_entities(''leak'') | sort %}
+
+                {% set value = states(eid) %}
+
+                {% set dc = state_attr(eid, ''device_class'') %}
+
+                {% if not (false) and (true) %}
+
+                {% set ns.rows = ns.rows + [{''entity'': eid, ''name'': names.get(eid, state_attr(eid, ''friendly_name'')
+                or eid), ''secondary_info'': ''last-changed'', ''tap_action'': {''action'':''none''}, ''hold_action'': {''action'':''none''},
+                ''double_tap_action'': {''action'':''none''}}] %}
+
+                {% endif %}
+
+                {% endfor %}
+
+                {{ ns.rows | to_json }}'
+            unique: true
+            else:
+              type: custom:button-card
+              name: No detectors
+              label: No leak detectors are labelled
+              icon: mdi:water-off-outline
+              show_label: true
+              styles:
+                card:
+                - background: transparent
+                - border: none
+                - box-shadow: none
+                - height: 175px
+                - padding: 20px
+                icon:
+                - width: 54px
+                - color: var(--primary-base-color)
+                name:
+                - font-size: 23px
+                - font-weight: '650'
+                - color: var(--primary-base-color)
+                label:
+                - font-size: 17px
+                - color: var(--secondary-base-color)
+                grid:
+                - grid-template-rows: 64px 34px 28px
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+        - type: vertical-stack
+          cards:
+          - type: entities
+            title: Smoke
+            show_header_toggle: false
+            state_color: true
+            entities:
+            - entity: binary_sensor.smoke_detector_smoke_detected
+              name: Smoke detector
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+            card_mod:
+              style: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+                \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n\
+                \  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color: var(--red);\n\
+                \  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650; font-size: 23px;\
+                \ padding-top: 14px; }\n"
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Home
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Batteries
+      icon: mdi:battery-heart-variant
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-batteries
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Safety
+      icon: mdi:water-alert-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-safety
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--scene-on-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Tasks
+      icon: mdi:clipboard-check-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-tasks
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Equipment
+      icon: mdi:tools
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-equipment
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: House tasks
+  path: home-tasks
+  icon: mdi:clipboard-check-outline
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/house
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: House tasks
+      icon: mdi:clipboard-check-outline
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: todo-list
+          entity: todo.house_maintenance
+          title: ''
+          display_order: duedate_asc
+          hide_completed: false
+          hide_create: false
+          item_tap_action: edit
+          card_mod:
+            style: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+              \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n\
+              \  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color: var(--red);\n\
+              \  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650; font-size: 23px; padding-top:\
+              \ 14px; }\n\nha-card { --mdc-theme-primary: var(--primary-select-color); --mdc-text-field-fill-color: var(--opaque-background-color);\
+              \ --mdc-text-field-ink-color: var(--primary-base-color); --mdc-text-field-label-ink-color: var(--secondary-base-color);\
+              \ }"
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Home
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Batteries
+      icon: mdi:battery-heart-variant
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-batteries
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Safety
+      icon: mdi:water-alert-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-safety
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Tasks
+      icon: mdi:clipboard-check-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-tasks
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--scene-on-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Equipment
+      icon: mdi:tools
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-equipment
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: Equipment
+  path: home-equipment
+  icon: mdi:tools
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/house
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: Equipment
+      icon: mdi:tools
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: vertical-stack
+        cards:
+        - type: grid
+          square: false
+          columns: 2
+          cards:
+          - type: custom:button-card
+            entity: binary_sensor.upstairs_otbr_connected
+            name: Upstairs
+            icon: mdi:access-point-network
+            label: '[[[ const ids=["binary_sensor.upstairs_otbr_connected", "binary_sensor.zigbee2mqtt_bridge_connection_state"];
+              const names=["Thread", "Zigbee"]; const values=ids.map(id=>states[id]?.state); const bad=values.map((s,i)=>s===''on''?-1:i).filter(i=>i>=0);
+              let status=''Online''; if(bad.length===2) status=values.every(s=>s===''off'')?''Both offline'':''Check both'';
+              else if(bad.length===1){const i=bad[0]; status=names[i]+(values[i]===''off''?'' offline'':'' unavailable'');}
+              return names.join('' · '')+''<br>''+status; ]]]'
+            triggers_update:
+            - binary_sensor.upstairs_otbr_connected
+            - binary_sensor.zigbee2mqtt_bridge_connection_state
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            styles:
+              card:
+              - height: 146px
+              - background: var(--opaque-background-color)
+              - border: 1px solid var(--secondary-base-color)
+              - border-radius: 20px
+              - padding: 14px
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i n" "i l"'
+              - grid-template-columns: 70px 1fr
+              - grid-template-rows: 38px 1fr
+              icon:
+              - width: 50px
+              - color: '[[[ return ["binary_sensor.upstairs_otbr_connected", "binary_sensor.zigbee2mqtt_bridge_connection_state"].every(id=>states[id]?.state===''on'')
+                  ? ''var(--green)'' : ''var(--red)''; ]]]'
+              name:
+              - justify-self: start
+              - font-size: 23px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              label:
+              - justify-self: start
+              - text-align: left
+              - font-size: 16px
+              - line-height: '1.5'
+              - white-space: normal
+              - color: var(--primary-base-color)
+            show_label: true
+          - type: custom:button-card
+            entity: binary_sensor.downstairs_tr_connected
+            name: Downstairs
+            icon: mdi:access-point-network
+            label: '[[[ const ids=["binary_sensor.downstairs_tr_connected", "binary_sensor.zigbee2mqtt_bridge_connection_state_2"];
+              const names=["Thread", "Zigbee"]; const values=ids.map(id=>states[id]?.state); const bad=values.map((s,i)=>s===''on''?-1:i).filter(i=>i>=0);
+              let status=''Online''; if(bad.length===2) status=values.every(s=>s===''off'')?''Both offline'':''Check both'';
+              else if(bad.length===1){const i=bad[0]; status=names[i]+(values[i]===''off''?'' offline'':'' unavailable'');}
+              return names.join('' · '')+''<br>''+status; ]]]'
+            triggers_update:
+            - binary_sensor.downstairs_tr_connected
+            - binary_sensor.zigbee2mqtt_bridge_connection_state_2
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            styles:
+              card:
+              - height: 146px
+              - background: var(--opaque-background-color)
+              - border: 1px solid var(--secondary-base-color)
+              - border-radius: 20px
+              - padding: 14px
+              - box-shadow: none
+              grid:
+              - grid-template-areas: '"i n" "i l"'
+              - grid-template-columns: 70px 1fr
+              - grid-template-rows: 38px 1fr
+              icon:
+              - width: 50px
+              - color: '[[[ return ["binary_sensor.downstairs_tr_connected", "binary_sensor.zigbee2mqtt_bridge_connection_state_2"].every(id=>states[id]?.state===''on'')
+                  ? ''var(--green)'' : ''var(--red)''; ]]]'
+              name:
+              - justify-self: start
+              - font-size: 23px
+              - font-weight: '650'
+              - color: var(--primary-base-color)
+              label:
+              - justify-self: start
+              - text-align: left
+              - font-size: 16px
+              - line-height: '1.5'
+              - white-space: normal
+              - color: var(--primary-base-color)
+            show_label: true
+        - type: grid
+          columns: 2
+          square: false
+          cards:
+          - type: vertical-stack
+            cards:
+            - type: custom:auto-entities
+              card:
+                type: entities
+                title: Needs attention
+                show_header_toggle: false
+                state_color: true
+                card_mod:
+                  style: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+                    \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color:\
+                    \ var(--secondary-base-color);\n  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color:\
+                    \ var(--red);\n  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650;\
+                    \ font-size: 23px; padding-top: 14px; }\n"
+              filter:
+                template: '{% set names = {"binary_sensor.bathroom_leak_sink_water_leak": "Bathroom sink", "binary_sensor.ensuite_leak_sink_left_water_leak":
+                  "En Suite left sink", "binary_sensor.ensuite_leak_sink_right_water_leak": "En Suite right sink", "binary_sensor.kitchen_leak_fridge_water_leak":
+                  "Kitchen fridge", "binary_sensor.kitchen_leak_sink_water_leak": "Kitchen sink", "binary_sensor.laundry_leak_floor_water_leak":
+                  "Laundry floor", "binary_sensor.laundry_leak_sink_water_leak": "Laundry sink", "binary_sensor.smoke_detector_smoke_detected":
+                  "Smoke detector", "binary_sensor.zigbee2mqtt_bridge_connection_state": "Zigbee1 bridge", "binary_sensor.zigbee2mqtt_bridge_connection_state_2":
+                  "Zigbee2 bridge", "sensor.tablet_living_kiosk_battery": "Living tablet", "binary_sensor.bathroom_vibration_shower_vibration":
+                  "Bathroom vibration sensor", "binary_sensor.ensuite_vibration_sensor_vibration": "En Suite vibration sensor",
+                  "binary_sensor.upstairs_otbr_connected": "Upstairs OTBR", "binary_sensor.downstairs_tr_connected": "Downstairs
+                  TR"} %}
+
+                  {% set ns = namespace(rows=[]) %}
+
+                  {% for eid in label_entities(''health_monitored'') | sort %}
+
+                  {% set value = states(eid) %}
+
+                  {% set dc = state_attr(eid, ''device_class'') %}
+
+                  {% if not (false) and ((dc in [''moisture'', ''smoke''] and eid.startswith(''binary_sensor.'') and value
+                  == ''on'') or (eid not in label_entities(''maintenance'') and eid not in label_entities(''retired'') and
+                  (value in [''unknown'', ''unavailable''] or (dc == ''connectivity'' and value == ''off'')))) %}
+
+                  {% set ns.rows = ns.rows + [{''entity'': eid, ''name'': names.get(eid, state_attr(eid, ''friendly_name'')
+                  or eid), ''secondary_info'': ''last-changed'', ''tap_action'': {''action'':''none''}, ''hold_action'': {''action'':''none''},
+                  ''double_tap_action'': {''action'':''none''}}] %}
+
+                  {% endif %}
+
+                  {% endfor %}
+
+                  {{ ns.rows | to_json }}'
+              unique: true
+              else:
+                type: custom:button-card
+                name: All clear
+                label: Monitored equipment is healthy
+                icon: mdi:check-circle-outline
+                show_label: true
+                styles:
+                  card:
+                  - background: transparent
+                  - border: none
+                  - box-shadow: none
+                  - height: 175px
+                  - padding: 20px
+                  icon:
+                  - width: 54px
+                  - color: var(--green)
+                  name:
+                  - font-size: 23px
+                  - font-weight: '650'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 17px
+                  - color: var(--secondary-base-color)
+                  grid:
+                  - grid-template-rows: 64px 34px 28px
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+            - type: custom:auto-entities
+              card:
+                type: entities
+                title: In maintenance
+                show_header_toggle: false
+                state_color: true
+                card_mod:
+                  style: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+                    \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color:\
+                    \ var(--secondary-base-color);\n  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color:\
+                    \ var(--red);\n  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650;\
+                    \ font-size: 23px; padding-top: 14px; }\n"
+              filter:
+                template: '{% set names = {"binary_sensor.bathroom_leak_sink_water_leak": "Bathroom sink", "binary_sensor.ensuite_leak_sink_left_water_leak":
+                  "En Suite left sink", "binary_sensor.ensuite_leak_sink_right_water_leak": "En Suite right sink", "binary_sensor.kitchen_leak_fridge_water_leak":
+                  "Kitchen fridge", "binary_sensor.kitchen_leak_sink_water_leak": "Kitchen sink", "binary_sensor.laundry_leak_floor_water_leak":
+                  "Laundry floor", "binary_sensor.laundry_leak_sink_water_leak": "Laundry sink", "binary_sensor.smoke_detector_smoke_detected":
+                  "Smoke detector", "binary_sensor.zigbee2mqtt_bridge_connection_state": "Zigbee1 bridge", "binary_sensor.zigbee2mqtt_bridge_connection_state_2":
+                  "Zigbee2 bridge", "sensor.tablet_living_kiosk_battery": "Living tablet", "binary_sensor.bathroom_vibration_shower_vibration":
+                  "Bathroom vibration sensor", "binary_sensor.ensuite_vibration_sensor_vibration": "En Suite vibration sensor",
+                  "binary_sensor.upstairs_otbr_connected": "Upstairs OTBR", "binary_sensor.downstairs_tr_connected": "Downstairs
+                  TR"} %}
+
+                  {% set ns = namespace(rows=[]) %}
+
+                  {% for eid in label_entities(''maintenance'') | sort %}
+
+                  {% set value = states(eid) %}
+
+                  {% set dc = state_attr(eid, ''device_class'') %}
+
+                  {% if not (eid in label_entities(''retired'')) and (true) %}
+
+                  {% set ns.rows = ns.rows + [{''entity'': eid, ''name'': names.get(eid, state_attr(eid, ''friendly_name'')
+                  or eid), ''secondary_info'': ''last-changed'', ''tap_action'': {''action'':''none''}, ''hold_action'': {''action'':''none''},
+                  ''double_tap_action'': {''action'':''none''}}] %}
+
+                  {% endif %}
+
+                  {% endfor %}
+
+                  {{ ns.rows | to_json }}'
+              unique: true
+              else:
+                type: custom:button-card
+                name: In maintenance
+                label: No equipment currently listed
+                icon: mdi:tools
+                show_label: true
+                styles:
+                  card:
+                  - background: transparent
+                  - border: none
+                  - box-shadow: none
+                  - height: 175px
+                  - padding: 20px
+                  icon:
+                  - width: 54px
+                  - color: var(--primary-base-color)
+                  name:
+                  - font-size: 23px
+                  - font-weight: '650'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 17px
+                  - color: var(--secondary-base-color)
+                  grid:
+                  - grid-template-rows: 64px 34px 28px
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+          - type: vertical-stack
+            cards:
+            - type: custom:auto-entities
+              card:
+                type: entities
+                title: Other monitored equipment
+                show_header_toggle: false
+                state_color: true
+                card_mod:
+                  style: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+                    \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color:\
+                    \ var(--secondary-base-color);\n  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color:\
+                    \ var(--red);\n  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650;\
+                    \ font-size: 23px; padding-top: 14px; }\n"
+              filter:
+                template: '{% set names = {"binary_sensor.bathroom_leak_sink_water_leak": "Bathroom sink", "binary_sensor.ensuite_leak_sink_left_water_leak":
+                  "En Suite left sink", "binary_sensor.ensuite_leak_sink_right_water_leak": "En Suite right sink", "binary_sensor.kitchen_leak_fridge_water_leak":
+                  "Kitchen fridge", "binary_sensor.kitchen_leak_sink_water_leak": "Kitchen sink", "binary_sensor.laundry_leak_floor_water_leak":
+                  "Laundry floor", "binary_sensor.laundry_leak_sink_water_leak": "Laundry sink", "binary_sensor.smoke_detector_smoke_detected":
+                  "Smoke detector", "binary_sensor.zigbee2mqtt_bridge_connection_state": "Zigbee1 bridge", "binary_sensor.zigbee2mqtt_bridge_connection_state_2":
+                  "Zigbee2 bridge", "sensor.tablet_living_kiosk_battery": "Living tablet", "binary_sensor.bathroom_vibration_shower_vibration":
+                  "Bathroom vibration sensor", "binary_sensor.ensuite_vibration_sensor_vibration": "En Suite vibration sensor",
+                  "binary_sensor.upstairs_otbr_connected": "Upstairs OTBR", "binary_sensor.downstairs_tr_connected": "Downstairs
+                  TR"} %}
+
+                  {% set ns = namespace(rows=[]) %}
+
+                  {% for eid in label_entities(''health_monitored'') | sort %}
+
+                  {% set value = states(eid) %}
+
+                  {% set dc = state_attr(eid, ''device_class'') %}
+
+                  {% if not (eid in label_entities(''retired'') or eid in label_entities(''leak'')) and (true) %}
+
+                  {% set ns.rows = ns.rows + [{''entity'': eid, ''name'': names.get(eid, state_attr(eid, ''friendly_name'')
+                  or eid), ''secondary_info'': ''last-changed'', ''tap_action'': {''action'':''none''}, ''hold_action'': {''action'':''none''},
+                  ''double_tap_action'': {''action'':''none''}}] %}
+
+                  {% endif %}
+
+                  {% endfor %}
+
+                  {{ ns.rows | to_json }}'
+              unique: true
+              else:
+                type: custom:button-card
+                name: Monitored equipment
+                label: No other equipment listed
+                icon: mdi:lan-disconnect
+                show_label: true
+                styles:
+                  card:
+                  - background: transparent
+                  - border: none
+                  - box-shadow: none
+                  - height: 175px
+                  - padding: 20px
+                  icon:
+                  - width: 54px
+                  - color: var(--primary-base-color)
+                  name:
+                  - font-size: 23px
+                  - font-weight: '650'
+                  - color: var(--primary-base-color)
+                  label:
+                  - font-size: 17px
+                  - color: var(--secondary-base-color)
+                  grid:
+                  - grid-template-rows: 64px 34px 28px
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+            - type: markdown
+              content: '### Retired equipment
+
+                {% set devices = label_devices(''retired'') %}
+
+                {% set entities = label_entities(''retired'') %}
+
+                {% if not devices and not entities %}No equipment is marked as retired.{% endif %}
+
+                {% for device in devices | sort %}
+
+                - {{ device_attr(device, ''name_by_user'') or device_attr(device, ''name'') or device }} · {{ area_name(device)
+                or ''No area'' }}
+
+                {% endfor %}
+
+                {% for eid in entities | sort if device_id(eid) not in devices %}
+
+                - {{ state_attr(eid, ''friendly_name'') or eid }} · {{ area_name(eid) or ''No area'' }}
+
+                {% endfor %}'
+              card_mod:
+                style:
+                  .: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+                    \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color:\
+                    \ var(--secondary-base-color);\n  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color:\
+                    \ var(--red);\n  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650;\
+                    \ font-size: 23px; padding-top: 14px; }\n"
+                  ha-markdown$: 'ha-markdown { color: var(--primary-base-color); font-size: 18px; }
+
+                    table { width: 100%; border-collapse: collapse; }
+
+                    th, td { padding: 12px 5px; border-bottom: 1px solid var(--secondary-base-color); }
+
+                    th { font-weight: 650; font-size: 16px; }
+
+                    h3 { font-size: 23px; margin-top: 12px; }
+
+                    '
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Home
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Batteries
+      icon: mdi:battery-heart-variant
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-batteries
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Safety
+      icon: mdi:water-alert-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-safety
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Tasks
+      icon: mdi:clipboard-check-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-tasks
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Equipment
+      icon: mdi:tools
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-equipment
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--scene-on-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+- title: Vacuum care
+  path: home-vacuum-care
+  icon: mdi:broom
+  subview: true
+  theme: living-tablet
+  back_path: /lovelace-living/house
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    keep:
+      background: true
+      border_radius: true
+    cards:
+    - type: custom:button-card
+      name: Vacuum care
+      icon: mdi:broom
+      styles:
+        card:
+        - height: 64px
+        - border: none
+        - background: transparent
+        - box-shadow: none
+        - padding: 0 10px
+        grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 62px 1fr
+        icon:
+        - width: 43px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 31px
+        - font-weight: '650'
+        - color: var(--primary-base-color)
+        - justify-self: start
+      tap_action:
+        action: none
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 12
+    - type: custom:stack-in-card
+      cards:
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+        - type: vertical-stack
+          cards:
+          - type: markdown
+            title: Upstairs · Matrix10 Ultra
+            entity_id:
+            - sensor.upstairs_robot_filter_left
+            - sensor.upstairs_robot_filter_time_left
+            - sensor.upstairs_robot_main_brush_left
+            - sensor.upstairs_robot_main_brush_time_left
+            - sensor.upstairs_robot_side_brush_left
+            - sensor.upstairs_robot_side_brush_time_left
+            - sensor.upstairs_robot_sensor_dirty_left
+            - sensor.upstairs_robot_sensor_dirty_time_left
+            - sensor.upstairs_robot_wheel_dirty_left
+            - sensor.upstairs_robot_wheel_dirty_time_left
+            content: '{% macro reading(eid) -%}
+
+              {%- set value = states(eid) -%}
+
+              {%- if value == ''unavailable'' -%}Unavailable
+
+              {%- elif value == ''unknown'' or not is_number(value) -%}Unknown
+
+              {%- else -%}{{ value }}{{ '''' if state_attr(eid, ''unit_of_measurement'') == ''%'' else '' '' }}{{ state_attr(eid,
+              ''unit_of_measurement'') or '''' }}
+
+              {%- endif -%}
+
+              {%- endmacro %}
+
+              | Service item | Life left | Time left |
+
+              | :--- | ---: | ---: |
+
+              | Filter | {{ reading(''sensor.upstairs_robot_filter_left'') }} | {{ reading(''sensor.upstairs_robot_filter_time_left'')
+              }} |
+
+              | Main brush | {{ reading(''sensor.upstairs_robot_main_brush_left'') }} | {{ reading(''sensor.upstairs_robot_main_brush_time_left'')
+              }} |
+
+              | Side brush | {{ reading(''sensor.upstairs_robot_side_brush_left'') }} | {{ reading(''sensor.upstairs_robot_side_brush_time_left'')
+              }} |
+
+              | Sensor cleaning | {{ reading(''sensor.upstairs_robot_sensor_dirty_left'') }} | {{ reading(''sensor.upstairs_robot_sensor_dirty_time_left'')
+              }} |
+
+              | Wheel cleaning | {{ reading(''sensor.upstairs_robot_wheel_dirty_left'') }} | {{ reading(''sensor.upstairs_robot_wheel_dirty_time_left'')
+              }} |'
+            card_mod:
+              style:
+                .: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+                  \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n\
+                  \  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color: var(--red);\n\
+                  \  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650; font-size: 23px;\
+                  \ padding-top: 14px; }\n"
+                ha-markdown$: 'ha-markdown { color: var(--primary-base-color); font-size: 18px; }
+
+                  table { width: 100%; border-collapse: collapse; }
+
+                  th, td { padding: 12px 5px; border-bottom: 1px solid var(--secondary-base-color); }
+
+                  th { font-weight: 650; font-size: 16px; }
+
+                  h3 { font-size: 23px; margin-top: 12px; }
+
+                  '
+        - type: vertical-stack
+          cards:
+          - type: markdown
+            title: Downstairs · X40 Ultra
+            entity_id:
+            - sensor.downstairs_robot_filter_left
+            - sensor.downstairs_robot_filter_time_left
+            - sensor.downstairs_robot_main_brush_left
+            - sensor.downstairs_robot_main_brush_time_left
+            - sensor.downstairs_robot_side_brush_left
+            - sensor.downstairs_robot_side_brush_time_left
+            - sensor.downstairs_robot_sensor_dirty_left
+            - sensor.downstairs_robot_sensor_dirty_time_left
+            content: '{% macro reading(eid) -%}
+
+              {%- set value = states(eid) -%}
+
+              {%- if value == ''unavailable'' -%}Unavailable
+
+              {%- elif value == ''unknown'' or not is_number(value) -%}Unknown
+
+              {%- else -%}{{ value }}{{ '''' if state_attr(eid, ''unit_of_measurement'') == ''%'' else '' '' }}{{ state_attr(eid,
+              ''unit_of_measurement'') or '''' }}
+
+              {%- endif -%}
+
+              {%- endmacro %}
+
+              | Service item | Life left | Time left |
+
+              | :--- | ---: | ---: |
+
+              | Filter | {{ reading(''sensor.downstairs_robot_filter_left'') }} | {{ reading(''sensor.downstairs_robot_filter_time_left'')
+              }} |
+
+              | Main brush | {{ reading(''sensor.downstairs_robot_main_brush_left'') }} | {{ reading(''sensor.downstairs_robot_main_brush_time_left'')
+              }} |
+
+              | Side brush | {{ reading(''sensor.downstairs_robot_side_brush_left'') }} | {{ reading(''sensor.downstairs_robot_side_brush_time_left'')
+              }} |
+
+              | Sensor cleaning | {{ reading(''sensor.downstairs_robot_sensor_dirty_left'') }} | {{ reading(''sensor.downstairs_robot_sensor_dirty_time_left'')
+              }} |'
+            card_mod:
+              style:
+                .: "ha-card {\n  background: transparent; box-shadow: none; border: none;\n  color: var(--primary-base-color);\
+                  \ border-radius: 20px;\n  --primary-text-color: var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n\
+                  \  --paper-item-icon-color: var(--primary-base-color);\n  --state-binary_sensor-moisture-on-color: var(--red);\n\
+                  \  --state-binary_sensor-smoke-on-color: var(--red);\n}\n.card-header { font-weight: 650; font-size: 23px;\
+                  \ padding-top: 14px; }\n"
+                ha-markdown$: 'ha-markdown { color: var(--primary-base-color); font-size: 18px; }
+
+                  table { width: 100%; border-collapse: collapse; }
+
+                  th, td { padding: 12px 5px; border-bottom: 1px solid var(--secondary-base-color); }
+
+                  th { font-weight: 650; font-size: 16px; }
+
+                  h3 { font-size: 23px; margin-top: 12px; }
+
+                  '
+      keep:
+        background: true
+        border_radius: true
+      card_mod:
+        style: "ha-card {\n  height: 600px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;\n  padding: 0 8px\
+          \ 12px; border: none; border-radius: 16px;\n  background: transparent; box-shadow: none; overscroll-behavior: contain;\n\
+          \  scrollbar-width: thin; scrollbar-color: var(--secondary-base-color) transparent;\n}\n"
+    card_mod:
+      style: "ha-card {\n  height: 735px; box-sizing: border-box; overflow: hidden; padding: 20px;\n  border: 5px solid var(--primary-base-color);\
+        \ border-radius: 30px;\n  background: var(--tablet-card-background-color); box-shadow: none;\n  --primary-text-color:\
+        \ var(--primary-base-color);\n  --secondary-text-color: var(--secondary-base-color);\n  --ha-card-background: transparent;\
+        \ --card-background-color: transparent;\n}\n"
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      name: Home
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Batteries
+      icon: mdi:battery-heart-variant
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-batteries
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Safety
+      icon: mdi:water-alert-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-safety
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Tasks
+      icon: mdi:clipboard-check-outline
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-tasks
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)
+    - type: custom:gap-card
+      height: 27
+    - type: custom:button-card
+      name: Equipment
+      icon: mdi:tools
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home-equipment
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - padding: 8px
+        - border-radius: 20px
+        - border: 2px solid var(--secondary-base-color)
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 65px
+        - color: var(--primary-base-color)
+        name:
+        - font-size: 12px
+        - font-weight: '600'
+        - color: var(--primary-base-color)

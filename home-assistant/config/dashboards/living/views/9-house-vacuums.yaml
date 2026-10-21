@@ -1,0 +1,255 @@
+- title: Downstairs vacuum
+  path: house-vacuum-downstairs
+  subview: true
+  back_path: /lovelace-living/house
+  icon: mdi:robot-vacuum
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    card_mod:
+      style: "ha-card {\n  border-width: 5px;\n  border-color: var(--primary-base-color);\n  border-radius: 30px;\n  background:\
+        \ var(--tablet-card-background-color);\n}\n"
+    cards:
+    - type: custom:dreame-vacuum-card
+      entity: vacuum.downstairs_robot
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      color_type: card
+      color: var(--scene-on-background-color)
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house
+      styles:
+        card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--scene-icon-color)
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 40
+    - type: custom:button-card
+      entity: sensor.downstairs_robot_battery_level
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: none
+      styles:
+        card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 80%
+        - color: "[[[\n   if (entity.state > 80)\n     return 'var(--green)'\n    \n    if (entity.state > 20)\n      return\
+            \ 'var(--yellow)'\n\n    return 'var(--red)'\n]]]\n"
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 40
+    - type: custom:button-card
+      entity: sensor.downstairs_robot_low_water_warning
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: none
+      styles:
+        card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 80%
+        - color: "[[[\n   if (entity.state == \"no_warning\")\n     return 'var(--green)'\n\n    return 'var(--red)'\n]]]\n"
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 40
+    - type: custom:button-card
+      color_type: card
+      color: var(--scene-on-background-color)
+      icon: mdi:stairs-up
+      name: Upstairs
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house-vacuum-upstairs
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+        - padding: 8px
+        icon:
+        - width: 65%
+        - color: var(--scene-icon-color)
+        name:
+        - font-size: 12px
+        - color: var(--scene-icon-color)
+  theme: living-tablet
+- title: Upstairs vacuum
+  path: house-vacuum-upstairs
+  subview: true
+  back_path: /lovelace-living/house
+  icon: mdi:robot-vacuum
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: '"m1 c1 m2 c2 m3"
+
+      '
+    margin: 30px 0px
+  cards:
+  - type: custom:stack-in-card
+    view_layout:
+      grid-area: c1
+    card_mod:
+      style: "ha-card {\n  border-width: 5px;\n  border-color: var(--primary-base-color);\n  border-radius: 30px;\n  background:\
+        \ var(--tablet-card-background-color);\n}\n"
+    cards:
+    - type: custom:dreame-vacuum-card
+      entity: vacuum.upstairs_robot
+      map_config:
+        map_1:
+          rotation: 270
+  - type: custom:layout-card
+    layout_type: custom:vertical-layout
+    view_layout:
+      grid-area: c2
+    layout:
+      width: 100
+    cards:
+    - type: custom:gap-card
+      height: 45
+    - type: custom:button-card
+      color_type: card
+      color: var(--scene-on-background-color)
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house
+      styles:
+        card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 100%
+        - color: var(--scene-icon-color)
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 40
+    - type: custom:button-card
+      entity: sensor.upstairs_robot_battery_level
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: none
+      styles:
+        card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 80%
+        - color: "[[[\n   if (entity.state > 80)\n     return 'var(--green)'\n    \n    if (entity.state > 20)\n      return\
+            \ 'var(--yellow)'\n\n    return 'var(--red)'\n]]]\n"
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 40
+    - type: custom:button-card
+      entity: sensor.upstairs_robot_low_water_warning
+      show_name: false
+      aspect_ratio: 1/1
+      tap_action:
+        action: none
+      styles:
+        card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+        icon:
+        - width: 80%
+        - color: "[[[\n   if (entity.state == \"no_warning\")\n     return 'var(--green)'\n\n    return 'var(--red)'\n]]]\n"
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+    - type: custom:gap-card
+      height: 40
+    - type: custom:button-card
+      color_type: card
+      color: var(--scene-on-background-color)
+      icon: mdi:stairs-down
+      name: Downstairs
+      show_name: true
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/house-vacuum-downstairs
+      hold_action:
+        action: none
+      double_tap_action:
+        action: none
+      styles:
+        card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+        - padding: 8px
+        icon:
+        - width: 65%
+        - color: var(--scene-icon-color)
+        name:
+        - font-size: 12px
+        - color: var(--scene-icon-color)
+  theme: living-tablet

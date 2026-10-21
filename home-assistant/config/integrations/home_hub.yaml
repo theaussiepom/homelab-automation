@@ -1,0 +1,36 @@
+# Home hub presentation health only; no device actions or notifications.
+# Fault rules are owned by custom_templates/home_health.jinja.
+template:
+  - binary_sensor:
+      - name: Home Attention
+        default_entity_id: binary_sensor.home_attention
+        unique_id: house_home_hub_attention
+        device_class: problem
+        icon: mdi:home-alert-outline
+        state: >-
+          {% from 'home_health.jinja' import home_health %}
+          {% set issues = (home_health | as_function)() %}
+          {{ issues.values() | sum(start=[]) | count > 0 }}
+        attributes:
+          issues: >-
+            {% from 'home_health.jinja' import home_health %}
+            {{ (home_health | as_function)() }}
+          issue_count: >-
+            {% from 'home_health.jinja' import home_health %}
+            {% set issues = (home_health | as_function)() %}
+            {{ issues.values() | sum(start=[]) | unique | list | count }}
+
+# Label queries do not subscribe to registry changes; refresh this aggregate only.
+automation:
+  - id: home_hub_refresh_label_membership
+    alias: Home Hub - Refresh label membership
+    mode: restart
+    triggers:
+      - trigger: event
+        event_type: entity_registry_updated
+      - trigger: event
+        event_type: label_registry_updated
+    actions:
+      - action: homeassistant.update_entity
+        target:
+          entity_id: binary_sensor.home_attention

@@ -1,0 +1,19 @@
+- title: Home
+  path: home
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 130px 540px 425px 130px
+    grid-template-areas: |
+      "rooms h1 h3 h4"
+    margin: 22px 30px 30px 30px
+  cards:
+    - !include home/room-buttons.yaml
+    - !include home/home-buttons.yaml
+    - !include home/clock.yaml
+    - !include home/rooms/ben.yaml
+    - !include home/rooms/landing.yaml
+    - !include home/rooms/living.yaml
+    - !include home/rooms/matty.yaml
+    - !include home/rooms/outside.yaml
+    - !include home/rooms/study.yaml
+    - !include home/energy.yaml

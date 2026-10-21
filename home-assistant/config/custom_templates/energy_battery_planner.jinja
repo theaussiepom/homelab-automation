@@ -1,0 +1,413 @@
+{# Exact interpolation of the already floor/capacity-clipped passive trajectory. #}
+{% macro passive_energy_at(pieces, at) -%}
+  {%- set value=namespace(energy=pieces[-1].right if pieces|count else 0) -%}
+  {%- for piece in pieces if piece.start<=at<=piece.end -%}
+    {%- set value.energy=piece.left+(piece.right-piece.left)*(at-piece.start)/(piece.end-piece.start) -%}
+  {%- endfor -%}
+  {{- value.energy -}}
+{%- endmacro %}
+{# Pure calculation helper. Caller validates freshness, source coverage and numeric inputs.
+   rows: [UTC epoch start, NE kW, SW kW], exactly one row per 1800 seconds.
+   All boundaries are epoch seconds on the selected planning day, not clock strings.
+   plan_start=max(now, selected overnight window start); horizon_end=that day's sunset.
+   EV charging is excluded from the three house profiles before this function is called. #}
+{% macro battery_plan(rows, plan_start, window_start, window_end, shoulder_end,
+    daylight_start, horizon_end, night_kwh, shoulder_kwh, daylight_kwh,
+    capacity_kwh, soc_pct, backup_soc_pct, preferred_reserve_kwh,
+    max_grid_soc_pct, charge_efficiency, discharge_efficiency, forecast_factor,
+    solar_charge_limit_kw, grid_charge_kw, returns, actuation_allowance_s=0, admission_allowance_s=0, continuation_grid_kw=3, discharge_operating_power_kw=0, shoulder_weights=[]) -%}
+  {# Operating draw is an empirical stored-energy allowance while discharging,
+     not a certified inverter specification. Zero preserves the prior model.
+     Reject booleans, nonnumbers, infinities and NaN before using the argument. #}
+  {%- set operating_power_valid=discharge_operating_power_kw is number
+      and discharge_operating_power_kw is not boolean
+      and 0<=discharge_operating_power_kw<=1 -%}
+  {%- set operating_kw=discharge_operating_power_kw if operating_power_valid else 0 -%}
+  {# A learned shoulder shape is exactly ten half-hour shares anchored at
+     tariff end. Empty shares preserve the flat period mean. Reject malformed
+     shares instead of silently renormalizing or changing their time scale. #}
+  {%- set shape=namespace(weights=[],error=none,total=0,cuts=[]) -%}
+  {%- if shoulder_weights is not sequence or shoulder_weights is string or shoulder_weights is mapping -%}
+    {%- set shape.error='invalid_shoulder_weights_type' -%}
+  {%- elif shoulder_weights|count not in [0,10] -%}
+    {%- set shape.error='invalid_shoulder_weights_length' -%}
+  {%- elif shoulder_weights|count==10 -%}
+    {%- for weight in shoulder_weights -%}
+      {%- if (weight is integer or weight is float) and 0<=weight<=1 -%}
+        {%- set shape.total=shape.total+weight -%}
+      {%- else -%}
+        {%- set shape.error='invalid_shoulder_weights_value' -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if shape.error is none and (shape.total-1)|abs>1e-9 -%}
+      {%- set shape.error='invalid_shoulder_weights_sum' -%}
+    {%- endif -%}
+    {%- if shape.error is none -%}{%- set shape.weights=shoulder_weights|list -%}{%- endif -%}
+  {%- endif -%}
+  {%- if shape.weights|count and (shoulder_end-window_end-18000)|abs>0.1 -%}
+    {%- set shape.error='unsupported_shoulder_profile_duration' -%}
+    {%- set shape.weights=[] -%}
+  {%- endif -%}
+  {%- for index in range(11) if shape.weights|count -%}
+    {%- set shape.cuts=shape.cuts+[window_end+index*1800] -%}
+  {%- endfor -%}
+  {%- set night_hours = (window_end-window_start)/3600 -%}
+  {%- set shoulder_hours = (shoulder_end-window_end)/3600 -%}
+  {%- set late_start = [shoulder_end, daylight_start]|max -%}
+  {%- set late_hours = [0, (horizon_end-late_start)/3600]|max -%}
+  {%- set night_kw = night_kwh/night_hours if night_hours>0 else 0 -%}
+  {%- set shoulder_kw = shoulder_kwh/shoulder_hours if shoulder_hours>0 else 0 -%}
+  {%- set sunrise_night_hours = [0, ([window_end,horizon_end]|min - [window_start,daylight_start]|max)/3600]|max -%}
+  {%- set sunrise_shoulder_hours = [0, ([shoulder_end,horizon_end]|min - [window_end,daylight_start]|max)/3600]|max -%}
+  {%- set daylight_shoulder=namespace(kwh=shoulder_kw*sunrise_shoulder_hours) -%}
+  {%- if shape.weights|count -%}
+    {%- set daylight_shoulder.kwh=0 -%}
+    {%- for index in range(10) -%}
+      {%- set overlap=[0,([window_end+(index+1)*1800,horizon_end]|min-[window_end+index*1800,daylight_start]|max)]|max -%}
+      {%- set daylight_shoulder.kwh=daylight_shoulder.kwh+shoulder_kwh*shape.weights[index]*overlap/1800 -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- set daylight_already_allocated = night_kw*sunrise_night_hours + daylight_shoulder.kwh -%}
+  {%- set late_kwh = daylight_kwh-daylight_already_allocated -%}
+  {%- set late_kw = [0,late_kwh]|max/late_hours if late_hours>0 else 0 -%}
+  {%- set valid = shape.error is none and night_hours>0 and shoulder_hours>0 and late_hours>0
+      and operating_power_valid and capacity_kwh>0 and 0<charge_efficiency<=1 and 0<discharge_efficiency<=1
+      and 0<forecast_factor<=1 and 0<=backup_soc_pct<max_grid_soc_pct<=100
+      and 0<=soc_pct<=100 and night_kwh>=0 and shoulder_kwh>=0 and daylight_kwh>=0
+      and late_kwh>=-0.05 and solar_charge_limit_kw>0 and grid_charge_kw>0
+      and 0<=actuation_allowance_s<=300 and 0<=admission_allowance_s<=300
+      and continuation_grid_kw>0 and window_start<=plan_start<window_end<horizon_end -%}
+  {%- set ns = namespace(prefix=0, peak=0, solar_stored=0, night_remaining=0,
+      load=0, shoulder_load=0, solar=0, charge_cap_loss=0, rows=[], covered=0, expected_start=plan_start,
+      continuity=true, recovery_run=0, recovery_at=none, post_prefix=0, post_peak=0) -%}
+  {%- if valid -%}
+    {%- for row in rows|sort(attribute=0) -%}
+      {%- set row_a = [row[0],plan_start]|max -%}
+      {%- set row_b = [row[0]+1800,horizon_end]|min -%}
+      {%- if row_b>row_a -%}
+        {%- set cuts=([row_a,row_b,window_end,shoulder_end,daylight_start]+shape.cuts)|select('ge',row_a)|select('le',row_b)|unique|sort|list -%}
+        {%- for cut_index in range(cuts|count-1) -%}
+        {%- set a=cuts[cut_index] -%}
+        {%- set b=cuts[cut_index+1] -%}
+        {%- if (a-ns.expected_start)|abs>0.1 -%}{%- set ns.continuity=false -%}{%- endif -%}
+        {%- set ns.expected_start=b -%}
+        {%- set hours=(b-a)/3600 -%}
+        {%- set hn=[0,([b,window_end]|min-[a,window_start]|max)/3600]|max -%}
+        {%- set hs=[0,([b,shoulder_end]|min-[a,window_end]|max)/3600]|max -%}
+        {%- set hl=[0,(b-[a,late_start]|max)/3600]|max -%}
+        {%- set shoulder_load=namespace(kwh=shoulder_kw*hs) -%}
+        {%- if shape.weights|count -%}
+          {%- set shoulder_load.kwh=0 -%}
+          {%- for index in range(10) -%}
+            {%- set overlap=[0,([b,window_end+(index+1)*1800]|min-[a,window_end+index*1800]|max)]|max -%}
+            {%- set shoulder_load.kwh=shoulder_load.kwh+shoulder_kwh*shape.weights[index]*overlap/1800 -%}
+          {%- endfor -%}
+        {%- endif -%}
+        {%- set load=night_kw*hn+shoulder_load.kwh+late_kw*hl -%}
+        {%- set solar=[0,row[1]+row[2]]|max*forecast_factor*hours -%}
+        {%- set deficit=[0,load-solar]|max -%}
+        {# Potential stored drain if this entire deficit is served by battery.
+           Forward trajectories clip at the floor: operating draw ends at the
+           same fractional crossing as delivered household energy. #}
+        {%- set operating=operating_kw*hours if deficit>0 else 0 -%}
+        {%- set drain=deficit/discharge_efficiency+operating -%}
+        {%- set house_per_stored=deficit/drain if drain>0 else 0 -%}
+        {%- set raw_surplus=[0,solar-load]|max -%}
+        {%- set charge=[raw_surplus,solar_charge_limit_kw*hours]|min*charge_efficiency -%}
+        {%- set delta=drain-charge -%}
+        {%- set ns.prefix=ns.prefix+delta -%}
+        {%- set ns.peak=[ns.peak,ns.prefix]|max -%}
+        {%- set ns.night_remaining=ns.night_remaining+night_kw*hn/discharge_efficiency+(operating_kw*hn if deficit>0 else 0) -%}
+        {%- set ns.load=ns.load+load -%}
+        {%- set ns.shoulder_load=ns.shoulder_load+shoulder_load.kwh -%}
+        {%- set ns.solar=ns.solar+solar -%}
+        {%- set ns.solar_stored=ns.solar_stored+charge -%}
+        {%- set ns.charge_cap_loss=ns.charge_cap_loss+raw_surplus-charge/charge_efficiency -%}
+        {%- set ns.covered=ns.covered+b-a -%}
+        {%- set ns.rows=ns.rows+[dict(start=a,end=b,delta=delta,load=load,solar=solar,deficit=deficit,drain=drain,operating=operating,house_per_stored=house_per_stored)] -%}
+        {%- if a>=window_end -%}
+          {%- set ns.post_prefix=ns.post_prefix+delta -%}
+          {%- set ns.post_peak=[ns.post_peak,ns.post_prefix]|max -%}
+          {%- set ns.recovery_run=ns.recovery_run+hours if solar-load>=0.1*hours else 0 -%}
+          {%- if ns.recovery_at is none and ns.recovery_run>=1 -%}
+            {%- set ns.recovery_at=b -%}
+          {%- endif -%}
+        {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- set coverage_ok=ns.continuity and (ns.covered-(horizon_end-plan_start))|abs<0.1 -%}
+  {%- set backup=capacity_kwh*backup_soc_pct/100 -%}
+  {%- set usable_capacity=capacity_kwh-backup -%}
+  {%- set preferred=[preferred_reserve_kwh,usable_capacity]|min -%}
+  {# Reverse the capacity-bounded post-window trajectory. A requirement above
+     capacity cannot be served even by a full battery; buying extra energy before
+     a later full-battery plateau cannot improve that deficit or sunset reserve.
+     Each backwards clamp preserves all attainable demand service, then the
+     attainable preferred reserve, with the least useful initial stored energy.
+     The terminal-zero pass separates the service bridge from extra reserve. #}
+  {%- set bounded = namespace(required=preferred, bridge=0) -%}
+  {%- for row in ns.rows|reverse if row.start>=window_end -%}
+    {%- set bounded.required=[[0,bounded.required+row.delta]|max,usable_capacity]|min -%}
+    {%- set bounded.bridge=[[0,bounded.bridge+row.delta]|max,usable_capacity]|min -%}
+  {%- endfor -%}
+  {# This target is for the planned stop at window_end, NOT now. Overnight demand is
+     used below to project battery before the start; grid supplies house while charging. #}
+  {%- set required_available=bounded.required -%}
+  {%- set raw_target=backup+required_available -%}
+  {%- set base_target=[raw_target,capacity_kwh*max_grid_soc_pct/100]|min -%}
+  {%- set lead_s=actuation_allowance_s+admission_allowance_s -%}
+  {# Actual ACK can be earlier than the conservative latest production time.
+     A fixed-duration session may then finish up to lead_s before tariff end.
+     Cover that bounded final house drain explicitly, conservatively ignoring PV.
+     This is not an extra preferred-reserve purchase or a delivery guarantee. #}
+  {%- set timing_reserve=(night_kw/discharge_efficiency+operating_kw if night_kw>0 else 0)*[lead_s,window_end-plan_start]|min/3600 if discharge_efficiency>0 else 0 -%}
+  {%- set target=[base_target+timing_reserve,capacity_kwh*max_grid_soc_pct/100]|min -%}
+  {%- set stop_target=[base_target+ns.night_remaining,capacity_kwh*max_grid_soc_pct/100]|min -%}
+  {%- set current=capacity_kwh*soc_pct/100 -%}
+  {# Qualification can run before the tariff, but requests cannot. Actual setup has
+     no credited charge energy: reserve a bounded ACK delay plus minute admission
+     latency. These are policy bounds, not commissioned charge-response timings. #}
+  {%- set earliest_charge=[window_end,plan_start+lead_s]|min -%}
+  {%- set deliverable_hours=[0,(window_end-earliest_charge)/3600]|max -%}
+  {%- set schedule=namespace(latest=none,at_start=current,at_end=current,grid_stored=0,
+       precharge_direct_grid=0,earliest_energy=current,earliest_direct_grid=0,lo=earliest_charge,hi=window_end) -%}
+  {# Exact piecewise-linear latest feasible start. Split pre-charge trajectory at
+     floor/capacity crossings as well as forecast/load boundaries. This allows PV
+     charge power above grid charge power; no global monotonicity assumption. #}
+  {%- set scheduling_valid=valid -%}
+  {%- set pre=namespace(energy=current,direct_grid=0,pieces=[]) -%}
+  {%- set rate=grid_charge_kw*charge_efficiency/3600 -%}
+  {%- if scheduling_valid -%}
+    {%- for row in ns.rows if row.start<window_end -%}
+      {%- set a=row.start -%}{%- set b=[row.end,window_end]|min -%}
+      {%- set slope=-row.delta/(row.end-row.start) -%}
+      {%- set floor=[backup,pre.energy]|min -%}
+      {%- set bound=floor if slope<0 else capacity_kwh -%}
+      {%- set crossing=a+(bound-pre.energy)/slope if slope!=0 else b -%}
+      {%- if a<=earliest_charge<=b -%}
+        {%- set schedule.earliest_energy=[[floor,pre.energy+slope*(earliest_charge-a)]|max,capacity_kwh]|min -%}
+        {%- set schedule.earliest_direct_grid=pre.direct_grid+[0,floor-(pre.energy+slope*(earliest_charge-a))]|max*row.house_per_stored -%}
+      {%- endif -%}
+      {%- set target_crossing=a+(target-pre.energy)/slope if slope!=0 else b -%}
+      {%- set cuts=[a,crossing,target_crossing,b]|select('ge',a)|select('le',b)|unique|sort|list -%}
+      {%- for index in range(cuts|count-1) -%}
+        {%- set piece_left=[[floor,pre.energy+slope*(cuts[index]-a)]|max,capacity_kwh]|min -%}
+        {%- set piece_right=[[floor,pre.energy+slope*(cuts[index+1]-a)]|max,capacity_kwh]|min -%}
+        {%- set pre.pieces=pre.pieces+[dict(start=cuts[index],end=cuts[index+1],left=piece_left,right=piece_right)] -%}
+        {%- set left=[cuts[index],earliest_charge]|max -%}{%- set right=cuts[index+1] -%}
+        {%- if right>left -%}
+        {%- set e_left=[[floor,pre.energy+slope*(left-a)]|max,capacity_kwh]|min -%}
+        {%- set e_right=[[floor,pre.energy+slope*(right-a)]|max,capacity_kwh]|min -%}
+        {%- set f_left=e_left+rate*(window_end-left)-target -%}
+        {%- set f_right=e_right+rate*(window_end-right)-target -%}
+        {%- set candidate=right if f_right>=0 else left+(right-left)*f_left/(f_left-f_right) if f_left>=0 and f_left!=f_right else none -%}
+        {%- if candidate is not none and (schedule.latest is none or candidate>schedule.latest) -%}
+          {%- set e_candidate=e_left+(e_right-e_left)*(candidate-left)/(right-left) -%}
+          {%- set schedule.latest=candidate -%}
+          {%- set schedule.at_start=e_candidate -%}
+          {%- set schedule.grid_stored=rate*(window_end-candidate) -%}
+          {%- set schedule.at_end=e_candidate+schedule.grid_stored -%}
+          {%- set schedule.precharge_direct_grid=pre.direct_grid+[0,floor-(pre.energy+slope*(candidate-a))]|max*row.house_per_stored -%}
+        {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- set pre.direct_grid=pre.direct_grid+[0,floor-(pre.energy+slope*(b-a))]|max*row.house_per_stored -%}
+      {%- set pre.energy=[[floor,pre.energy+slope*(b-a)]|max,capacity_kwh]|min -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {# Charge can enable anywhere from request to request+lead_s. The fixed budget
+     then expires up to lead_s before tariff end, or the captured target can end
+     it earlier. Score the WORST conservative outcome over that whole interval.
+     After Stop, ignore PV and drain at the house-only rate. This is a lower bound,
+     not an exact physical optimizer. Clamp that bound at the starting backup/
+     current floor; the real battery floor can only be higher after charging.
+     The passive trajectory is split at load/PV, floor, capacity and target bounds.
+     Between shifted boundaries all possible worst-case enable endpoints define
+     affine functions of design-production time. Their lower-envelope maximum
+     lies at an endpoint or intersection. No sampling cadence is used here. #}
+  {%- set floor_bound=[backup,current]|min -%}
+  {%- set drain_rate=(night_kw/discharge_efficiency+operating_kw if night_kw>0 else 0)/3600 if discharge_efficiency>0 else 0 -%}
+  {%- set robust=namespace(start=window_end,bound=pre.energy,useful=[base_target,pre.energy]|min,nominal_bound=none) -%}
+  {%- set nominal_start=schedule.latest -%}
+  {%- set partitions=namespace(points=[earliest_charge,window_end]) -%}
+  {%- for piece in pre.pieces -%}
+    {%- set partitions.points=partitions.points+[piece.start,piece.end,piece.start+lead_s,piece.end+lead_s] -%}
+  {%- endfor -%}
+  {%- set partitions.points=partitions.points|select('ge',earliest_charge)|select('le',window_end)|unique|sort|list -%}
+  {%- for index in range(partitions.points|count-1) if scheduling_valid -%}
+    {%- set lo=partitions.points[index] -%}{%- set hi=partitions.points[index+1] -%}
+    {%- if hi>lo -%}
+      {%- set mid=(lo+hi)/2 -%}
+      {%- set lines=namespace(items=[]) -%}
+      {%- set enables=namespace(items=[dict(offset=0),dict(offset=-lead_s)]) -%}
+      {%- for piece in pre.pieces if mid-lead_s<piece.start<mid -%}
+        {%- set enables.items=enables.items+[dict(fixed=piece.start)] -%}
+      {%- endfor -%}
+      {%- for enable in enables.items -%}
+        {%- set e_lo=enable.fixed if enable.fixed is defined else lo+enable.offset -%}
+        {%- set e_hi=enable.fixed if enable.fixed is defined else hi+enable.offset -%}
+        {%- set energy_lo=passive_energy_at(pre.pieces,e_lo)|float -%}
+        {%- set energy_hi=passive_energy_at(pre.pieces,e_hi)|float -%}
+        {%- set energy_mid=(energy_lo+energy_hi)/2 -%}
+        {%- if energy_mid>=target -%}
+          {# Target already reached at enable: owner admits no charge, duration=0.
+             Never extrapolate a negative time-to-target or invent grid energy. #}
+          {%- set values=[(energy_lo-drain_rate*(window_end-e_lo),energy_hi-drain_rate*(window_end-e_hi))] -%}
+        {%- else -%}
+          {%- set budget_lo=energy_lo+rate*(window_end-lo)-drain_rate*(lo-e_lo) -%}
+          {%- set budget_hi=energy_hi+rate*(window_end-hi)-drain_rate*(hi-e_hi) -%}
+          {%- set cap_lo=target-drain_rate*(window_end-e_lo-(target-energy_lo)/rate) -%}
+          {%- set cap_hi=target-drain_rate*(window_end-e_hi-(target-energy_hi)/rate) -%}
+          {%- set values=[(budget_lo,budget_hi),(cap_lo,cap_hi)] -%}
+        {%- endif -%}
+        {%- for pair in values -%}
+          {%- set slope=(pair[1]-pair[0])/(hi-lo) -%}
+          {%- set lines.items=lines.items+[dict(slope=slope,intercept=pair[0]-slope*lo)] -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {%- set points=namespace(items=[lo,hi]) -%}
+      {%- if nominal_start is not none and lo<=nominal_start<=hi -%}
+        {%- set points.items=points.items+[nominal_start] -%}
+      {%- endif -%}
+      {%- for line in lines.items -%}
+        {%- if line.slope!=0 -%}
+          {%- for level in [base_target,floor_bound] -%}
+            {%- set cross=(level-line.intercept)/line.slope -%}
+            {%- if lo<cross<hi -%}{%- set points.items=points.items+[cross] -%}{%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+        {%- for other in lines.items[loop.index:] if line.slope!=other.slope -%}
+          {%- set cross=(other.intercept-line.intercept)/(line.slope-other.slope) -%}
+          {%- if lo<cross<hi -%}{%- set points.items=points.items+[cross] -%}{%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {%- for point in points.items|unique -%}
+        {%- set outcome=namespace(value=capacity_kwh) -%}
+        {%- for line in lines.items -%}
+          {%- set outcome.value=[outcome.value,line.slope*point+line.intercept]|min -%}
+        {%- endfor -%}
+        {%- set bound=[floor_bound,outcome.value]|max -%}
+        {%- set useful=[base_target,bound]|min -%}
+        {%- if nominal_start is not none and (point-nominal_start)|abs<1e-7 -%}
+          {%- set robust.nominal_bound=bound if robust.nominal_bound is none else [bound,robust.nominal_bound]|min -%}
+        {%- endif -%}
+        {%- if useful>robust.useful+1e-9 or ((useful-robust.useful)|abs<=1e-9 and point>robust.start) -%}
+          {%- set robust.start=point -%}{%- set robust.bound=bound -%}{%- set robust.useful=useful -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {# Preserve a previously feasible latest-start result only when the complete
+     early-enable bound actually funds its base target. Otherwise select the best
+     conservative attainable result, including passive operation and shortfall. #}
+  {%- set nominal_safe=nominal_start is not none and robust.nominal_bound is not none and robust.nominal_bound>=base_target-1e-9 -%}
+  {%- set start=nominal_start if nominal_safe else robust.start -%}
+  {%- set projected_tariff_end=robust.nominal_bound if nominal_safe else robust.bound -%}
+  {%- set schedule_basis='latest_feasible_start' if nominal_safe else 'best_conservative_charge' if start<window_end else 'best_conservative_passive' -%}
+  {%- if scheduling_valid and pre.energy>=base_target -%}
+    {%- set start=window_end -%}{%- set projected_tariff_end=pre.energy -%}
+    {%- set schedule_basis='passive_target_met' -%}
+  {%- endif -%}
+  {%- set request_start=[plan_start,start-lead_s]|max if start<window_end else window_end -%}
+  {%- set hours_needed=(window_end-start)/3600 if scheduling_valid else 0 -%}
+  {%- set added_stored=hours_needed*grid_charge_kw*charge_efficiency -%}
+  {%- set schedule.latest=start -%}
+  {%- set schedule.at_start=passive_energy_at(pre.pieces,start)|float if pre.pieces|count else current -%}
+  {%- set projected_stop=[target,schedule.at_start+added_stored]|min if schedule.at_start<target else schedule.at_start -%}
+  {%- if added_stored==0 -%}
+    {%- set projected_stop=pre.energy -%}{%- set timing_reserve=0 -%}{%- set target=base_target -%}
+  {%- endif -%}
+  {# Precharge direct-grid house energy is diagnostic only. Reconstruct to the
+     selected design start so a later fallback does not retain earliest-start data. #}
+  {%- set direct=namespace(energy=current,grid=0,operating=0) -%}
+  {%- for row in ns.rows if row.start<start -%}
+    {%- set end=[row.end,start]|min -%}
+    {%- set delta=row.delta*(end-row.start)/(row.end-row.start) -%}
+    {%- set floor=[backup,direct.energy]|min -%}
+    {%- set direct.grid=direct.grid+[0,floor-(direct.energy-delta)]|max*row.house_per_stored -%}
+    {%- set fraction=(end-row.start)/(row.end-row.start) -%}
+    {%- set served_fraction=[[0,(direct.energy-floor)/delta]|max,1]|min if delta>0 else 0 -%}
+    {%- set direct.operating=direct.operating+row.operating*fraction*served_fraction -%}
+    {%- set direct.energy=[[floor,direct.energy-delta]|max,capacity_kwh]|min -%}
+  {%- endfor -%}
+  {%- set schedule.precharge_direct_grid=direct.grid -%}
+  {%- set continuation_upper=[capacity_kwh*max_grid_soc_pct/100,current+[grid_charge_kw,continuation_grid_kw]|max*charge_efficiency/3600*(window_end-plan_start)]|min -%}
+  {%- set sim=namespace(energy=projected_tariff_end-backup,
+       unserved=0,unserved_house=0,operating=0,spill=0,minimum=usable_capacity) -%}
+  {%- for row in ns.rows -%}
+    {%- if row.start>=window_end -%}
+    {%- set next=sim.energy-row.delta -%}
+    {# Convert the unmet fraction of this row back to AC household demand.
+       Multiplying all missing stored energy by efficiency would invent grid
+       demand for operating draw that ceased when the battery reached its floor. #}
+    {%- set served_fraction=[[0,sim.energy/row.drain]|max,1]|min if row.drain>0 else 0 -%}
+    {%- set unmet_house=row.deficit*(1-served_fraction) -%}
+    {%- set sim.unserved_house=sim.unserved_house+unmet_house -%}
+    {%- set sim.unserved=sim.unserved+unmet_house/discharge_efficiency -%}
+    {%- set sim.operating=sim.operating+row.operating*served_fraction -%}
+    {%- set sim.spill=sim.spill+[0,next-usable_capacity]|max -%}
+    {# A pre-existing reserve shortfall is not household demand. Preserve it
+       while idle/at floor; later solar must first restore that actual shortfall. #}
+    {%- set floor=[0,sim.energy]|min -%}
+    {%- set sim.energy=[[floor,next]|max,usable_capacity]|min -%}
+    {%- set sim.minimum=[sim.minimum,sim.energy]|min -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- do returns(dict(valid=valid and coverage_ok and scheduling_valid,
+    invalid_reason=shape.error if shape.error is not none else 'invalid_profiles_or_inputs' if not valid else 'forecast_gap_or_duplicate' if not coverage_ok else 'invalid_schedule' if not scheduling_valid else none,
+    plan_start=plan_start,horizon_end=horizon_end,model_version=8,
+    actuation_allowance_s=actuation_allowance_s,admission_allowance_s=admission_allowance_s,
+    earliest_confirmed_start_epoch=earliest_charge,
+    maximum_prefix_deficit_kwh=ns.peak,net_storage_deficit_kwh=ns.prefix,
+    morning_deficit=bounded.bridge,overnight_drain=ns.night_remaining,
+    unbounded_post_window_prefix_deficit_kwh=ns.post_peak,
+    unbounded_post_window_net_deficit_kwh=ns.post_prefix,
+    solar_to_battery=ns.solar_stored,house_kwh=ns.load,conservative_solar_kwh=ns.solar,
+    forecast_factor=forecast_factor,charge_efficiency=charge_efficiency,discharge_efficiency=discharge_efficiency,
+    shoulder_profile_basis='Ten normalized half-hour energy shares anchored at tariff end; no renormalization.' if shape.weights|count else 'Flat shoulder-period mean; no learned shape supplied.',
+    shoulder_weights=shape.weights,
+    shoulder_profile_interval_seconds=1800,
+    shoulder_profile_sum_tolerance=1e-9,
+    shoulder_profile_kwh=ns.shoulder_load,
+    daylight_shoulder_overlap_kwh=daylight_shoulder.kwh,
+    discharge_operating_power_kw=operating_kw,
+    discharge_loss_assumptions=dict(proportional_efficiency=discharge_efficiency,
+      operating_power_kw=operating_kw,
+      operating_scope='Positive net household deficit, only while battery discharges above its floor; no draw during idle, surplus, forced charging or after floor.',
+      calibration_status='Empirical planning assumptions, not certified hardware efficiency or independently metered inverter overhead.'),
+    overnight_drain_basis='Potential night profile drain without PV credit; added operating term only in forecast deficit intervals. Actual discharge is floor-clipped in the trajectory.',
+    first_sustained_solar_recovery_at=ns.recovery_at,
+    preferred_reserve_kwh=preferred,bridge_kwh=bounded.bridge,preferred_reserve_extra_kwh=[0,required_available-bounded.bridge]|max,backup_kwh=backup,capacity_kwh=capacity_kwh,
+    raw_target_kwh=raw_target,base_target_kwh=base_target,
+    timing_reserve_kwh=timing_reserve,timing_reserve_cap_shortfall_kwh=[0,base_target+timing_reserve-target]|max,
+    stop_target_kwh=stop_target,target_kwh=target,target_soc=target/capacity_kwh*100 if capacity_kwh>0 else 0,
+    energy_needed_kwh=added_stored,grid_energy_kwh=added_stored/charge_efficiency if charge_efficiency>0 else 0,
+    hours_needed=hours_needed,remaining_charge_window_hours=deliverable_hours,
+    charge_start_epoch=request_start,charge_energy_start_epoch=start,charge_stop_epoch=window_end,
+    projected_battery_at_start_kwh=schedule.at_start if schedule.latest is not none else schedule.earliest_energy,
+    projected_battery_at_stop_kwh=projected_stop,projected_battery_at_tariff_end_kwh=projected_tariff_end,
+    schedule_basis=schedule_basis,
+    nominal_feasible_schedule_retained=nominal_safe,
+    schedule_projection='Conservative lower bound over the full permitted early-enable interval; post-Stop PV omitted, captured target and time budget retained.',
+    continuation_grid_kw=[grid_charge_kw,continuation_grid_kw]|max,
+    passive_target_met=scheduling_valid and coverage_ok and pre.energy>=base_target,
+    passive_dominates_continuation=scheduling_valid and coverage_ok and pre.energy>=continuation_upper,
+    immediate_continuation_upper_bound_kwh=continuation_upper,
+    projected_passive_tariff_end_kwh=pre.energy,
+    precharge_direct_grid_house_kwh=schedule.precharge_direct_grid if schedule.latest is not none else schedule.earliest_direct_grid,
+    charge_window_shortfall_kwh=[0,base_target-projected_tariff_end]|max,
+    target_cap_shortfall_kwh=[0,raw_target-base_target]|max,
+    trajectory_unserved_kwh=sim.unserved,
+    trajectory_unserved_house_kwh=sim.unserved_house,
+    trajectory_unserved_basis='Unserved household AC demand divided by discharge efficiency; excludes operating draw after battery stops at its floor.',
+    trajectory_discharge_operating_kwh=sim.operating,
+    precharge_discharge_operating_kwh=direct.operating,
+    discharge_operating_diagnostics_basis='Trajectory operating energy covers post-tariff only. Precharge operating energy covers the passive path to design charge start; neither is a whole-day actual-energy total. Early-Stop allowance is included in the conservative tariff-end bound.',
+    projected_reserve_kwh=[0,sim.energy]|max,
+    projected_backup_shortfall_kwh=[0,-sim.energy]|max,
+    preferred_reserve_shortfall_kwh=[0,preferred-[0,sim.energy]|max]|max,
+    solar_power_cap_spill_kwh=ns.charge_cap_loss,capacity_spill_kwh=sim.spill,
+    interval_count=ns.rows|count,daylight_profile_remainder_kwh=late_kwh)) -%}
+{%- endmacro %}

@@ -1,0 +1,71 @@
+{# Home hub's single fault policy. General remains the battery-policy owner. #}
+{% macro home_health(returns) -%}
+  {%- set ns = namespace(batteries=[], leaks=[], equipment=[], upstairs=[], downstairs=[]) -%}
+  {%- set missing = ['unknown', 'unavailable', 'none', ''] -%}
+  {%- set ignore_id = 'sensor.notify_battery_ignore' -%}
+  {%- set ignored = state_attr(ignore_id, 'entity_id') -%}
+  {# A missing exclusion helper must not make the battery panel look healthy. #}
+  {%- if ignored is not iterable or ignored is string or ignored is mapping -%}
+    {%- set ns.batteries = ns.batteries + [ignore_id] -%}
+    {%- set ignored = [] -%}
+  {%- endif -%}
+  {%- for eid in label_entities('low_battery') | unique | sort -%}
+    {%- set battery_state = states(eid) -%}
+    {%- if eid not in ignored and eid != ignore_id -%}
+      {%- set ns.batteries = ns.batteries + [eid] -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- set leak_entities = label_entities('leak') -%}
+  {%- set excluded = label_entities('maintenance') + label_entities('retired') -%}
+  {%- set monitored = (label_entities('health_monitored') + leak_entities) | unique | sort -%}
+  {%- for eid in monitored -%}
+    {%- set value = states(eid) -%}
+    {%- set dc = state_attr(eid, 'device_class') -%}
+    {%- set safety = eid.startswith('binary_sensor.') and
+        (dc in ['moisture', 'smoke'] or eid in leak_entities or
+         eid == 'binary_sensor.smoke_detector_smoke_detected') -%}
+    {# Active safety alarms stay visible even when marked Maintenance or Retired. #}
+    {%- set alarm = safety and value == 'on' -%}
+    {%- set unavailable = value in missing -%}
+    {%- set connection_lost = dc == 'connectivity' and value == 'off' -%}
+    {%- if alarm or (eid not in excluded and (unavailable or connection_lost)) -%}
+      {%- if safety -%}
+        {%- set ns.leaks = ns.leaks + [eid] -%}
+      {%- else -%}
+        {%- set ns.equipment = ns.equipment + [eid] -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- for floor in ['upstairs', 'downstairs'] -%}
+    {%- set robot = namespace(issues=[]) -%}
+    {%- set vacuum = 'vacuum.' ~ floor ~ '_robot' -%}
+    {%- if states(vacuum) in missing + ['error'] -%}
+      {%- set robot.issues = robot.issues + [vacuum] -%}
+    {%- endif -%}
+    {%- for suffix, normal in [('error', 'no_error'), ('low_water_warning', 'no_warning')] -%}
+      {%- set eid = 'sensor.' ~ floor ~ '_robot_' ~ suffix -%}
+      {%- if states(eid) != normal -%}
+        {%- set robot.issues = robot.issues + [eid] -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- set service_items = ['filter', 'main_brush', 'side_brush', 'sensor_dirty'] +
+        (['wheel_dirty'] if floor == 'upstairs' else []) -%}
+    {%- for suffix in service_items -%}
+      {%- set eid = 'sensor.' ~ floor ~ '_robot_' ~ suffix ~ '_left' -%}
+      {%- set value = states(eid) -%}
+      {%- if not is_number(value) or value | float(0) <= 0 -%}
+        {%- set robot.issues = robot.issues + [eid] -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if floor == 'upstairs' -%}
+      {%- set ns.upstairs = robot.issues -%}
+    {%- else -%}
+      {%- set ns.downstairs = robot.issues -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- do returns({'batteries': ns.batteries, 'leaks': ns.leaks,
+      'equipment': ns.equipment, 'upstairs': ns.upstairs,
+      'downstairs': ns.downstairs}) -%}
+{%- endmacro %}

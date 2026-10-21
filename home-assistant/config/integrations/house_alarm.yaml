@@ -1,0 +1,841 @@
+# Native House Alarm: paired-door and presence policies authorised by Ben.
+# Helpers restore across restart except the startup readiness guard.
+alarm_control_panel:
+- platform: manual_entry
+  name: House Alarm
+  unique_id: house_alarm
+  code: !secret house_alarm_code
+  code_arm_required: false
+  arming_states:
+  - armed_away
+  - armed_home
+  - armed_night
+  arming_time: 120
+  delay_time: 30
+  trigger_time: 120
+  disarm_after_trigger: false
+  disarmed:
+    trigger_time: 0
+  armed_home:
+    arming_time: 120
+  armed_night:
+    arming_time: 15
+input_boolean:
+  house_alarm_automatic_arming:
+    name: House Alarm Automatic Arming
+    icon: mdi:shield-sync
+  house_alarm_automatic_countdown:
+    name: House Alarm Automatic Countdown
+    icon: mdi:timer-sand
+  house_alarm_alert_sent:
+    name: House Alarm Alert Sent
+    icon: mdi:message-check
+  house_alarm_front_door_inside_exempt:
+    name: Front Door inside door temporarily exempt
+    icon: mdi:door-open
+  house_alarm_living_inside_exempt:
+    name: Living inside door temporarily exempt
+    icon: mdi:door-open
+  house_alarm_laundry_inside_exempt:
+    name: Laundry inside door temporarily exempt
+    icon: mdi:door-open
+  house_alarm_monitor_ready:
+    name: House Alarm Monitor Ready
+    initial: false
+    icon: mdi:shield-check
+timer:
+  house_alarm_countdown:
+    name: House Alarm Countdown
+    restore: true
+input_text:
+  house_alarm_status:
+    name: House Alarm Status
+    max: 255
+  house_alarm_last_cause:
+    name: House Alarm Last Cause
+    max: 255
+template:
+- binary_sensor:
+  - name: House Alarm Perimeter Ready
+    unique_id: house_alarm_perimeter_ready
+    state: '{% set ns=namespace(ok=true) %}
+
+      {% for e in [''binary_sensor.frontdoor_door_door_inside_frontdoor_contact'',
+      ''binary_sensor.living_door_door_inside_living_contact'', ''binary_sensor.laundry_door_door_inside_laundry_contact'',
+      ''binary_sensor.frontdoor_door_door_outside_frontdoor_contact'', ''binary_sensor.living_door_door_outside_living_contact'',
+      ''binary_sensor.laundry_door_door_outside_laundry_contact'', ''binary_sensor.frontdoor_door_door_gate_deck_contact'']
+      + [''binary_sensor.garage_door_state_open_contact'', ''binary_sensor.garage_door_state_closed'']
+      %}{% if states(e) not in [''on'',''off''] %}{% set ns.ok=false %}{% endif %}{%
+      endfor %}
+
+      {% for e in [''binary_sensor.frontdoor_door_door_outside_frontdoor_contact'',
+      ''binary_sensor.living_door_door_outside_living_contact'', ''binary_sensor.laundry_door_door_outside_laundry_contact'',
+      ''binary_sensor.frontdoor_door_door_gate_deck_contact''] %}{% if not is_state(e,''off'')
+      %}{% set ns.ok=false %}{% endif %}{% endfor %}
+
+      {% for e in [''binary_sensor.zigbee2mqtt_bridge_connection_state'', ''binary_sensor.zigbee2mqtt_bridge_connection_state_2'']
+      %}{% if not is_state(e,''on'') %}{% set ns.ok=false %}{% endif %}{% endfor %}
+
+      {{ ns.ok and is_state(''cover.garage_door'',''closed'') and is_state(''binary_sensor.garage_door_state_open_contact'',''on'')
+      and is_state(''binary_sensor.garage_door_state_closed'',''off'') }}'
+  - name: House Alarm Away Ready
+    unique_id: house_alarm_away_ready
+    state: '{% set ns=namespace(ok=is_state(''binary_sensor.house_alarm_perimeter_ready'',''on''))
+      %}{% for e in [''binary_sensor.living_motion_motion_living_entry_occupancy'',
+      ''binary_sensor.bar_motion_motion_bar_occupancy'', ''binary_sensor.master_motion_motion_master_robe_occupancy'',
+      ''binary_sensor.powder_motion_motion_powder_occupancy'', ''binary_sensor.laundry_motion_motion_laundry_inside_occupancy'',
+      ''binary_sensor.ensuite_motion_motion_ensuite_occupancy'', ''binary_sensor.bathroom_motion_motion_bathroom_occupancy'',
+      ''binary_sensor.landing_motion_motion_landing_master_occupancy'', ''binary_sensor.garage_motion_motion_garage_entrance_occupancy'',
+      ''binary_sensor.study_motion_motion_study_window_occupancy'', ''binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy'',
+      ''binary_sensor.garage_motion_motion_garage_door_occupancy'', ''binary_sensor.landing_motion_motion_landing_occupancy'',
+      ''binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy''] %}{% if
+      not is_state(e,''off'') %}{% set ns.ok=false %}{% endif %}{% endfor %}{{ ns.ok
+      }}'
+  - name: House Alarm Coverage Problem
+    unique_id: house_alarm_coverage_problem
+    device_class: problem
+    state: '{% set ns=namespace(bad=false) %}
+
+      {% set pirs=[''binary_sensor.living_motion_motion_living_entry_occupancy'',
+      ''binary_sensor.bar_motion_motion_bar_occupancy'', ''binary_sensor.master_motion_motion_master_robe_occupancy'',
+      ''binary_sensor.powder_motion_motion_powder_occupancy'', ''binary_sensor.laundry_motion_motion_laundry_inside_occupancy'',
+      ''binary_sensor.ensuite_motion_motion_ensuite_occupancy'', ''binary_sensor.bathroom_motion_motion_bathroom_occupancy'',
+      ''binary_sensor.landing_motion_motion_landing_master_occupancy'', ''binary_sensor.garage_motion_motion_garage_entrance_occupancy'',
+      ''binary_sensor.study_motion_motion_study_window_occupancy'', ''binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy'',
+      ''binary_sensor.garage_motion_motion_garage_door_occupancy'', ''binary_sensor.landing_motion_motion_landing_occupancy'',
+      ''binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy''] %}{% set
+      base=[''binary_sensor.frontdoor_door_door_inside_frontdoor_contact'', ''binary_sensor.living_door_door_inside_living_contact'',
+      ''binary_sensor.laundry_door_door_inside_laundry_contact'', ''binary_sensor.frontdoor_door_door_outside_frontdoor_contact'',
+      ''binary_sensor.living_door_door_outside_living_contact'', ''binary_sensor.laundry_door_door_outside_laundry_contact'',
+      ''binary_sensor.frontdoor_door_door_gate_deck_contact'', ''binary_sensor.garage_door_state_open_contact'',
+      ''binary_sensor.garage_door_state_closed''] %}
+
+      {% set watched=base+(pirs if states(''alarm_control_panel.house_alarm'') in
+      [''disarmed'',''armed_away''] or state_attr(''alarm_control_panel.house_alarm'',''previous_state'')==''armed_away''
+      or state_attr(''alarm_control_panel.house_alarm'',''next_state'')==''armed_away''
+      else []) %}
+
+      {% for e in watched %}{% if states(e) not in [''on'',''off''] %}{% set ns.bad=true
+      %}{% endif %}{% endfor %}
+
+      {% for e in [''binary_sensor.zigbee2mqtt_bridge_connection_state'', ''binary_sensor.zigbee2mqtt_bridge_connection_state_2'']
+      %}{% if not is_state(e,''on'') %}{% set ns.bad=true %}{% endif %}{% endfor %}
+
+      {% if states(''alarm_control_panel.house_alarm'') in [''armed_away'',''armed_home'',''armed_night'',''pending'',''triggered'']
+      %}
+
+      {% set exceptions={''binary_sensor.frontdoor_door_door_inside_frontdoor_contact'':
+      ''input_boolean.house_alarm_front_door_inside_exempt'', ''binary_sensor.living_door_door_inside_living_contact'':
+      ''input_boolean.house_alarm_living_inside_exempt'', ''binary_sensor.laundry_door_door_inside_laundry_contact'':
+      ''input_boolean.house_alarm_laundry_inside_exempt''} %}
+
+      {% for e in [''binary_sensor.frontdoor_door_door_inside_frontdoor_contact'',
+      ''binary_sensor.living_door_door_inside_living_contact'', ''binary_sensor.laundry_door_door_inside_laundry_contact'',
+      ''binary_sensor.frontdoor_door_door_outside_frontdoor_contact'', ''binary_sensor.living_door_door_outside_living_contact'',
+      ''binary_sensor.laundry_door_door_outside_laundry_contact'', ''binary_sensor.frontdoor_door_door_gate_deck_contact'']
+      %}{% if is_state(e,''on'') and (e not in exceptions or not is_state(exceptions[e],''on''))
+      %}{% set ns.bad=true %}{% endif %}{% endfor %}
+
+      {% if is_state(''binary_sensor.garage_door_state_closed'',''on'') or not is_state(''cover.garage_door'',''closed'')
+      %}{% set ns.bad=true %}{% endif %}
+
+      {% if states(''alarm_control_panel.house_alarm'')==''armed_away'' or state_attr(''alarm_control_panel.house_alarm'',''previous_state'')==''armed_away''
+      %}{% for e in pirs %}{% if is_state(e,''on'') %}{% set ns.bad=true %}{% endif
+      %}{% endfor %}{% endif %}
+
+      {% endif %}
+
+      {{ ns.bad or not is_state(''input_boolean.house_alarm_monitor_ready'',''on'')
+      or states(''cover.garage_door'') not in [''closed'',''open'',''opening'',''closing'']
+      or (is_state(''binary_sensor.garage_door_state_open_contact'',''off'') and is_state(''binary_sensor.garage_door_state_closed'',''off''))
+      }}'
+automation:
+- id: house_alarm_controller
+  trace:
+    stored_traces: 0
+  alias: House Alarm - sensors, arming and presence
+  description: Native panel controller. Door exemptions end on closing; only genuine
+    sensor edges trigger. Person home departures start perimeter-only Axl arming;
+    real arrivals disarm. Alarm PIN remains server-side; these two automations do not retain traces.
+  mode: queued
+  max: 100
+  triggers:
+  - trigger: state
+    entity_id: alarm_control_panel.house_alarm
+    id: arming
+    to: arming
+  - trigger: state
+    entity_id: alarm_control_panel.house_alarm
+    attribute: next_state
+    id: mode_changed
+  - trigger: state
+    entity_id: alarm_control_panel.house_alarm
+    id: armed
+    from: arming
+    to:
+    - armed_away
+    - armed_home
+    - armed_night
+  - trigger: state
+    entity_id: alarm_control_panel.house_alarm
+    id: disarmed
+    to: disarmed
+  - trigger: state
+    entity_id: alarm_control_panel.house_alarm
+    id: triggered
+    to: triggered
+  - trigger: state
+    entity_id:
+    - binary_sensor.frontdoor_door_door_inside_frontdoor_contact
+    - binary_sensor.living_door_door_inside_living_contact
+    - binary_sensor.laundry_door_door_inside_laundry_contact
+    id: inside_closed
+    to: 'off'
+  - trigger: state
+    entity_id:
+    - binary_sensor.frontdoor_door_door_inside_frontdoor_contact
+    - binary_sensor.living_door_door_inside_living_contact
+    - binary_sensor.laundry_door_door_inside_laundry_contact
+    - binary_sensor.frontdoor_door_door_outside_frontdoor_contact
+    - binary_sensor.living_door_door_outside_living_contact
+    - binary_sensor.laundry_door_door_outside_laundry_contact
+    - binary_sensor.frontdoor_door_door_gate_deck_contact
+    id: perimeter
+    from: 'off'
+    to: 'on'
+  - trigger: state
+    entity_id:
+    - binary_sensor.living_motion_motion_living_entry_occupancy
+    - binary_sensor.bar_motion_motion_bar_occupancy
+    - binary_sensor.master_motion_motion_master_robe_occupancy
+    - binary_sensor.powder_motion_motion_powder_occupancy
+    - binary_sensor.laundry_motion_motion_laundry_inside_occupancy
+    - binary_sensor.ensuite_motion_motion_ensuite_occupancy
+    - binary_sensor.bathroom_motion_motion_bathroom_occupancy
+    - binary_sensor.landing_motion_motion_landing_master_occupancy
+    - binary_sensor.garage_motion_motion_garage_entrance_occupancy
+    - binary_sensor.study_motion_motion_study_window_occupancy
+    - binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy
+    - binary_sensor.garage_motion_motion_garage_door_occupancy
+    - binary_sensor.landing_motion_motion_landing_occupancy
+    - binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy
+    id: motion
+    from: 'off'
+    to: 'on'
+  - trigger: state
+    entity_id: binary_sensor.garage_door_state_closed
+    id: garage
+    from: 'off'
+    to: 'on'
+  - trigger: state
+    entity_id:
+    - binary_sensor.frontdoor_door_door_inside_frontdoor_contact
+    - binary_sensor.living_door_door_inside_living_contact
+    - binary_sensor.laundry_door_door_inside_laundry_contact
+    - binary_sensor.frontdoor_door_door_outside_frontdoor_contact
+    - binary_sensor.living_door_door_outside_living_contact
+    - binary_sensor.laundry_door_door_outside_laundry_contact
+    - binary_sensor.frontdoor_door_door_gate_deck_contact
+    - binary_sensor.living_motion_motion_living_entry_occupancy
+    - binary_sensor.bar_motion_motion_bar_occupancy
+    - binary_sensor.master_motion_motion_master_robe_occupancy
+    - binary_sensor.powder_motion_motion_powder_occupancy
+    - binary_sensor.laundry_motion_motion_laundry_inside_occupancy
+    - binary_sensor.ensuite_motion_motion_ensuite_occupancy
+    - binary_sensor.bathroom_motion_motion_bathroom_occupancy
+    - binary_sensor.landing_motion_motion_landing_master_occupancy
+    - binary_sensor.garage_motion_motion_garage_entrance_occupancy
+    - binary_sensor.study_motion_motion_study_window_occupancy
+    - binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy
+    - binary_sensor.garage_motion_motion_garage_door_occupancy
+    - binary_sensor.landing_motion_motion_landing_occupancy
+    - binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy
+    - binary_sensor.garage_door_state_closed
+    id: recovered_active
+    from:
+    - unknown
+    - unavailable
+    to: 'on'
+  - trigger: state
+    entity_id: cover.garage_door
+    id: garage
+    from: closed
+    to:
+    - opening
+    - open
+  - trigger: state
+    entity_id: cover.garage_door
+    id: garage
+    from:
+    - opening
+    - closing
+    to: open
+  # Filter state events at runtime so edits to All People take effect immediately.
+  - trigger: event
+    event_type: state_changed
+    id: presence
+  - trigger: state
+    entity_id: group.persons
+    id: people_changed
+  - trigger: state
+    entity_id: input_boolean.house_alarm_automatic_arming
+    id: auto_enabled
+    from: 'off'
+    to: 'on'
+  - trigger: state
+    entity_id: input_boolean.house_alarm_automatic_arming
+    id: auto_disabled
+    from: 'on'
+    to: 'off'
+  - trigger: state
+    entity_id:
+    - input_boolean.guest_in_study
+    - input_boolean.guest_room_in_use
+    to:
+    - 'on'
+    - 'off'
+    - unknown
+    - unavailable
+    id: guests_changed
+  - trigger: event
+    event_type: house_alarm_startup_ready
+    id: startup_reconcile
+  - trigger: time_pattern
+    minutes: /1
+    id: retry_notification
+  variables:
+    inside:
+      binary_sensor.frontdoor_door_door_inside_frontdoor_contact: input_boolean.house_alarm_front_door_inside_exempt
+      binary_sensor.living_door_door_inside_living_contact: input_boolean.house_alarm_living_inside_exempt
+      binary_sensor.laundry_door_door_inside_laundry_contact: input_boolean.house_alarm_laundry_inside_exempt
+    outside:
+    - binary_sensor.frontdoor_door_door_outside_frontdoor_contact
+    - binary_sensor.living_door_door_outside_living_contact
+    - binary_sensor.laundry_door_door_outside_laundry_contact
+    - binary_sensor.frontdoor_door_door_gate_deck_contact
+    contacts:
+    - binary_sensor.frontdoor_door_door_inside_frontdoor_contact
+    - binary_sensor.living_door_door_inside_living_contact
+    - binary_sensor.laundry_door_door_inside_laundry_contact
+    - binary_sensor.frontdoor_door_door_outside_frontdoor_contact
+    - binary_sensor.living_door_door_outside_living_contact
+    - binary_sensor.laundry_door_door_outside_laundry_contact
+    - binary_sensor.frontdoor_door_door_gate_deck_contact
+    pirs:
+    - binary_sensor.living_motion_motion_living_entry_occupancy
+    - binary_sensor.bar_motion_motion_bar_occupancy
+    - binary_sensor.master_motion_motion_master_robe_occupancy
+    - binary_sensor.powder_motion_motion_powder_occupancy
+    - binary_sensor.laundry_motion_motion_laundry_inside_occupancy
+    - binary_sensor.ensuite_motion_motion_ensuite_occupancy
+    - binary_sensor.bathroom_motion_motion_bathroom_occupancy
+    - binary_sensor.landing_motion_motion_landing_master_occupancy
+    - binary_sensor.garage_motion_motion_garage_entrance_occupancy
+    - binary_sensor.study_motion_motion_study_window_occupancy
+    - binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy
+    - binary_sensor.garage_motion_motion_garage_door_occupancy
+    - binary_sensor.landing_motion_motion_landing_occupancy
+    - binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy
+    limits:
+    - binary_sensor.garage_door_state_open_contact
+    - binary_sensor.garage_door_state_closed
+    bridges:
+    - binary_sensor.zigbee2mqtt_bridge_connection_state
+    - binary_sensor.zigbee2mqtt_bridge_connection_state_2
+    modes:
+    - armed_away
+    - armed_home
+    - armed_night
+    people: "{{ state_attr('group.persons','entity_id') or [] }}"
+    zone_names:
+      binary_sensor.living_motion_motion_living_entry_occupancy: Living motion
+      binary_sensor.bar_motion_motion_bar_occupancy: Bar motion
+      binary_sensor.master_motion_motion_master_robe_occupancy: Master robe motion
+      binary_sensor.powder_motion_motion_powder_occupancy: Powder motion
+      binary_sensor.laundry_motion_motion_laundry_inside_occupancy: Laundry motion
+      binary_sensor.ensuite_motion_motion_ensuite_occupancy: En Suite motion
+      binary_sensor.bathroom_motion_motion_bathroom_occupancy: Bathroom motion
+      binary_sensor.landing_motion_motion_landing_master_occupancy: Landing Master-side
+        motion
+      binary_sensor.garage_motion_motion_garage_entrance_occupancy: Garage entrance
+        motion
+      binary_sensor.study_motion_motion_study_window_occupancy: Study window motion
+      binary_sensor.ensuite_motion_motion_ensuite_shower_occupancy: En Suite shower
+        motion
+      binary_sensor.garage_motion_motion_garage_door_occupancy: Garage door motion
+      binary_sensor.landing_motion_motion_landing_occupancy: Landing motion
+      binary_sensor.bathroom_motion_motion_bathroom_shower_occupancy: Bathroom shower
+        motion
+      binary_sensor.frontdoor_door_door_inside_frontdoor_contact: Front Door inside
+        door
+      binary_sensor.living_door_door_inside_living_contact: Living inside door
+      binary_sensor.laundry_door_door_inside_laundry_contact: Laundry inside door
+      binary_sensor.frontdoor_door_door_outside_frontdoor_contact: Front Door security
+        door
+      binary_sensor.living_door_door_outside_living_contact: Living security door
+      binary_sensor.laundry_door_door_outside_laundry_contact: Laundry security door
+      binary_sensor.frontdoor_door_door_gate_deck_contact: Front Door gate
+      cover.garage_door: Garage door
+      binary_sensor.zigbee2mqtt_bridge_connection_state: Zigbee1 bridge
+      binary_sensor.zigbee2mqtt_bridge_connection_state_2: Zigbee2 bridge
+      binary_sensor.garage_door_state_open_contact: Garage open limit
+      binary_sensor.garage_door_state_closed: Garage door
+  conditions:
+  - condition: template
+    value_template: >-
+      {{ trigger.id != 'presence' or
+         (trigger.event.data.entity_id in (state_attr('group.persons','entity_id') or [])
+          and trigger.event.data.entity_id.startswith('person.')
+          and (trigger.event.data.old_state is none or trigger.event.data.new_state is none
+               or trigger.event.data.old_state.state != trigger.event.data.new_state.state)) }}
+  actions:
+  - variables:
+      presence_entity: "{{ trigger.event.data.entity_id if trigger.id == 'presence' else '' }}"
+      presence_from: "{{ trigger.event.data.old_state.state if trigger.id == 'presence' and trigger.event.data.old_state is not none else 'unknown' }}"
+      presence_to: "{{ trigger.event.data.new_state.state if trigger.id == 'presence' and trigger.event.data.new_state is not none else 'unavailable' }}"
+      all_people_away: &all_people_away_template >-
+        {% set members = state_attr('group.persons','entity_id') or [] %}
+        {% set members = members if members is iterable and members is not string else [] %}
+        {% set ns = namespace(away=members|count > 0 and states('group.persons') not in ['unknown','unavailable']) %}
+        {% for member in members %}
+          {% if member is not string or not member.startswith('person.') or states(member) in ['home','unknown','unavailable','none',''] %}
+            {% set ns.away = false %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.away }}
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id==''inside_closed'' }}'
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: '{{ inside[trigger.entity_id] }}'
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id==''disarmed'' }}'
+      sequence:
+      - condition: template
+        value_template: '{{ states(''alarm_control_panel.house_alarm'') == trigger.to_state.state
+          and states[''alarm_control_panel.house_alarm''].last_updated == trigger.to_state.last_updated
+          }}'
+      - action: timer.cancel
+        target:
+          entity_id: timer.house_alarm_countdown
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.house_alarm_front_door_inside_exempt
+          - input_boolean.house_alarm_living_inside_exempt
+          - input_boolean.house_alarm_laundry_inside_exempt
+          - input_boolean.house_alarm_automatic_countdown
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ not states(''input_text.house_alarm_status'').startswith((''Not
+              armed:'', ''Automatic arming cancelled'', ''Disarmed —'')) }}'
+          sequence:
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.house_alarm_status
+            data:
+              value: Disarmed
+      - if:
+        - condition: template
+          value_template: >-
+            {{ trigger.from_state is not none and
+               (trigger.from_state.state == 'triggered' or
+                (trigger.from_state.state in modes and
+                 (trigger.from_state.attributes.get('manual_entry_restore') or {}).get('state') == 'triggered')) }}
+        then:
+        - action: persistent_notification.create
+          continue_on_error: true
+          data:
+            title: House alarm — disarmed
+            message: |-
+              {% set previous = trigger.from_state.attributes %}
+              {% set saved = previous.get('manual_entry_restore') or {} %}
+              {% set triggered_at = as_timestamp(previous.get('phase_started_at'), 0) if trigger.from_state.state == 'triggered' else as_timestamp(saved.get('transition_started_at'), 0) + (saved.get('entry_delay_seconds', 0) | int) %}
+              {{ states('input_text.house_alarm_last_cause') }}
+
+              **Triggered:** {{ triggered_at | timestamp_custom('%d %b %Y %H:%M:%S', true) }}
+              **Disarmed:** {{ as_local(trigger.to_state.last_changed).strftime('%d %b %Y %H:%M:%S') }}
+              {% if states('input_text.house_alarm_status').startswith('Disarmed —') %}
+              {{ states('input_text.house_alarm_status') }}
+              {% endif %}
+
+              [Open Security](/dashboard-home/security)
+            notification_id: house_alarm_triggered
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id==''armed'' }}'
+      sequence:
+      - condition: template
+        value_template: '{{ states(''alarm_control_panel.house_alarm'') == trigger.to_state.state
+          and states[''alarm_control_panel.house_alarm''].last_updated == trigger.to_state.last_updated
+          }}'
+      - action: timer.cancel
+        target:
+          entity_id: timer.house_alarm_countdown
+      - variables:
+          target_mode: '{{ trigger.to_state.state }}'
+      - variables:
+          all_people_away: *all_people_away_template
+      - variables:
+          not_ready: '{% set ns=namespace(items=[]) %}
+
+            {% for e in contacts+limits+(pirs if target_mode==''armed_away'' else
+            []) %}{% if states(e) not in [''on'',''off''] %}{% set ns.items=ns.items+[zone_names.get(e,e)+''
+            unavailable''] %}{% endif %}{% endfor %}
+
+            {% for e in outside %}{% if is_state(e,''on'') %}{% set ns.items=ns.items+[zone_names.get(e,e)+''
+            open''] %}{% endif %}{% endfor %}
+
+            {% for e in bridges %}{% if not is_state(e,''on'') %}{% set ns.items=ns.items+[zone_names[e]+''
+            offline''] %}{% endif %}{% endfor %}
+
+            {% if not is_state(''cover.garage_door'',''closed'') or not is_state(''binary_sensor.garage_door_state_open_contact'',''on'')
+            or not is_state(''binary_sensor.garage_door_state_closed'',''off'') %}{%
+            set ns.items=ns.items+[''Garage not confirmed closed''] %}{% endif %}
+
+            {% if target_mode==''armed_away'' %}{% for e in pirs %}{% if is_state(e,''on'')
+            %}{% set ns.items=ns.items+[zone_names[e]+'' still active''] %}{% endif
+            %}{% endfor %}{% endif %}
+
+            {% if is_state(''input_boolean.house_alarm_automatic_countdown'',''on'')
+            and target_mode==''armed_home'' and (not is_state(''input_boolean.house_alarm_automatic_arming'',''on'')
+            or not is_state(''input_boolean.guest_in_study'',''off'')
+            or not is_state(''input_boolean.guest_room_in_use'',''off'')
+            or not all_people_away)
+            %}{% set ns.items=ns.items+[''Automatic arming cancelled: presence or
+            guest override changed''] %}{% endif %}
+
+            {% if not is_state(''input_boolean.house_alarm_monitor_ready'',''on'')
+            %}{% set ns.items=ns.items+[''Sensors initialising''] %}{% endif %}
+
+            {{ ns.items }}'
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ not_ready | count > 0 }}'
+          sequence:
+          - action: alarm_control_panel.alarm_disarm
+            target:
+              entity_id: alarm_control_panel.house_alarm
+            data:
+              code: !secret house_alarm_code
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.house_alarm_automatic_countdown
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.house_alarm_status
+            data:
+              value: '{{ (''Not armed: ''+not_ready|join(''; ''))[:255] }}'
+          - action: persistent_notification.create
+            data:
+              title: House alarm not armed
+              message: '{{ not_ready|join(''
+
+                '') }}'
+              notification_id: house_alarm_not_ready
+        - conditions:
+          - condition: template
+            value_template: '{{ true }}'
+          sequence:
+          - action: '{{ ''input_boolean.turn_on'' if is_state(''binary_sensor.frontdoor_door_door_inside_frontdoor_contact'',''on'')
+              and states[''binary_sensor.frontdoor_door_door_inside_frontdoor_contact''].last_changed
+              <= trigger.to_state.last_changed else ''input_boolean.turn_off'' }}'
+            target:
+              entity_id: input_boolean.house_alarm_front_door_inside_exempt
+          - action: '{{ ''input_boolean.turn_on'' if is_state(''binary_sensor.living_door_door_inside_living_contact'',''on'')
+              and states[''binary_sensor.living_door_door_inside_living_contact''].last_changed
+              <= trigger.to_state.last_changed else ''input_boolean.turn_off'' }}'
+            target:
+              entity_id: input_boolean.house_alarm_living_inside_exempt
+          - action: '{{ ''input_boolean.turn_on'' if is_state(''binary_sensor.laundry_door_door_inside_laundry_contact'',''on'')
+              and states[''binary_sensor.laundry_door_door_inside_laundry_contact''].last_changed
+              <= trigger.to_state.last_changed else ''input_boolean.turn_off'' }}'
+            target:
+              entity_id: input_boolean.house_alarm_laundry_inside_exempt
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.house_alarm_automatic_countdown
+          - action: input_text.set_value
+            target:
+              entity_id: input_text.house_alarm_status
+            data:
+              value: '{{ {''armed_home'': ''Armed (Axl)'', ''armed_away'': ''Armed'',
+                ''armed_night'': ''Armed Night''}.get(trigger.to_state.state, ''Armed'') }}'
+          - action: persistent_notification.dismiss
+            data:
+              notification_id: house_alarm_not_ready
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id in [''arming'',''mode_changed''] }}'
+      sequence:
+      - condition: template
+        value_template: '{{ states(''alarm_control_panel.house_alarm'') == trigger.to_state.state
+          and states[''alarm_control_panel.house_alarm''].last_updated == trigger.to_state.last_updated
+          }}'
+      - condition: template
+        value_template: '{{ trigger.from_state is not none and trigger.from_state.state
+          not in [''unknown'',''unavailable''] }}'
+      - condition: template
+        value_template: '{{ trigger.id!=''mode_changed'' or (trigger.from_state.state==''arming''
+          and trigger.to_state.state==''arming'' and trigger.from_state.attributes.get(''next_state'')
+          != trigger.to_state.attributes.get(''next_state'')) }}'
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ state_attr(''alarm_control_panel.house_alarm'',''next_state'')
+              != ''armed_home'' }}'
+          sequence:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.house_alarm_automatic_countdown
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_alarm_status
+        data:
+          value: '{{ (''Automatic '' if is_state(''input_boolean.house_alarm_automatic_countdown'',''on'')
+            else '''')+{''armed_home'': ''Arm (Axl)'', ''armed_away'': ''Arm'',
+            ''armed_night'': ''Night''}.get(state_attr(''alarm_control_panel.house_alarm'',''next_state''),
+            ''Arm'')+'' countdown'' }}'
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id in [''perimeter'',''motion'',''garage''] }}'
+      sequence:
+      - condition: template
+        value_template: '{{ is_state(''input_boolean.house_alarm_monitor_ready'',''on'')
+          and states(''alarm_control_panel.house_alarm'') in modes and trigger.to_state.last_changed
+          >= states[''alarm_control_panel.house_alarm''].last_changed }}'
+      - condition: template
+        value_template: '{{ trigger.id != ''motion'' or is_state(''alarm_control_panel.house_alarm'',''armed_away'')
+          }}'
+      - condition: template
+        value_template: '{{ trigger.entity_id not in inside or not is_state(inside[trigger.entity_id],''on'')
+          }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_alarm_last_cause
+        data:
+          value: '{{ (zone_names.get(trigger.entity_id,trigger.entity_id)+'' — ''+{''armed_home'': ''Axl'', ''armed_away'': ''Away'', ''armed_night'': ''Night''}.get(states(''alarm_control_panel.house_alarm''), ''Alarm''))[:255]
+            }}'
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.house_alarm_alert_sent
+      - action: manual_entry.trigger
+        target:
+          entity_id: alarm_control_panel.house_alarm
+        data:
+          delay_seconds: '{{ 120 if trigger.id == ''garage'' else 30 }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_alarm_status
+        data:
+          value: '{{ ''Entry countdown: ''+states(''input_text.house_alarm_last_cause'')
+            }}'
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id==''recovered_active'' and is_state(''input_boolean.house_alarm_monitor_ready'',''on'')
+          and states(''alarm_control_panel.house_alarm'') in modes and (trigger.entity_id
+          not in pirs or is_state(''alarm_control_panel.house_alarm'',''armed_away''))
+          }}'
+      sequence:
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_alarm_status
+        data:
+          value: '{{ (''Coverage check: ''+zone_names.get(trigger.entity_id,trigger.entity_id)+''
+            recovered active; no fresh intrusion confirmed'')[:255] }}'
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id in [''triggered'',''retry_notification''] and
+          is_state(''alarm_control_panel.house_alarm'',''triggered'') and is_state(''input_boolean.house_alarm_alert_sent'',''off'')
+          }}'
+      sequence:
+      - action: timer.cancel
+        target:
+          entity_id: timer.house_alarm_countdown
+      - action: persistent_notification.create
+        continue_on_error: true
+        data:
+          title: House alarm
+          message: >-
+            {{ states('input_text.house_alarm_last_cause') }} ·
+            {{ as_local(states['alarm_control_panel.house_alarm'].last_changed).strftime('%d %b %Y %H:%M:%S') }}
+
+            [Open Security](/dashboard-home/security)
+          notification_id: house_alarm_triggered
+      - action: notify.notify_phones
+        data:
+          title: House alarm
+          message: '{{ states(''input_text.house_alarm_last_cause'')+'' · ''+now().strftime(''%d
+            %b %H:%M'') }}'
+          data:
+            url: /dashboard-home/security
+            tag: house-alarm
+            push:
+              interruption-level: time-sensitive
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.house_alarm_alert_sent
+    - conditions:
+      - condition: template
+        value_template: >-
+          {{ trigger.id == 'presence' and presence_to == 'home'
+             and presence_from not in ['home','unknown','unavailable','none','']
+             and presence_entity in (state_attr('group.persons','entity_id') or [])
+             and states('group.persons') not in ['unknown','unavailable']
+             and is_state(presence_entity,'home')
+             and states('alarm_control_panel.house_alarm') not in ['disarmed','unknown','unavailable'] }}
+      sequence:
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.house_alarm
+        data:
+          code: !secret house_alarm_code
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_alarm_status
+        data:
+          value: '{{ ''Disarmed — '' + (state_attr(presence_entity,''friendly_name'') or presence_entity) + '' arrived home'' }}'
+    - conditions:
+      - condition: template
+        value_template: >-
+          {{ all_people_away and (trigger.id in ['auto_enabled','startup_reconcile']
+             or (trigger.id == 'presence' and presence_from in ['home','unknown','unavailable']
+                 and presence_to not in ['home','unknown','unavailable','none',''])
+             or (trigger.id == 'people_changed' and all_people_away)
+             or (trigger.id == 'guests_changed' and is_state('input_boolean.guest_in_study','off')
+                 and is_state('input_boolean.guest_room_in_use','off'))) }}
+      sequence:
+      - condition: template
+        value_template: '{{ is_state(''input_boolean.house_alarm_monitor_ready'',''on'')
+          and is_state(''input_boolean.house_alarm_automatic_arming'',''on'')
+          and is_state(''input_boolean.guest_in_study'',''off'')
+          and is_state(''input_boolean.guest_room_in_use'',''off'') and
+          is_state(''alarm_control_panel.house_alarm'',''disarmed'') and all_people_away
+          }}'
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.house_alarm_automatic_countdown
+      - action: alarm_control_panel.alarm_arm_home
+        target:
+          entity_id: alarm_control_panel.house_alarm
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_alarm_status
+        data:
+          value: 'Automatic Arm (Axl): 2-minute exit countdown'
+    - conditions:
+      - condition: template
+        value_template: >-
+          {{ (trigger.id == 'auto_disabled'
+              or (trigger.id in ['presence','people_changed'] and not all_people_away)
+              or (trigger.id == 'guests_changed' and
+                  (not is_state('input_boolean.guest_in_study','off')
+                   or not is_state('input_boolean.guest_room_in_use','off'))))
+             and is_state('input_boolean.house_alarm_automatic_countdown','on')
+             and is_state('alarm_control_panel.house_alarm','arming')
+             and state_attr('alarm_control_panel.house_alarm','next_state') == 'armed_home' }}
+      sequence:
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.house_alarm
+        data:
+          code: !secret house_alarm_code
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.house_alarm_automatic_countdown
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_alarm_status
+        data:
+          value: Automatic arming cancelled
+- id: house_alarm_startup
+  trace:
+    stored_traces: 0
+  alias: House Alarm - startup readiness
+  mode: single
+  triggers:
+  - trigger: homeassistant
+    event: start
+  actions:
+  - delay:
+      seconds: 20
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''binary_sensor.frontdoor_door_door_inside_frontdoor_contact'',''off'')
+          }}'
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.house_alarm_front_door_inside_exempt
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''binary_sensor.living_door_door_inside_living_contact'',''off'')
+          }}'
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.house_alarm_living_inside_exempt
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''binary_sensor.laundry_door_door_inside_laundry_contact'',''off'')
+          }}'
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.house_alarm_laundry_inside_exempt
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.house_alarm_monitor_ready
+  - variables:
+      all_people_away: *all_people_away_template
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''input_boolean.house_alarm_automatic_countdown'',''on'')
+          and is_state(''alarm_control_panel.house_alarm'',''arming'') and state_attr(''alarm_control_panel.house_alarm'',''next_state'')==''armed_home''
+          and (not is_state(''input_boolean.house_alarm_automatic_arming'',''on'')
+            or not is_state(''input_boolean.guest_in_study'',''off'')
+            or not is_state(''input_boolean.guest_room_in_use'',''off'')
+          or not all_people_away)
+          }}'
+      sequence:
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.house_alarm
+        data:
+          code: !secret house_alarm_code
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.house_alarm_automatic_countdown
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_alarm_status
+        data:
+          value: Automatic arming cancelled
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''alarm_control_panel.house_alarm'',''disarmed'')
+          }}'
+      sequence:
+      - action: timer.cancel
+        target:
+          entity_id: timer.house_alarm_countdown
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.house_alarm_automatic_countdown
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_alarm_status
+        data:
+          value: Disarmed
+  - event: house_alarm_startup_ready

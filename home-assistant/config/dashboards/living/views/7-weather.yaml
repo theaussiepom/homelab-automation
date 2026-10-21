@@ -1,0 +1,195 @@
+- title: Weather
+  path: weather
+  subview: true
+  icon: mdi:weather-partly-cloudy
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 30px 980px auto 100px auto
+    grid-template-areas: |
+      "m1 a1 m2 a2 m3"
+      "m1 b1 m2 a2 m3"
+    margin: 30px 0px
+  cards:
+    - type: custom:stack-in-card
+      view_layout:
+        grid-area: a1
+      card_mod:
+        style: |
+          ha-card {
+            border-width: 5px;
+            border-color: var(--primary-base-color);
+            border-radius: 30px;
+            background: var(--tablet-card-background-color);
+          }
+      cards:
+        - type: markdown
+          content: |-
+            <center>
+              <b>
+                <font size=6>
+                  Robina Forecast
+                </font>
+              </b>
+            </center>
+          card_mod:
+            style: |
+              ha-card {
+                background: var(--secondary-background-color);
+                border-style: none;
+              }
+        - type: custom:clock-weather-card
+          entity: weather.robina
+          temperature_sensor: sensor.frontdoor_weather_weather_frontdoor_temperature
+          forecast_rows: 8
+          hide_today_section: true
+          card_mod:
+            style: |
+              ha-card {
+                background: var(--secondary-background-color);
+                border-style: none;
+                margin: -15px 0px 0px 0px;
+              }
+    - type: custom:layout-card
+      layout_type: custom:grid-layout
+      view_layout:
+        grid-area: b1
+      layout:
+        grid-template-columns: 1fr 20px 1fr
+        grid-template-areas: |
+          "f1 m1 f2"
+        margin: 10px -5px 0px -5px
+        card_margin: 0px 0px 0px 0px
+      cards:
+        - type: custom:stack-in-card
+          view_layout:
+            grid-area: f1
+          card_mod:
+            style: |
+              ha-card {
+                border-width: 5px;
+                border-color: var(--primary-base-color);
+                border-radius: 30px;
+                background: var(--tablet-card-background-color);
+              }
+          cards:
+            - type: markdown
+              content: |-
+                <center>
+                  <b>
+                    <font size=6>
+                      Today
+                    </font>
+                  </b>
+                </center>
+              card_mod:
+                style: |
+                  ha-card {
+                    background: var(--secondary-background-color);
+                    border-style: none;
+                  }
+            - type: markdown
+              content: |-
+                <center>
+                  <b>
+                    <font size=5>
+                      {{ states['sensor.robina_extended_text_0'].state | regex_replace(find='\.\.+', replace='.') | replace('.', '<br/><br/>') }}
+                    </font>
+                  </b>
+                </center>
+              card_mod:
+                style: |
+                  ha-card {
+                    background: var(--secondary-background-color);
+                    border-style: none;
+                    margin: -15px 0px -25px 0px;
+                  }
+        - type: custom:stack-in-card
+          view_layout:
+            grid-area: f2
+          card_mod:
+            style: |
+              ha-card {
+                border-width: 5px;
+                border-color: var(--primary-base-color);
+                border-radius: 30px;
+                background: var(--tablet-card-background-color);
+              }
+          cards:
+            - type: markdown
+              content: |-
+                <center>
+                  <b>
+                    <font size=6>
+                      Tomorrow
+                    </font>
+                  </b>
+                </center>
+              card_mod:
+                style: |
+                  ha-card {
+                    background: var(--secondary-background-color);
+                    border-style: none;
+                  }
+            - type: markdown
+              content: |-
+                <center>
+                  <b>
+                    <font size=5>
+                      {{ states['sensor.robina_extended_text_1'].state | regex_replace(find='\.\.+', replace='.') | replace('.', '<br/><br/>') }}
+                    </font>
+                  </b>
+                </center>
+              card_mod:
+                style: |
+                  ha-card {
+                    background: var(--secondary-background-color);
+                    border-style: none;
+                    margin: -15px 0px -25px 0px;
+                  }
+    - type: custom:layout-card
+      layout_type: custom:vertical-layout
+      view_layout:
+        grid-area: a2
+      layout:
+        width: 100
+      cards:
+        - type: custom:gap-card
+          height: 45
+        - type: custom:button-card
+          color_type: card
+          color: var(--scene-on-background-color)
+          icon: mdi:arrow-left-bold-outline
+          show_name: false
+          aspect_ratio: 1/1
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace-living/home
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+            icon:
+              - width: 100%
+              - color: var(--scene-icon-color)
+        - type: custom:gap-card
+          height: 40
+        - type: custom:button-card
+          color_type: card
+          icon: mdi:radar
+          show_name: false
+          aspect_ratio: 1/1
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace-living/radar
+          styles:
+            card:
+              - border-radius: 20px
+              - border-color: var(--secondary-base-color)
+              - border-width: 2px
+              - background: var(--opaque-background-color)
+              - margin: "-15px 0px 0px 0px"
+            icon:
+              - width: 85%
+              - color: var(--scene-icon-color)

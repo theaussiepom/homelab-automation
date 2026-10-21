@@ -1,0 +1,68 @@
+custom_cover_card:
+  color_type: card
+  icon: |
+    [[[
+      switch (variables.coverAction) {
+        case 'open_cover':
+          return 'mdi:arrow-up-bold';
+        case 'close_cover':
+          return 'mdi:arrow-down-bold'
+        case 'stop_cover':
+          return 'mdi:stop'
+      }
+    ]]]
+  icon_scale: |
+    [[[
+      switch (variables.coverAction) {
+        case 'open_cover':
+          return 1;
+        case 'close_cover':
+          return 1;
+        case 'stop_cover':
+          return 0.8;
+      }
+    ]]]
+  tap_action:
+    action: call-service
+    service: "[[[ return `cover.${variables.coverAction}` ]]]"
+    target:
+      entity_id: "[[[ return entity.entity_id ]]]"
+  hold_action:
+    action: call-service
+    service: "[[[ return `cover.${variables.coverAction}` ]]]"
+    target:
+      entity_id: cover.blinds_house
+  show_name: false
+  aspect_ratio: 1/1
+  styles:
+    card:
+      - border-radius: 10px
+      - border: none
+      - margin: -10px 0px 0px 0px
+      - background-color: |
+          [[[
+            let isEnabled;
+            switch (variables.coverAction) {
+              case 'open_cover':
+                isEnabled = entity.attributes.current_position < 100;
+                break;
+              case 'close_cover':
+                isEnabled = entity.attributes.current_position > 0;
+                break;
+              case 'stop_cover':
+                isEnabled = ['closing', 'opening'].includes(entity.state);
+                break;
+            }
+
+            return isEnabled ? 'var(--primary-select-color)' : 'var(--primary-off-color)';
+          ]]]
+    icon:
+      - width: 100%
+      - color: var(--primary-base-color)
+      - animation: |
+          [[[
+            return ((variables.coverAction == 'open_cover' && entity.state == "opening") ||
+                    (variables.coverAction == 'close_cover' && entity.state == "closing"))
+                      ? 'blink 1.5s ease infinite'
+                      : 'none'
+          ]]]

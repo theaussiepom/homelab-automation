@@ -1,0 +1,13 @@
+persons:
+  name: All People
+  entities:
+    - !secret ha_group_identity_1
+    - !secret ha_group_identity_2
+    - !secret ha_group_identity_3
+    - !secret ha_group_identity_4
+    - !secret ha_group_identity_5
+ben_erin:
+  name: Ben and Erin
+  entities:
+    - !secret ha_group_identity_1
+    - !secret ha_group_identity_2

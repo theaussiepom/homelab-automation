@@ -1,0 +1,394 @@
+change_hvac_option:
+  alias: Change HVAC Option
+  sequence:
+  - service: input_select.select_next
+    target:
+      entity_id: input_select.climate_ac_options
+    data:
+      cycle: true
+  - service: climate.set_hvac_mode
+    data_template:
+      entity_id: climate.ac_0
+      hvac_mode: '{{ states("input_select.climate_ac_options") }}'
+  mode: queued
+  icon: mdi:hvac
+refresh_home_assistant:
+  alias: Refresh Home Assistant
+  sequence:
+  - target:
+      entity_id:
+      - cover.blind_deck_long
+    data: {}
+    action: homeassistant.reload_config_entry
+  - action: script.display_living_refresh
+  description: ''
+  icon: mdi:restart
+scene_living_dining:
+  alias: Living + Landing Dining
+  sequence:
+  - parallel:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.scene_living_dining
+      data:
+        transition: 1
+    - action: scene.turn_on
+      target:
+        entity_id: scene.landing_chill
+      data:
+        transition: 1
+  mode: restart
+scene_living_bright:
+  alias: Living + Landing Bright
+  sequence:
+  - parallel:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.living_bright
+      data:
+        transition: 1
+    - action: scene.turn_on
+      target:
+        entity_id: scene.landing_bright
+      data:
+        transition: 1
+  mode: restart
+scene_living_chill:
+  alias: Living + Landing Chill
+  sequence:
+  - parallel:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.living_chill
+      data:
+        transition: 1
+    - action: scene.turn_on
+      target:
+        entity_id: scene.landing_chill
+      data:
+        transition: 1
+  mode: restart
+scene_living_cinema:
+  alias: Living + Landing Cinema
+  sequence:
+  - parallel:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.living_cinema
+      data:
+        transition: 1
+    - action: scene.turn_on
+      target:
+        entity_id: scene.scene_landing_off
+      data:
+        transition: 1
+  mode: restart
+scene_living_morning:
+  alias: Living + Landing Morning
+  sequence:
+  - parallel:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.living_morning
+      data:
+        transition: 1
+    - action: scene.turn_on
+      target:
+        entity_id: scene.landing_morning
+      data:
+        transition: 1
+  mode: restart
+scene_living_rainy_day:
+  alias: Living + Landing Rainy Day
+  sequence:
+  - parallel:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.living_rainy_day
+      data:
+        transition: 1
+    - action: scene.turn_on
+      target:
+        entity_id: scene.landing_rainy_day
+      data:
+        transition: 1
+  mode: restart
+scene_living_nightlight:
+  alias: Living + Landing Nightlight
+  sequence:
+  - parallel:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.scene_living_nightlight
+      data:
+        transition: 1
+    - action: scene.turn_on
+      target:
+        entity_id: scene.landing_nightlight
+      data:
+        transition: 1
+  mode: restart
+scene_living_off:
+  alias: Living + Landing Off
+  sequence:
+  - parallel:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.living_off
+      data:
+        transition: 1
+    - action: scene.turn_on
+      target:
+        entity_id: scene.scene_landing_off
+      data:
+        transition: 1
+  mode: restart
+scene_matty_chill:
+  alias: Guest Chill
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.guest_chill
+scene_matty_bright:
+  alias: Guest Bright
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.guest_bright
+scene_matty_nightlight:
+  alias: Guest Nightlight
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.guest_nightlight
+scene_matty_off:
+  alias: Guest Off
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.guest_off
+scene_study_bright:
+  alias: Study Bright
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.study_bright
+scene_study_chill:
+  alias: Study Chill
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.study_chill
+scene_study_nightlight:
+  alias: Study Nightlight
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.study_nightlight
+scene_study_off:
+  alias: Study Off
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.study_off
+scene_garage_off:
+  alias: Garage Off
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_garage_off
+scene_garage_bright:
+  alias: Garage Bright
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_garage_bright
+scene_garage_chill:
+  alias: Garage Chill
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_garage_chill
+scene_ben_bright:
+  alias: Master Bright
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_master_bright
+scene_ben_chill:
+  alias: Master Chill
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_master_chill
+scene_ben_evening:
+  alias: Master Evening
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_master_evening
+scene_ben_nightlight:
+  alias: Master Nightlight
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_master_nightlight
+scene_ben_off:
+  alias: Master Off
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_master_off
+scene_landing_off:
+  alias: Landing Off
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_landing_off
+scene_deck_off:
+  alias: Deck Off
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.deck_off
+scene_deck_bright:
+  alias: Deck Bright
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.deck_bright
+scene_deck_chill:
+  alias: Deck Chill
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.deck_chill
+scene_ensuite_bright:
+  alias: Ensuite Bright
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_ensuite_bright
+scene_ensuite_chill:
+  alias: Ensuite Chill
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_ensuite_chill
+scene_ensuite_night:
+  alias: Ensuite Night
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_ensuite_night
+scene_ensuite_off:
+  alias: Ensuite Off
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_ensuite_off
+scene_bathroom_bright:
+  alias: Bathroom Bright
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_bathroom_bright
+scene_bathroom_bright2:
+  alias: Bathroom Bright 2
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_bathroom_bright2
+scene_bathroom_chill:
+  alias: Bathroom Chill
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_bathroom_chill
+scene_bathroom_night:
+  alias: Bathroom Night
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_bathroom_night
+scene_bathroom_off:
+  alias: Bathroom Off
+  sequence:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.scene_bathroom_off
+
+scene_living_movie:
+  alias: Living + Landing Movie
+  description: Movie alias for the combined Living and Landing Cinema mode.
+  mode: restart
+  sequence:
+  - action: script.scene_living_cinema
+
+# Stable controls for the Living tablet.
+display_living_wake:
+  alias: Living Display - Wake
+  description: Turn on the verified Living tablet screen through Fully Kiosk without changing brightness or the current page.
+  icon: mdi:tablet
+  mode: restart
+  sequence:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.tablet_living_kiosk_screen
+display_living_sleep:
+  alias: Living Display - Sleep
+  description: Turn off the Living tablet screen through Fully Kiosk without changing brightness or the current page.
+  icon: mdi:tablet
+  mode: restart
+  sequence:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.tablet_living_kiosk_screen
+display_living_brightness:
+  alias: Living Display - Brightness
+  description: Set Living tablet brightness on Fully Kiosk's native 0-255 scale without changing screen power.
+  icon: mdi:brightness-6
+  mode: restart
+  fields:
+    brightness:
+      name: Brightness
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 255
+          step: 1
+          mode: slider
+  sequence:
+  - action: number.set_value
+    target:
+      entity_id: number.tablet_living_kiosk_screen_brightness
+    data:
+      value: '{{ brightness }}'
+display_living_refresh:
+  alias: Living Display - Refresh
+  description: Restart the Living tablet Fully Kiosk browser using its existing restart-browser action. Does not reboot the tablet.
+  icon: mdi:refresh
+  mode: parallel
+  sequence:
+  - action: button.press
+    target:
+      entity_id: button.tablet_living_kiosk_restart_browser
+
+# Add this entry to scripts.yaml. This public script configuration deliberately contains no secret.
+house_alarm_disarm_trusted:
+  alias: House Alarm - trusted account disarm
+  description: Disarm from Ben or Erin's authenticated Home Assistant account. Tablet and other accounts require the PIN.
+  icon: mdi:shield-off-outline
+  mode: single
+  trace:
+    stored_traces: 0
+  sequence:
+    - if:
+        - condition: template
+          value_template: >-
+            {{ context.user_id not in ['a9a9e2d41e7b44fab972c064d89f67ce', 'e68930c0a3314c1b804ac859b1e6a8ec'] }}
+      then:
+        - stop: Disarm requires Ben or Erin's Home Assistant account.
+          error: true
+    - event: house_alarm_trusted_disarm_requested

@@ -1,0 +1,89 @@
+# Recognised Front Door fingerprints: independent alarm disarm and closed-only garage opening.
+# Enrolment stays in UniFi. This allowlist uses the verified person's immutable UniFi ID.
+input_text:
+  house_fingerprint_last_accepted:
+    name: House Fingerprint Last Accepted
+    icon: mdi:fingerprint
+    max: 255
+
+automation:
+  - id: house_fingerprint_entry
+    alias: House - fingerprint entry
+    description: >-
+      Ben's approved Front Door fingerprint disarms the house and independently
+      opens the garage only when closed. No waiting, retries, or closing commands.
+    mode: single
+    max_exceeded: silent
+    trace:
+      stored_traces: 0
+    triggers:
+      - trigger: state
+        entity_id: event.g4_doorbell_pro_fingerprint
+    actions:
+      # Keep authorisation in the actions, so Run actions cannot bypass it.
+      - condition: template
+        value_template: >-
+          {% set t = trigger if trigger is defined else none %}
+          {% set previous = states('input_text.house_fingerprint_last_accepted') %}
+          {% set last = {} if previous == '' else previous | from_json(none) %}
+          {% set event_time = as_timestamp(t.to_state.state, 0)
+             if t is not none and t.to_state is defined and t.to_state is not none else 0 %}
+          {{ t is not none and t.platform == 'state'
+             and t.entity_id == 'event.g4_doorbell_pro_fingerprint'
+             and t.from_state is not none and t.to_state is not none
+             and t.to_state.context.user_id is none
+             and t.from_state.state != 'unavailable'
+             and t.to_state.state not in ['unknown', 'unavailable']
+             and t.from_state.state != t.to_state.state
+             and not t.from_state.attributes.get('restored', false)
+             and not t.to_state.attributes.get('restored', false)
+             and t.to_state.attributes.get('event_type') == 'identified'
+             and t.to_state.attributes.get('ulp_id') == 'daa085e5-bf5b-4b59-9022-b90a6e523c16'
+             and t.to_state.attributes.get('user_status', 'ACTIVE') == 'ACTIVE'
+             and t.to_state.attributes.get('event_id', '') | length > 0
+             and t.to_state.attributes.get('event_id') != t.from_state.attributes.get('event_id')
+             and previous not in ['unknown', 'unavailable']
+             and last is mapping
+             and (previous == '' or (
+               last.get('id') is string and last.get('id') | length > 0
+               and last.get('at') is number and last.get('at') >= 0
+               and last.get('accepted') is number and last.get('accepted') >= 0))
+             and t.to_state.attributes.get('event_id') != last.get('id')
+             and event_time > (last.get('at', 0) | float(0))
+             and 0 <= as_timestamp(now()) - event_time <= 15
+             and as_timestamp(now()) - (last.get('accepted', 0) | float(0)) >= 5 }}
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.house_fingerprint_last_accepted
+        data:
+          value: >-
+            {{ {'id': trigger.to_state.attributes.event_id,
+                'at': as_timestamp(trigger.to_state.state),
+                'accepted': as_timestamp(now())} | to_json }}
+      - parallel:
+          - sequence:
+              - action: alarm_control_panel.alarm_disarm
+                target:
+                  entity_id: alarm_control_panel.house_alarm
+                data:
+                  code: !secret house_alarm_code
+          - sequence:
+              - condition: state
+                entity_id: cover.garage_door
+                state: closed
+              # The cover is maintained by Node-RED; confirm its end sensors too.
+              - condition: state
+                entity_id: binary_sensor.garage_door_state_closed
+                state: 'off'
+              - condition: state
+                entity_id: binary_sensor.garage_door_state_open_contact
+                state: 'on'
+              - action: cover.open_cover
+                target:
+                  entity_id: cover.garage_door
+          - sequence:
+              - action: logbook.log
+                data:
+                  name: Front Door fingerprint
+                  message: Ben's fingerprint accepted for house entry.
+                  entity_id: event.g4_doorbell_pro_fingerprint

@@ -1,0 +1,28 @@
+script:
+  display_living_show:
+    alias: Living Display - Show Page
+    description: Open a Home Assistant path on the verified Living tablet. Defaults to the Living home dashboard; does not change screen power.
+    icon: mdi:tablet-dashboard
+    mode: restart
+    fields:
+      path:
+        name: Home Assistant path
+        description: A path beginning with /, such as /lovelace-living/home.
+        default: /lovelace-living/home
+        selector:
+          text: {}
+    sequence:
+    - variables:
+        display_path: '{{ path | default(''/lovelace-living/home'', true) | trim }}'
+    - if:
+      - condition: template
+        value_template: '{{ not display_path.startswith(''/'') or display_path.startswith(''//'') }}'
+      then:
+      - stop: Use a Home Assistant path beginning with a single /.
+        error: true
+    - variables:
+        display_path: '{{ display_path if is_state(''alarm_control_panel.house_alarm'', ''disarmed'') else ''/lovelace-living/security'' }}'
+    - action: fully_kiosk.load_url
+      data:
+        device_id: 5719f051f5f7ed0ffc5ee8aa1799f4fa
+        url: !secret ha_display_dashboard_private_url_1

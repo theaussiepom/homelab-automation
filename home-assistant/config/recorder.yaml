@@ -1,0 +1,93 @@
+db_url: !secret mariadb_url
+purge_keep_days: 7
+exclude: #Exclude entities
+  domains:
+    - automation
+    - media_player
+    - number
+    - update
+    - remote
+    - sun
+    - vacuum
+    - weather
+    - zone
+  entity_globs:
+    - binary_sensor.*_browser_* # browser mod
+    - binary_sensor.*_kiosk_tablet_*
+    - binary_sensor.*_phone_*
+    - binary_sensor.*_macbook_*
+    - binary_sensor.[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]_[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F] # browser mod
+    - input_boolean.boolean_dashboard_*
+    - light.[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]_[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]_screen # browser mod
+    - sensor.[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]_[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]_browser_* # browser mod
+    - sensor.*_battery
+    - sensor.*_battery_low
+    - sensor.*_cpu_*
+    - sensor.*_ip
+    - sensor.*_memory_*
+    - sensor.*_phone_*
+    - sensor.*_ssid
+    - sensor.*_volume
+    - sensor.*_wifi_*
+    - sensor.browser_mod_* # browser mod
+    - sensor.brother_mfc_* # printer
+    - sensor.coolangatta_*
+    - sensor.date*
+    - sensor.*_illuminance_lux
+    - sensor.kiosk_*
+    - sensor.mfc_* # printer
+    - sensor.mobile_tablet*
+    - sensor.robina_*
+    - sensor.scrypted_token_*
+    - sensor.sun_*
+  entities:
+    - binary_sensor.myenergi_zappi_21539112_update_available
+    - sensor.active_issues
+    - sensor.alarm_control_panels
+    - sensor.areas
+    - sensor.automations
+    - sensor.buttons
+    - sensor.calendars
+    - sensor.cameras
+    - sensor.climate
+    - sensor.covers
+    - sensor.custom_integrations
+    - sensor.date
+    - sensor.dennisboys
+    - sensor.dennisboysguest
+    - sensor.dennisboysinv
+    - sensor.dennisboysiot
+    - sensor.device_trackers
+    - sensor.devices
+    - sensor.humidifiers  
+    - sensor.ignored_issues
+    - sensor.images
+    - sensor.input_power
+    - sensor.input_voltage
+    - sensor.integrations
+    - sensor.issues
+    - sensor.lights
+    - sensor.media_players
+    - sensor.persistent_notifications
+    - sensor.persons
+    - sensor.remotes
+    - sensor.router_clients
+    - sensor.running_state
+    - sensor.scenes
+    - sensor.scripts
+    - sensor.selects
+    - sensor.sensors
+    - sensor.sirens
+    - sensor.suns
+    - sensor.switches
+    - sensor.texts
+    - sensor.time
+    - sensor.time_date
+    - sensor.time_utc
+    - sensor.times
+    - sensor.tts
+    - sensor.update
+    - sensor.vacuums
+    - sensor.water_heaters
+    - sensor.weather
+    - sensor.zones

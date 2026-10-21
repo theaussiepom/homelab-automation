@@ -1,0 +1,88 @@
+input_boolean:
+  living_transition_switch:
+    name: Living Transition Switch
+    icon: mdi:brightness-5
+  deck_transition_switch:
+    name: Deck Transition Switch
+    icon: mdi:brightness-5
+
+template:
+  binary_sensor:
+    - name: Living Transition Switch
+      unique_id: living_transition_switch
+      state: "{{ states('input_boolean.living_transition_switch') }}"
+      attributes:
+        automate: transition
+    - name: Deck Transition Switch
+      unique_id: deck_transition_switch
+      state: "{{ states('input_boolean.deck_transition_switch') }}"
+      attributes:
+        automate: transition
+
+  sensor:
+    - name: Lights Transition Brightness Living Chill Down
+      unique_id: lights_brightness_transition_down_chill
+      attributes:
+        light: light.helper_living_light_down_chill_all
+        automate: transition
+        switch: binary_sensor.living_transition_switch
+      state: >
+        {% from 'light-transition.jinja' import calculate_brightness %}
+        {{ calculate_brightness(76, 153) }}
+    - name: Lights Transition Brightness Living Non-Chill Down
+      unique_id: lights_brightness_transition_nondown_chill
+      attributes:
+        light: light.helper_living_light_down_nonchill_all
+        automate: transition
+        switch: binary_sensor.living_transition_switch
+      state: >
+        {% from 'light-transition.jinja' import calculate_brightness %}
+        {{ calculate_brightness(0, 153) }}
+    - name: Lights Transition Brightness Living Bar
+      unique_id: lights_brightness_transition_bar
+      attributes:
+        light: light.helper_living_bar_all
+        automate: transition
+        switch: binary_sensor.living_transition_switch
+      state: >
+        {% from 'light-transition.jinja' import calculate_brightness %}
+        {{ calculate_brightness(76, 153) }}
+    - name: Lights Transition Brightness Living TV
+      unique_id: lights_brightness_transition_tv
+      attributes:
+        light: light.living_light_strip_living_tv
+        automate: transition
+        switch: binary_sensor.living_transition_switch
+      state: >
+        {% from 'light-transition.jinja' import calculate_brightness %}
+        {{ calculate_brightness(76, 153) }}
+    - name: Lights Transition Brightness Deck Down
+      unique_id: lights_brightness_transition_deck_down
+      attributes:
+        light: light.helper_deck_down_all
+        automate: transition
+        color_temp: 363
+        switch: binary_sensor.deck_transition_switch
+      state: >
+        {% from 'light-transition.jinja' import calculate_brightness %}
+        {{ calculate_brightness(36, 255) }}
+    - name: Lights Transition Brightness Deck Strip
+      unique_id: lights_brightness_transition_deck_strip
+      attributes:
+        light: light.helper_deck_strip_all
+        automate: transition
+        xy_color: "[0.309, 0.169]"
+        switch: binary_sensor.deck_transition_switch
+      state: >
+        {% from 'light-transition.jinja' import calculate_brightness %}
+        {{ calculate_brightness(153, 255) }}
+    - name: Lights Transition Brightness Deck Flood
+      unique_id: lights_brightness_transition_deck_flood
+      attributes:
+        light: light.deck_light_flood
+        automate: transition
+        xy_color: "[0.341, 0.345]"
+        switch: binary_sensor.deck_transition_switch
+      state: >
+        {% from 'light-transition.jinja' import calculate_brightness %}
+        {{ calculate_brightness(90, 172) }}

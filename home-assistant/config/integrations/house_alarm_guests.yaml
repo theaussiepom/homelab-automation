@@ -1,0 +1,24 @@
+# Guest helper is configured through Home Assistant UI: binary_sensor.house_guests_staying.
+# Auto Arm change notifications. Room-use safeguards remain in the main alarm controller.
+automation:
+  - id: house_alarm_auto_arm_notifications
+    alias: House Alarm - Auto Arm phone notifications
+    description: Notify Ben and Erin on genuine Auto Arm changes, including manual changes.
+    mode: queued
+    max: 20
+    triggers:
+      - trigger: state
+        entity_id: input_boolean.house_alarm_automatic_arming
+        from: 'off'
+        to: 'on'
+      - trigger: state
+        entity_id: input_boolean.house_alarm_automatic_arming
+        from: 'on'
+        to: 'off'
+    actions:
+      - action: notify.notify_phones
+        data:
+          title: House alarm
+          message: "Auto Arm is {{ trigger.to_state.state }}."
+          data:
+            url: /dashboard-home/security

@@ -1,0 +1,447 @@
+volumes:
+  retained_zigbeelens_config:
+    external: true
+    name: 1b9b7c1401ee316f37f7db6c9bd9cc5c68f459dd6032be39a946b4af5eab0c1b
+  docker:
+    name: docker
+    external: true
+services:
+  homeassistant:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    image: "sha256:9ead8136ff82492d18908fa2f3141fa6fde9c58ac6de2e376455e32d88a0f697"
+    hostname: hass
+    container_name: hass
+    entrypoint:
+    - /bin/sh
+    - -c
+    - /startup/mdns-route.sh && exec /init
+    labels:
+      traefik.enable: true
+      traefik.http.routers.hass.tls: true
+      traefik.http.routers.hass.tls.certresolver: cloudflare
+      traefik.http.routers.hass.tls.domains[0].main: hass.${DOMAIN}
+      traefik.http.routers.hass.tls.domains[1].main: ${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}
+      traefik.http.routers.hass.tls.domains[1].sans: "*.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}"
+      traefik.http.routers.hass.entrypoints: https
+      traefik.http.routers.hass.rule: (Host(`hass.${DOMAIN}`) || Host(`hass.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}`)) && HeaderRegexp(`CF-Connecting-IP`,
+        `.*`)
+      traefik.http.routers.hass.middlewares: cloudflare@file,cloudflare-header@file,securityHeadersHass@file
+      traefik.http.routers.hass-local.tls: true
+      traefik.http.routers.hass-local.tls.certresolver: cloudflare
+      traefik.http.routers.hass-local.tls.domains[0].main: hass.${DOMAIN}
+      traefik.http.routers.hass-local.tls.domains[1].main: ${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}
+      traefik.http.routers.hass-local.tls.domains[1].sans: "*.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}"
+      traefik.http.routers.hass-local.entrypoints: https
+      traefik.http.routers.hass-local.rule: (Host(`hass.${DOMAIN}`) || Host(`hass.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}`))
+      traefik.http.routers.hass-local.middlewares: local@file,securityHeadersHassTablets@file
+      traefik.http.routers.hass-tablets.tls: true
+      traefik.http.routers.hass-tablets.tls.certresolver: cloudflare
+      traefik.http.routers.hass-tablets.tls.domains[0].main: hass.${DOMAIN}
+      traefik.http.routers.hass-tablets.tls.domains[1].main: ${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}
+      traefik.http.routers.hass-tablets.tls.domains[1].sans: "*.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}"
+      traefik.http.routers.hass-tablets.entrypoints: https
+      traefik.http.routers.hass-tablets.rule: (Host(`hass.${DOMAIN}`) || Host(`hass.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}`)) && (${HASS_TABLETS})
+      traefik.http.routers.hass-tablets.middlewares: securityHeadersHassTablets@file
+      traefik.http.services.hass.loadbalancer.server.port: 8123
+    environment:
+    - MACVLAN_PREFIX=${HOME_NETWORK_PREFIX}
+    volumes:
+    - type: bind
+      source: /run/dbus
+      target: /run/dbus
+      read_only: true
+      bind:
+        create_host_path: false
+    - type: bind
+      source: /var/run/avahi-daemon/socket
+      target: /var/run/avahi-daemon/socket
+      read_only: false
+      bind:
+        create_host_path: false
+    - type: bind
+      source: /etc/localtime
+      target: /etc/localtime
+      read_only: true
+      bind:
+        create_host_path: false
+    - type: bind
+      source: ${HOMELAB_AUTOMATION_ROOT:?required}/home-assistant/startup
+      target: /startup
+      read_only: false
+      bind:
+        create_host_path: false
+    - type: bind
+      source: ${HOMELAB_HA_CONFIG_DIR:?required}
+      target: /config
+      read_only: false
+      bind:
+        create_host_path: false
+    - type: volume
+      source: docker
+      target: /media
+      read_only: false
+      volume:
+        subpath: "homelab-data/services/home-assistant/media"
+    - type: bind
+      source: ${HOMELAB_HA_CONFIG_DIR:?required}/www/community
+      target: /hacsfiles
+      read_only: false
+      bind:
+        create_host_path: false
+    - type: bind
+      source: /var/lib/databases/influxdb
+      target: /influxdb_data
+      read_only: false
+      bind:
+        create_host_path: false
+    restart: always
+    privileged: true
+    dns:
+    - "${HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_1:?Set HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_1 in the private project env file}"
+    - "${HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_2:?Set HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_2 in the private project env file}"
+    networks:
+      db_hass: null
+      underground:
+        ipv4_address: "${HOMELAB_AUTOMATION_HOMEASSISTANT_IPV4_ADDRESS_1:?Set HOMELAB_AUTOMATION_HOMEASSISTANT_IPV4_ADDRESS_1 in the private project env file}"
+      internal_ai: null
+      macvlan_100:
+        ipv4_address: ${HOME_NETWORK_PREFIX}.242
+      mqtt: null
+  node-red:
+    image: nodered/node-red:latest
+    container_name: nodered
+    labels:
+      traefik.enable: true
+      traefik.http.routers.nodered.tls: true
+      traefik.http.routers.nodered.tls.certresolver: cloudflare
+      traefik.http.routers.nodered.entrypoints: https
+      traefik.http.routers.nodered.rule: (Host(`nodered.${DOMAIN}`) || Host(`nodered.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}`))
+      traefik.http.routers.nodered.middlewares: chain-lan-unsafe@file
+      traefik.http.services.nodered.loadbalancer.server.port: 1880
+    environment:
+      FLOWS: /config/flows.json
+      TZ: ${TZ}
+      NODE_RED_API_TOKEN: ${NODE_RED_API_TOKEN:-}
+    restart: always
+    command:
+    - --settings
+    - /config/settings.js
+    volumes:
+    - type: bind
+      source: ${HOMELAB_NODE_RED_CONFIG_DIR:?required}
+      target: /config
+      bind:
+        create_host_path: false
+    - type: bind
+      source: /mnt/nas/docker/homelab-data/services/node-red/data
+      target: /data
+      read_only: false
+      bind:
+        create_host_path: false
+    - type: bind
+      source: ${HOMELAB_AUTOMATION_ROOT:?required}/node-red/healthcheck.js
+      target: /healthcheck.js
+      read_only: true
+      bind:
+        create_host_path: false
+    dns:
+    - "${HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_1:?Set HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_1 in the private project env file}"
+    - "${HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_2:?Set HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_2 in the private project env file}"
+    expose:
+    - 1880
+    networks:
+      underground:
+        ipv4_address: "${HOMELAB_AUTOMATION_NODE_RED_IPV4_ADDRESS_1:?Set HOMELAB_AUTOMATION_NODE_RED_IPV4_ADDRESS_1 in the private project env file}"
+      macvlan_100:
+        ipv4_address: ${HOME_NETWORK_PREFIX}.244
+      mqtt: null
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '5'
+  mosquitto:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    image: sha256:0745ced90756f8f0e75e16b872c7f4e281ea37e1dd93ba101880152bb31a98a6
+    hostname: broker
+    volumes:
+    - type: bind
+      source: ${HOMELAB_MQTT_CONFIG_DIR:?required}
+      target: /mosquitto/config
+      read_only: false
+      bind:
+        create_host_path: false
+    - type: volume
+      source: docker
+      target: /mosquitto/data
+      read_only: false
+      volume:
+        subpath: homelab-data/services/mqtt/data
+    - type: volume
+      source: docker
+      target: /mosquitto/log
+      read_only: false
+      volume:
+        subpath: homelab-data/services/mqtt/log
+    environment:
+      TZ: ${TZ}
+    restart: always
+    ports:
+    - 1883:1883
+    networks:
+      mqtt:
+        ipv4_address: "${HOMELAB_AUTOMATION_MOSQUITTO_IPV4_ADDRESS_1:?Set HOMELAB_AUTOMATION_MOSQUITTO_IPV4_ADDRESS_1 in the private project env file}"
+    pull_policy: never
+  mqtt-explorer:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    image: sha256:7967f3bf415358175eb5c06300d4e24d87d2d7b45c2e387671de569cfc3fe127
+    container_name: mqttexplorer
+    labels:
+      traefik.enable: true
+      traefik.http.routers.mqtt-explorer.tls: true
+      traefik.http.routers.mqtt-explorer.tls.certresolver: cloudflare
+      traefik.http.routers.mqtt-explorer.entrypoints: https
+      traefik.http.routers.mqtt-explorer.rule: (Host(`mqtt.${DOMAIN}`) || Host(`mqtt.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}`))
+      traefik.http.routers.mqtt-explorer.middlewares: chain-lan-forwardauth-unsafe@file
+      traefik.http.services.mqtt-explorer.loadbalancer.server.port: 80
+    volumes:
+    - type: bind
+      source: ${HOMELAB_MQTT_EXPLORER_CONFIG_DIR:?required}
+      target: /mqtt-explorer/config
+      read_only: false
+      bind:
+        create_host_path: false
+    environment:
+      TZ: ${TZ}
+      HTTP_PORT: 80
+      CONFIG_PATH: /mqtt-explorer/config
+    restart: always
+    networks:
+    - underground
+    - mqtt
+    pull_policy: never
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt
+    labels:
+      traefik.enable: true
+      traefik.http.routers.zigbee1.tls: true
+      traefik.http.routers.zigbee1.tls.certresolver: cloudflare
+      traefik.http.routers.zigbee1.entrypoints: https
+      traefik.http.routers.zigbee1.rule: (Host(`zigbee1.${DOMAIN}`) || Host(`zigbee1.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}`))
+      traefik.http.routers.zigbee1.middlewares: chain-lan-forwardauth-unsafe@file
+      traefik.http.services.zigbee1.loadbalancer.server.port: 8099
+    restart: always
+    volumes:
+    - type: bind
+      source: /run/udev
+      target: /run/udev
+      read_only: true
+      bind:
+        create_host_path: false
+    - type: bind
+      source: "/mnt/nas/docker/homelab-data/services/zigbee2mqtt/data"
+      target: /app/data
+      read_only: false
+      bind:
+        create_host_path: false
+    environment:
+      TZ: ${TZ}
+    devices:
+    - /dev/serial/by-id/${ZBT_SERIAL_ID}:/dev/ttyACM0
+    dns:
+    - "${HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_1:?Set HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_1 in the private project env file}"
+    - "${HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_2:?Set HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_2 in the private project env file}"
+    expose:
+    - 8099
+    networks:
+    - underground
+    - mqtt
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: 5
+  zigbeelens:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    image: sha256:c3e6c68a013bf00cb9f5da2a6a5be25f2351e4705349ea8da8964fa61e2227d1
+    container_name: zigbeelens
+    hostname: zigbeelens
+    labels:
+      traefik.enable: true
+      traefik.http.routers.zigbeelens.tls: true
+      traefik.http.routers.zigbeelens.tls.certresolver: cloudflare
+      traefik.http.routers.zigbeelens.entrypoints: https
+      traefik.http.routers.zigbeelens.rule: (Host(`zigbeelens.${DOMAIN}`) || Host(`zigbeelens.${DOMAIN_ALIAS:?DOMAIN_ALIAS is required}`))
+      traefik.http.routers.zigbeelens.middlewares: local@file,authentik@file,securityHeadersZigbeeLens@file
+      traefik.http.services.zigbeelens.loadbalancer.server.port: 8377
+      traefik.http.services.zigbeelens.loadbalancer.passhostheader: true
+    environment:
+      ZIGBEELENS_CONFIG: /data/config.yaml
+      ZIGBEELENS_LOG_LEVEL: info
+      TZ: ${TZ}
+    restart: always
+    ports:
+    - 8377:8377
+    volumes:
+    - type: volume
+      source: retained_zigbeelens_config
+      target: /config
+      read_only: false
+    - type: volume
+      source: docker
+      target: /data
+      volume:
+        subpath: homelab-data/services/zigbeelens/data
+    - type: bind
+      source: ${HOMELAB_ZIGBEELENS_CONFIG_FILE:?required}
+      target: /data/config.yaml
+      read_only: true
+      bind:
+        create_host_path: false
+    dns:
+    - "${HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_1:?Set HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_1 in the private project env file}"
+    - "${HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_2:?Set HOMELAB_AUTOMATION_HOMEASSISTANT_DNS_2 in the private project env file}"
+    expose:
+    - 8377
+    networks:
+      mqtt:
+        ipv4_address: "${HOMELAB_AUTOMATION_ZIGBEELENS_IPV4_ADDRESS_1:?Set HOMELAB_AUTOMATION_ZIGBEELENS_IPV4_ADDRESS_1 in the private project env file}"
+      underground:
+        ipv4_address: "${HOMELAB_AUTOMATION_ZIGBEELENS_IPV4_ADDRESS_2:?Set HOMELAB_AUTOMATION_ZIGBEELENS_IPV4_ADDRESS_2 in the private project env file}"
+    env_file:
+    - path: /home/ben/.config/homelab/runtime-env/zigbeelens.env
+      format: raw
+      required: true
+    pull_policy: never
+  winet-extractor:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: always
+    image: sha256:154c6ba9e3f56f4b84a9d364906b667360529e1ebaeeab449f93ba977dcc0019
+    environment:
+      TZ: ${TZ}
+    volumes:
+    - type: volume
+      source: docker
+      target: /data
+      read_only: true
+      volume:
+        subpath: homelab-data/services/winet-extractor/data
+    networks:
+      mqtt:
+        ipv4_address: 10.0.2.44
+    pull_policy: never
+  faster-whisper:
+    image: lscr.io/linuxserver/faster-whisper:latest
+    environment:
+      PGID: 100
+      PUID: 1026
+      TZ: ${TZ}
+      WHISPER_MODEL: medium-int8
+      WHISPER_BEAM: 2
+    volumes:
+    - type: volume
+      source: docker
+      target: /config
+      read_only: false
+      volume:
+        subpath: homelab-data/services/faster-whisper/data
+    restart: always
+    networks:
+    - internal_ai
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: 5
+  piper:
+    image: lscr.io/linuxserver/piper:latest
+    environment:
+      PGID: 100
+      PUID: 1026
+      TZ: ${TZ}
+      PIPER_VOICE: en_GB-cori-high
+      PIPER_LENGTH: 1.0
+      PIPER_NOISE: 0.667
+      PIPER_NOISEW: 0.333
+      PIPER_SPEAKER: 0
+      PIPER_PROCS: 1
+    volumes:
+    - type: volume
+      source: docker
+      target: /config
+      read_only: false
+      volume:
+        subpath: homelab-data/services/piper/data
+    restart: always
+    networks:
+    - internal_ai
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: 5
+  openwakeword:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    image: sha256:ac6a9c01faf04c505a353fd2991654e1d20eac15ace6474754fef09240d533b7
+    volumes:
+    - type: volume
+      source: docker
+      target: /data
+      read_only: false
+      volume:
+        subpath: homelab-data/services/openwakeword/data
+    - type: volume
+      source: docker
+      target: /custom
+      read_only: false
+      volume:
+        subpath: homelab-data/services/openwakeword/data
+    environment:
+      TZ: ${TZ}
+    restart: always
+    command: --preload-model 'ok_nabu' --custom-model-dir /custom
+    networks:
+    - internal_ai
+    pull_policy: never
+networks:
+  db_hass:
+    external: true
+  underground:
+    external: true
+  automate:
+    external: true
+  internal_ai:
+    name: internal_ai
+    internal: true
+  macvlan_100:
+    external: true
+  mqtt:
+    name: mqtt
+    external: true
+  security:
+    external: true
+name: automation

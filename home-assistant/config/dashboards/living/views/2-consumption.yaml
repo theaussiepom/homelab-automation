@@ -1,0 +1,773 @@
+- title: Consumption
+  path: consumption
+  subview: true
+  icon: mdi:lightning-bolt
+  type: custom:grid-layout
+  layout:
+    grid-template-columns: 80px auto
+    grid-template-areas: |
+      "c1 c1"
+      "a1 a2"
+      "b1 b1"
+    margin: '-4px'
+    card_margin: 0px
+  theme: living-tablet
+  background: "#EDE5D1E0"
+  cards:
+    - type: custom:stack-in-card
+      view_layout:
+        grid-area: c1
+      cards:
+      - type: custom:button-card
+        entity: sensor.battery_level
+        name: Battery charge
+        icon: mdi:battery-arrow-up-outline
+        show_name: true
+        show_label: true
+        label: '[[[ const status=states[''input_text.sg_battery_target_charge_status'']?.state; let text=status && ![''unknown'',''unavailable''].includes(status)
+          ? status : ''Idle''; const active=states[''switch.sg_battery_charge_now'']?.state===''on''; const power=states[''sensor.battery_power_raw''];
+          const watts=Number(power?.state); if (active && states[''sensor.ems_mode_selection_raw'']?.state===''2'' && states[''sensor.battery_forced_charge_discharge_cmd_raw'']?.state===''170''
+          && power && Number.isFinite(watts) && ![''unknown'',''unavailable''].includes(power.state)) text += ` · ${(Math.abs(watts)/1000).toFixed(1)}
+          kW`; return text.replace(/[&<>"'']/g, c=>({''&'':''&amp;'',''<'':''&lt;'',''>'':''&gt;'',''"'':''&quot;'',"''":''&#39;''}[c])); ]]]'
+        custom_fields:
+          level: '[[[ const n=Number(entity?.state); return entity && ![''unknown'',''unavailable''].includes(entity.state) && Number.isFinite(n)
+            ? `${Math.round(n)}%` : ''—''; ]]]'
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+        double_tap_action:
+          action: none
+        triggers_update:
+        - input_text.sg_battery_target_charge_status
+        - switch.sg_battery_charge_now
+        - sensor.battery_power_raw
+        - sensor.ems_mode_selection_raw
+        - sensor.battery_forced_charge_discharge_cmd_raw
+        styles:
+          card:
+          - border: none
+          - background: transparent
+          - box-shadow: none
+          - padding: '0'
+          - min-height: 80px
+          grid:
+          - grid-template-areas: '"i n level" "i l level"'
+          - grid-template-columns: 56px 1fr auto
+          - grid-template-rows: 40px minmax(24px,auto)
+          - column-gap: 14px
+          icon:
+          - width: 46px
+          - color: '[[[ return states[''switch.sg_battery_charge_now'']?.state===''on'' ? ''var(--green)'' : ''var(--primary-base-color)''; ]]]'
+          name:
+          - justify-self: start
+          - font-size: 28px
+          - font-weight: '700'
+          - color: var(--primary-base-color)
+          label:
+          - justify-self: start
+          - text-align: left
+          - white-space: normal
+          - font-size: 16px
+          - color: var(--secondary-base-color)
+          custom_fields:
+            level:
+            - font-size: 38px
+            - font-weight: '700'
+            - color: var(--primary-base-color)
+            - align-self: center
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: repeat(6, 100px) 10px 100px
+          grid-template-areas: '"t50 t60 t70 t80 t90 t100 gap stop"'
+          grid-column-gap: 16px
+          grid-row-gap: 16px
+          grid-template-rows: 100px
+          justify-content: center
+          margin: '0'
+          card_margin: '0'
+          mediaquery:
+            '(max-width: 950px)':
+              grid-template-columns: repeat(3, minmax(80px, 100px))
+              grid-template-rows: repeat(3, 100px)
+              grid-template-areas: '"t50 t60 t70" "t80 t90 t100" "stop stop stop"'
+        cards:
+        - type: custom:button-card
+          color_type: card
+          entity: switch.sg_battery_charge_now
+          show_name: true
+          show_icon: true
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          styles:
+            card:
+            - width: 100px
+            - min-width: 100px
+            - height: 100px
+            - padding: 10px
+            - box-shadow: none
+            - border-style: solid
+            - border-color: var(--secondary-base-color)
+            - border-width: 2px
+            - border-radius: 20px
+            grid:
+            - grid-template-areas: '"i" "n"'
+            - grid-template-rows: 1fr 30px
+            icon:
+            - width: 44px
+            - height: 44px
+            - transform: none
+            - color: var(--scene-icon-color)
+            name:
+            - font-size: 24px
+            - font-weight: '700'
+            - color: var(--primary-base-color)
+          tap_action:
+            action: call-service
+            service: script.sg_charge_battery_to_target
+            service_data:
+              target_soc: '50'
+          triggers_update:
+          - input_text.sg_battery_manual_lease
+          - input_select.sg_battery_charge_target
+          - input_boolean.sg_battery_target_preparing
+          - script.sg_charge_battery_to_target
+          name: 50%
+          icon: mdi:battery-50
+          view_layout:
+            grid-area: t50
+          state:
+          - operator: template
+            value: '[[[ try { const lease=JSON.parse(states[''input_text.sg_battery_manual_lease'']?.state || ''{}''); return entity?.state===''on''
+              && lease.kind===''target'' && !lease.done && lease.target===50; } catch { return false; } ]]]'
+            styles:
+              card:
+              - background: var(--scene-on-background-color)
+          - operator: default
+            styles:
+              card:
+              - background: var(--opaque-background-color)
+        - type: custom:button-card
+          color_type: card
+          entity: switch.sg_battery_charge_now
+          show_name: true
+          show_icon: true
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          styles:
+            card:
+            - width: 100px
+            - min-width: 100px
+            - height: 100px
+            - padding: 10px
+            - box-shadow: none
+            - border-style: solid
+            - border-color: var(--secondary-base-color)
+            - border-width: 2px
+            - border-radius: 20px
+            grid:
+            - grid-template-areas: '"i" "n"'
+            - grid-template-rows: 1fr 30px
+            icon:
+            - width: 44px
+            - height: 44px
+            - transform: none
+            - color: var(--scene-icon-color)
+            name:
+            - font-size: 24px
+            - font-weight: '700'
+            - color: var(--primary-base-color)
+          tap_action:
+            action: call-service
+            service: script.sg_charge_battery_to_target
+            service_data:
+              target_soc: '60'
+          triggers_update:
+          - input_text.sg_battery_manual_lease
+          - input_select.sg_battery_charge_target
+          - input_boolean.sg_battery_target_preparing
+          - script.sg_charge_battery_to_target
+          name: 60%
+          icon: mdi:battery-60
+          view_layout:
+            grid-area: t60
+          state:
+          - operator: template
+            value: '[[[ try { const lease=JSON.parse(states[''input_text.sg_battery_manual_lease'']?.state || ''{}''); return entity?.state===''on''
+              && lease.kind===''target'' && !lease.done && lease.target===60; } catch { return false; } ]]]'
+            styles:
+              card:
+              - background: var(--scene-on-background-color)
+          - operator: default
+            styles:
+              card:
+              - background: var(--opaque-background-color)
+        - type: custom:button-card
+          color_type: card
+          entity: switch.sg_battery_charge_now
+          show_name: true
+          show_icon: true
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          styles:
+            card:
+            - width: 100px
+            - min-width: 100px
+            - height: 100px
+            - padding: 10px
+            - box-shadow: none
+            - border-style: solid
+            - border-color: var(--secondary-base-color)
+            - border-width: 2px
+            - border-radius: 20px
+            grid:
+            - grid-template-areas: '"i" "n"'
+            - grid-template-rows: 1fr 30px
+            icon:
+            - width: 44px
+            - height: 44px
+            - transform: none
+            - color: var(--scene-icon-color)
+            name:
+            - font-size: 24px
+            - font-weight: '700'
+            - color: var(--primary-base-color)
+          tap_action:
+            action: call-service
+            service: script.sg_charge_battery_to_target
+            service_data:
+              target_soc: '70'
+          triggers_update:
+          - input_text.sg_battery_manual_lease
+          - input_select.sg_battery_charge_target
+          - input_boolean.sg_battery_target_preparing
+          - script.sg_charge_battery_to_target
+          name: 70%
+          icon: mdi:battery-70
+          view_layout:
+            grid-area: t70
+          state:
+          - operator: template
+            value: '[[[ try { const lease=JSON.parse(states[''input_text.sg_battery_manual_lease'']?.state || ''{}''); return entity?.state===''on''
+              && lease.kind===''target'' && !lease.done && lease.target===70; } catch { return false; } ]]]'
+            styles:
+              card:
+              - background: var(--scene-on-background-color)
+          - operator: default
+            styles:
+              card:
+              - background: var(--opaque-background-color)
+        - type: custom:button-card
+          color_type: card
+          entity: switch.sg_battery_charge_now
+          show_name: true
+          show_icon: true
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          styles:
+            card:
+            - width: 100px
+            - min-width: 100px
+            - height: 100px
+            - padding: 10px
+            - box-shadow: none
+            - border-style: solid
+            - border-color: var(--secondary-base-color)
+            - border-width: 2px
+            - border-radius: 20px
+            grid:
+            - grid-template-areas: '"i" "n"'
+            - grid-template-rows: 1fr 30px
+            icon:
+            - width: 44px
+            - height: 44px
+            - transform: none
+            - color: var(--scene-icon-color)
+            name:
+            - font-size: 24px
+            - font-weight: '700'
+            - color: var(--primary-base-color)
+          tap_action:
+            action: call-service
+            service: script.sg_charge_battery_to_target
+            service_data:
+              target_soc: '80'
+          triggers_update:
+          - input_text.sg_battery_manual_lease
+          - input_select.sg_battery_charge_target
+          - input_boolean.sg_battery_target_preparing
+          - script.sg_charge_battery_to_target
+          name: 80%
+          icon: mdi:battery-80
+          view_layout:
+            grid-area: t80
+          state:
+          - operator: template
+            value: '[[[ try { const lease=JSON.parse(states[''input_text.sg_battery_manual_lease'']?.state || ''{}''); return entity?.state===''on''
+              && lease.kind===''target'' && !lease.done && lease.target===80; } catch { return false; } ]]]'
+            styles:
+              card:
+              - background: var(--scene-on-background-color)
+          - operator: default
+            styles:
+              card:
+              - background: var(--opaque-background-color)
+        - type: custom:button-card
+          color_type: card
+          entity: switch.sg_battery_charge_now
+          show_name: true
+          show_icon: true
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          styles:
+            card:
+            - width: 100px
+            - min-width: 100px
+            - height: 100px
+            - padding: 10px
+            - box-shadow: none
+            - border-style: solid
+            - border-color: var(--secondary-base-color)
+            - border-width: 2px
+            - border-radius: 20px
+            grid:
+            - grid-template-areas: '"i" "n"'
+            - grid-template-rows: 1fr 30px
+            icon:
+            - width: 44px
+            - height: 44px
+            - transform: none
+            - color: var(--scene-icon-color)
+            name:
+            - font-size: 24px
+            - font-weight: '700'
+            - color: var(--primary-base-color)
+          tap_action:
+            action: call-service
+            service: script.sg_charge_battery_to_target
+            service_data:
+              target_soc: '90'
+          triggers_update:
+          - input_text.sg_battery_manual_lease
+          - input_select.sg_battery_charge_target
+          - input_boolean.sg_battery_target_preparing
+          - script.sg_charge_battery_to_target
+          name: 90%
+          icon: mdi:battery-90
+          view_layout:
+            grid-area: t90
+          state:
+          - operator: template
+            value: '[[[ try { const lease=JSON.parse(states[''input_text.sg_battery_manual_lease'']?.state || ''{}''); return entity?.state===''on''
+              && lease.kind===''target'' && !lease.done && lease.target===90; } catch { return false; } ]]]'
+            styles:
+              card:
+              - background: var(--scene-on-background-color)
+          - operator: default
+            styles:
+              card:
+              - background: var(--opaque-background-color)
+        - type: custom:button-card
+          color_type: card
+          entity: switch.sg_battery_charge_now
+          show_name: true
+          show_icon: true
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          styles:
+            card:
+            - width: 100px
+            - min-width: 100px
+            - height: 100px
+            - padding: 10px
+            - box-shadow: none
+            - border-style: solid
+            - border-color: var(--secondary-base-color)
+            - border-width: 2px
+            - border-radius: 20px
+            grid:
+            - grid-template-areas: '"i" "n"'
+            - grid-template-rows: 1fr 30px
+            icon:
+            - width: 44px
+            - height: 44px
+            - transform: none
+            - color: var(--scene-icon-color)
+            name:
+            - font-size: 24px
+            - font-weight: '700'
+            - color: var(--primary-base-color)
+          tap_action:
+            action: call-service
+            service: script.sg_charge_battery_to_target
+            service_data:
+              target_soc: '100'
+          triggers_update:
+          - input_text.sg_battery_manual_lease
+          - input_select.sg_battery_charge_target
+          - input_boolean.sg_battery_target_preparing
+          - script.sg_charge_battery_to_target
+          name: 100%
+          icon: mdi:battery
+          view_layout:
+            grid-area: t100
+          state:
+          - operator: template
+            value: '[[[ try { const lease=JSON.parse(states[''input_text.sg_battery_manual_lease'']?.state || ''{}''); return entity?.state===''on''
+              && lease.kind===''target'' && !lease.done && lease.target===100; } catch { return false; } ]]]'
+            styles:
+              card:
+              - background: var(--scene-on-background-color)
+          - operator: default
+            styles:
+              card:
+              - background: var(--opaque-background-color)
+        - type: custom:button-card
+          color_type: card
+          entity: switch.sg_battery_charge_now
+          show_name: true
+          show_icon: true
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          styles:
+            card:
+            - width: 100px
+            - min-width: 100px
+            - height: 100px
+            - padding: 10px
+            - box-shadow: none
+            - border-style: solid
+            - border-color: var(--secondary-base-color)
+            - border-width: 2px
+            - border-radius: 20px
+            - max-width: 100px
+            - margin: 0 auto
+            grid:
+            - grid-template-areas: '"i" "n"'
+            - grid-template-rows: 1fr 30px
+            icon:
+            - width: 44px
+            - height: 44px
+            - transform: none
+            - color: '[[[ return entity?.state===''on'' || states[''script.sg_charge_battery_to_target'']?.state===''on'' ? ''var(--red)'' : ''var(--scene-icon-color)'';
+                ]]]'
+            name:
+            - font-size: 24px
+            - font-weight: '700'
+            - color: var(--primary-base-color)
+          tap_action:
+            action: call-service
+            service: script.sg_cancel_target_battery_charge
+          triggers_update:
+          - input_text.sg_battery_manual_lease
+          - input_select.sg_battery_charge_target
+          - input_boolean.sg_battery_target_preparing
+          - script.sg_charge_battery_to_target
+          name: Stop
+          icon: mdi:stop-circle-outline
+          view_layout:
+            grid-area: stop
+          state:
+          - operator: default
+            styles:
+              card:
+              - background: var(--opaque-background-color)
+      card_mod:
+        style: "ha-card {\n  margin: 12px 15px 16px;\n  padding: 16px 22px 22px;\n  border: 2px solid var(--primary-base-color);\n  border-radius:\
+          \ 30px;\n  background: var(--tablet-card-background-color);\n  box-shadow: none;\n}\n"
+    - type: custom:button-card
+      view_layout:
+        grid-area: a1
+      color_type: card
+      color: var(--scene-on-background-color)
+      icon: mdi:arrow-left-bold-outline
+      show_name: false
+      size: 40px
+      aspect_ratio: 1/1
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace-living/home
+      styles:
+        card:
+          - border-radius: 20px
+          - border-color: var(--secondary-base-color)
+          - border-width: 2px
+          - background: var(--opaque-background-color)
+        icon:
+          - color: var(--scene-icon-color)
+      card_mod:
+        style: |
+          ha-card {
+            margin: 15px 0px 0px 15px;
+          }
+    - type: energy-date-selection
+      view_layout:
+        grid-area: a2
+      card_mod:
+        style: |
+          ha-card {
+            border-width: 0px;
+            border-radius: 0px;
+            background: transparent;
+          }
+    - type: custom:sankey-chart
+      layout: auto
+      height: 670
+      unit_prefix: k
+      round: 1
+      convert_units_to: ''
+      co2_intensity_entity: sensor.co2_signal_co2_intensity
+      gas_co2_intensity: 2351.6459999999997
+      min_box_size: 10
+      min_box_distance: 5
+      show_states: true
+      show_units: true
+      sections:
+      - entities:
+        - type: entity
+          children:
+          - daily_energy_import
+          entity_id: sensor.sh10rs_a2392201672_total_purchased_energy
+          name: From Grid
+          color: "#474954"
+        - type: entity
+          children:
+          - daily_energy_import
+          entity_id: sensor.sh10rs_a2392201672_daily_battery_discharging_energy
+          subtract_entities:
+          - sensor.sh10rs_a2392201672_daily_battery_charging_energy
+          name: Net from battery
+          color: "#5E8C61"
+        - type: entity
+          children:
+          - daily_energy_import
+          entity_id: sensor.sh10rs_a2392201672_daily_pv_yield
+          name: Solar
+          color: "#FA9500"
+      - entities:
+        - type: remaining_parent_state
+          children:
+          - sensor.sh10rs_a2392201672_daily_battery_charging_energy
+          - sensor.energy_ev_charging_energy_total
+          - sensor.total_daily_energy
+          - sensor.sh10rs_a2392201672_total_feed_in_energy
+          name: " "
+          entity_id: daily_energy_import
+          color: "#585123"
+          tap_action:
+            action: none
+      - entities:
+        - type: entity
+          entity_id: sensor.sh10rs_a2392201672_daily_battery_charging_energy
+          subtract_entities:
+          - sensor.sh10rs_a2392201672_daily_battery_discharging_energy
+          children: []
+          name: Net to battery
+          color: "#5E8C61"
+        - type: remaining_parent_state
+          children:
+          - sensor.power_daily_energy_aircon
+          - sensor.power_daily_energy_downstairs
+          - sensor.power_daily_energy_upstairs
+          - sensor.power_daily_energy_lights
+          name: Home
+          entity_id: sensor.total_daily_energy
+          children_sum:
+            should_be: equal
+          color: "#EB6424"
+          tap_action:
+            action: none
+        - type: entity
+          children: []
+          entity_id: sensor.energy_ev_charging_energy_total
+          name: EV charging at home
+          color: "#AE8CA3"
+        - type: entity
+          children: []
+          entity_id: sensor.sh10rs_a2392201672_total_feed_in_energy
+          name: To Grid
+          color: "#474954"
+      - entities:
+        - type: entity
+          children:
+          - study
+          - remaining-upstairs
+          entity_id: sensor.power_daily_energy_upstairs
+          name: Upstairs
+          color: "#CD4E13"
+        - type: entity
+          children:
+          - kitchen
+          - living
+          - laundry
+          - remaining-downstairs
+          name: Downstairs
+          add_entities:
+          - sensor.power_daily_energy_oven
+          - sensor.power_daily_energy_microwave
+          entity_id: sensor.power_daily_energy_downstairs
+          color: "#CD4E13"
+        - type: passthrough
+          children: []
+          entity_id: sensor.power_daily_energy_aircon
+          color: "#EB6424"
+          tap_action:
+            action: none
+        - type: passthrough
+          children: []
+          entity_id: sensor.power_daily_energy_lights
+          name: Lights
+          color: "#EB6424"
+          tap_action:
+            action: none
+      - entities:
+        - type: remaining_child_state
+          entity_id: study
+          name: Study
+          children:
+          - sensor.plugstudynetwork_energy_today
+          - sensor.plugstudydesk_energy_today
+          color: "#EB6424"
+          tap_action:
+            action: none
+        - type: passthrough
+          entity_id: remaining-upstairs
+          color: "#EB6424"
+          tap_action:
+            action: none
+        - type: remaining_child_state
+          entity_id: kitchen
+          name: Kitchen
+          children:
+          - sensor.power_daily_energy_oven
+          - sensor.power_daily_energy_microwave
+          - sensor.plugfridge_energy_today
+          color: "#EB6424"
+          tap_action:
+            action: none
+        - type: remaining_child_state
+          entity_id: living
+          name: Living
+          children:
+          - sensor.pluglivingtv_energy_today
+          color: "#EB6424"
+          tap_action:
+            action: none
+        - type: remaining_child_state
+          entity_id: laundry
+          name: Laundry
+          children:
+          - sensor.plugwashingmachine_energy_today
+          - sensor.plugdryer_energy_today
+          color: "#EB6424"
+          tap_action:
+            action: none
+        - type: passthrough
+          entity_id: remaining-downstairs
+          color: "#EB6424"
+          tap_action:
+            action: none
+        - type: passthrough
+          children: []
+          entity_id: sensor.power_daily_energy_aircon
+          color: "#EB6424"
+          tap_action:
+            action: none
+        - type: passthrough
+          children: []
+          entity_id: sensor.power_daily_energy_lights
+          name: Lights
+          color: "#EB6424"
+          tap_action:
+            action: none
+      - entities:
+        - type: entity
+          children: []
+          entity_id: sensor.plugstudynetwork_energy_today
+          name: Network
+          color: "#EB6424"
+        - type: entity
+          children: []
+          entity_id: sensor.plugstudydesk_energy_today
+          name: Study Desk
+          color: "#EB6424"
+        - type: remaining_parent_state
+          children: []
+          entity_id: remaining-upstairs
+          name: Other
+          color: "#EB6424"
+        - type: entity
+          children: []
+          entity_id: sensor.plugfridge_energy_today
+          name: Fridge
+          color: "#EB6424"
+        - type: entity
+          children: []
+          entity_id: sensor.power_daily_energy_oven
+          name: Oven
+          color: "#EB6424"
+        - type: entity
+          children: []
+          entity_id: sensor.power_daily_energy_microwave
+          name: Microwave
+          color: "#EB6424"
+        - type: entity
+          children: []
+          entity_id: sensor.pluglivingtv_energy_today
+          name: Living TV
+          color: "#EB6424"
+        - type: entity
+          children: []
+          entity_id: sensor.plugwashingmachine_energy_today
+          name: Washing Machine
+          color: "#EB6424"
+        - type: entity
+          children: []
+          entity_id: sensor.plugdryer_energy_today
+          name: Tumble Dryer
+          color: "#EB6424"
+        - type: remaining_parent_state
+          children: []
+          entity_id: remaining-downstairs
+          name: Other
+          color: "#EB6424"
+        - type: entity
+          children: []
+          entity_id: sensor.power_daily_energy_aircon
+          name: Aircon
+          color: "#EB6424"
+        - type: entity
+          children: []
+          entity_id: sensor.power_daily_energy_lights
+          name: Lights
+          color: "#EB6424"
+      energy_date_selection: true
+      min_state: 0
+      wide: false
+      show_names: true
+      show_icons: false
+      view_layout:
+        grid-area: b1
+      card_mod:
+        style: |
+          ha-card {
+            border-width: 0px;
+            border-radius: 0px;
+            margin: 10px 0px 0px 0px;
+            background: transparent;
+          }

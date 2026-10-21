@@ -1,0 +1,99 @@
+{# Peak helpers define the expensive import window, including windows spanning midnight. #}
+{% macro battery_manual_charge_tariff_permitted(at, returns) -%}
+  {% set begin=as_datetime('2000-01-01T' ~ states('input_datetime.energy_time_peak_start'),none) %}
+  {% set finish=as_datetime('2000-01-01T' ~ states('input_datetime.energy_time_peak_end'),none) %}
+  {% set valid=begin is not none and finish is not none and begin!=finish %}
+  {% set allowed=false %}
+  {% if valid %}
+    {% set start=begin.hour*3600+begin.minute*60+begin.second %}
+    {% set end=finish.hour*3600+finish.minute*60+finish.second %}
+    {% set current=at.hour*3600+at.minute*60+at.second %}
+    {% set peak=(start<=current<end) if start<end else (current>=start or current<end) %}
+    {% set allowed=not peak %}
+  {% endif %}
+  {% do returns(allowed) %}
+{%- endmacro %}
+
+{# SH10RS: 10000 W maximum battery charge power; hardware/BMS may taper below it. #}
+{% macro battery_request_power_limit(source, operation, request_id, returns) -%}
+  {% set m=states('input_text.sg_battery_manual_lease')|from_json({}) %}
+  {% set m=m if m is mapping else {} %}
+  {% set dev=states.sensor.sungrow_device_type_code %}
+  {% set model_ok=dev is not none and has_value('sensor.sungrow_device_type_code')
+    and is_number(dev.state) and dev.state|float==3355
+    and 0<=as_timestamp(now())-as_timestamp(dev.last_reported,0)<=900 %}
+  {% set maximum=source=='manual' and operation=='charge' and m.get('kind')=='target'
+    and m.get('id')==request_id and m.get('done')==false and model_ok %}
+  {% do returns(10000 if maximum else 3000) %}
+{%- endmacro %}
+
+{# Explicit target overrides use the same serialized manual command owner. #}
+{% macro battery_manual_permitted(lease, returns) -%}
+  {% set t=as_timestamp(now()) %}
+  {% set m=lease if lease is mapping else {} %}
+  {% set soc=states.sensor.battery_level %}
+  {% set fresh=soc is not none and has_value('sensor.battery_level') and is_number(soc.state)
+     and 0<=soc.state|float<=100 and 0<=t-as_timestamp(soc.last_reported,0)<=180 %}
+  {% set target=m.get('kind')=='target' %}
+  {% set max_soc=states.sensor.max_soc %}
+  {% set dev=states.sensor.sungrow_device_type_code %}
+  {% set model_ok=dev is not none and has_value('sensor.sungrow_device_type_code')
+     and is_number(dev.state) and dev.state|float==3355
+     and 0<=t-as_timestamp(dev.last_reported,0)<=900 %}
+  {% set target_ok=target and model_ok and m.get('op')=='charge' and m.get('target') in [50,60,70,80,90,100]
+     and m.get('target') is number and m.get('power')==10000
+     and max_soc is not none and has_value('sensor.max_soc') and is_number(max_soc.state)
+     and 0<=t-as_timestamp(max_soc.last_reported,0)<=900
+     and m.get('target')|float<=max_soc.state|float and fresh and soc.state|float<m.get('target')|float %}
+  {% set tariff=battery_manual_charge_tariff_permitted|as_function %}
+  {% set charge_ok=(target_ok if target else (m.get('op')!='charge' or
+     (is_state('input_boolean.energy_allow_overnight_battery_charge','on') and fresh and soc.state|float<90)))
+     and (m.get('op')!='charge' or tariff(now())) %}
+  {% do returns(m.get('id') is string and m.get('id')|length>0 and m.get('done')==false
+     and is_number(m.get('start')) and is_number(m.get('end')) and m.start|float<=t<m.end|float
+     and 0<m.end|float-m.start|float<=(28800 if target else 900)
+     and m.get('op') in ['charge','discharge','bypass'] and is_number(m.get('power'))
+     and 0<m.power|float<=(10000 if target else 3000) and m.power|float==m.power|int
+     and fresh and charge_ok and is_state('input_boolean.sg_battery_control_armed','on')
+     and is_state('input_boolean.sg_battery_stop_pending','off')
+     and is_state('input_boolean.energy_disable_automation','off')) %}
+{%- endmacro %}
+
+{% macro battery_target_override_active(returns) -%}
+  {% set m=states('input_text.sg_battery_manual_lease')|from_json({}) %}
+  {% set m=m if m is mapping else {} %}
+  {% do returns(is_state('input_boolean.sg_battery_target_preparing','on')
+    or (m.get('kind')=='target' and m.get('finished')!=true)) %}
+{%- endmacro %}
+
+{# Refresh extends the acknowledged command, never its captured target or deadline. #}
+{% macro battery_target_refresh_permitted(epoch, request_id, power, returns) -%}
+  {% set t=as_timestamp(now()) %}
+  {% set m=states('input_text.sg_battery_manual_lease')|from_json({}) %}
+  {% set a=states('input_text.sg_battery_command_ack')|from_json({}) %}
+  {% set s=states('input_text.energy_battery_charge_session')|from_json({}) %}
+  {% set m=m if m is mapping else {} %}{% set a=a if a is mapping else {} %}
+  {% set s=s if s is mapping else {} %}
+  {% set permitted=battery_manual_permitted|as_function %}
+  {% set fresh=namespace(ok=true) %}
+  {% for entity in ['sensor.ems_mode_selection_raw','sensor.battery_forced_charge_discharge_cmd_raw','sensor.battery_forced_charge_discharge_power'] %}
+    {% set q=states[entity] %}
+    {% if q is none or not has_value(entity) or not is_number(q.state)
+       or q.state|float!=q.state|int or not (0<=t-as_timestamp(q.last_reported,0)<=180) %}{% set fresh.ok=false %}{% endif %}
+  {% endfor %}
+  {% set mode=states('sensor.ems_mode_selection_raw')|int(-1) %}
+  {% set command=states('sensor.battery_forced_charge_discharge_cmd_raw')|int(-1) %}
+  {% set setting=states('sensor.battery_forced_charge_discharge_power')|float(-1) %}
+  {% set watts=states.sensor.battery_power_raw %}
+  {% set watts_ok=watts is not none and has_value('sensor.battery_power_raw') and is_number(watts.state)
+    and 0<=t-as_timestamp(watts.last_reported,0)<=60
+    and (watts.state|float|abs>=100 or (m.get('target')==100 and states('sensor.battery_level')|float(-1)>=95)) %}
+  {% do returns(permitted(m) and m.get('kind')=='target' and m.get('op')=='charge'
+    and m.get('id')==request_id and m.get('power')==power and s.get('done',true)
+    and epoch==states('input_text.sg_battery_authority_epoch') and epoch not in ['', 'unknown','unavailable']
+    and a.get('id')==request_id and a.get('epoch')==epoch and a.get('authority')=='manual'
+    and a.get('op')=='charge' and a.get('power')==power and a.get('attempt')==1
+    and a.get('status')=='confirmed' and is_number(a.get('ts')) and is_number(a.get('started'))
+    and m.get('start',0)|float<=a.started|float<=a.ts|float<=t
+    and fresh.ok and mode in [2,4] and command==170 and 1<=setting<=10600 and watts_ok) %}
+{%- endmacro %}

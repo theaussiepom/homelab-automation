@@ -1,0 +1,765 @@
+{
+  "format": "ha-source-history-policy-v1",
+  "status": "review_branch_preparation",
+  "scope": "home-assistant",
+  "branch": "codex/ha-git-preparation-20261020",
+  "base": "3ddb3084b9f0018ad1358dd1a6b5a0f4433af69b",
+  "reviewed_content_aggregate": "95b429b8cef31ce298c114c92f53c2755a9353eaead2858f0e5f065871d41747",
+  "manual_commits_only": true,
+  "production_commit_authorized": false,
+  "publication_authorized": false,
+  "automatic_staging": false,
+  "entries": [
+    {
+      "path": "config/automations.yaml",
+      "sha256": "6b1a4b5501dd61030d436d73fd09e96befb2f2b825377fe0ccda79c5c847a2de",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": true
+    },
+    {
+      "path": "config/command_line.yaml",
+      "sha256": "732ec6df157448d562791e83407c4c123c7e994d0d8463cdfd2b50cf0c8f0933",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/configuration.yaml",
+      "sha256": "fcdf92bfa610850c9c8a3fbb9b4e89c966bae6940324c8c6bce7cea488b83f66",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/custom_templates/energy_battery_authority.jinja",
+      "sha256": "cfb68b9f8fa84dc34deb805120834e98135032396c7816013bc99b30c300d4c3",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/custom_templates/energy_battery_manual.jinja",
+      "sha256": "db3bba8f5e01cc5695dc1e0e2b1fa7f7b95234ac30ad7849938016a04e5691d5",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/custom_templates/energy_battery_planner.jinja",
+      "sha256": "7c40dfe63735681ee7e9c837c9c2f8a58694224aa22029122dea384f8157a9ce",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/custom_templates/energy_battery_recovery.jinja",
+      "sha256": "ef78386bf8e113cada86dc493d4bfccfd935a7ffce66117c3542a8ed06811162",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/custom_templates/energy_house_profile.jinja",
+      "sha256": "886fc1f313e303b9d7f33792fddd08877e55f46b2148acff1523aef1dd27e7cb",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/custom_templates/home_health.jinja",
+      "sha256": "6b24977f1115740677d2d005638967436dc674baec7a95bc6374a34c6cd407dd",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/custom_templates/light-transition.jinja",
+      "sha256": "684bfef8dd9a066309b7d213242c49887de5c20eb216fd7318414a47696c7e3f",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/button-card-templates/custom-cover.yaml",
+      "sha256": "2b0c48fa6bafa4885a9231e5365882116026a2525bda964cf44ca34c45653543",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/button-card-templates/custom-hvac.yaml",
+      "sha256": "83967f41d72fdd0e5f05bd38670cfd45398bc7482e6961907dd53ca6ecbdd181",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/button-card-templates/custom-room.yaml",
+      "sha256": "f5c368002696fef5b2fa4fcf3f0068a2440697d4d35080954b5060129b99ba4e",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/button-card-templates/custom-scene-off.yaml",
+      "sha256": "0c7df7aa4faee4811c70b85d970d52b25f829c4b80a1a586e3d30011a68b9407",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/button-card-templates/custom-scene.yaml",
+      "sha256": "acbc4e98d1151ca6ff633e7903c8681f18d497650ea63c1d98a14c4daa19855b",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/living.yaml",
+      "sha256": "a6038aaf43e96e9f7753203a237d496e93bc9d1f8982225be6d1a6986f052916",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/1-home.yaml",
+      "sha256": "b73c9c4e2a9f82d403f9522b9422b9cf57f3c6ecca21b75830d9c77fea75eaf8",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/2-consumption.yaml",
+      "sha256": "bc72711d91f755e2d38b74fca265d8ce21b03e72887f582b921fd34c1d1c2e9a",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/3-radar.yaml",
+      "sha256": "22261d935f9f013316027844f7b20530f3f6e81f8b08bdf728762b4330215df3",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/4-music.yaml",
+      "sha256": "ec8c72b5b4e89f91d2f166957086a010db5e5fe139e15809afabe69781ef04ab",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/5-vacuum-upstairs.yaml",
+      "sha256": "30bdc43e7864994bf3952dcc2ecace84608b975fabccff6511f8e8e4fcea38a4",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/5-vacuum.yaml",
+      "sha256": "d3f0de2f9fdc73e7119ab613a3e90096fbe3b4ebdecd620ccc43d2331bb191bd",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/7-weather.yaml",
+      "sha256": "a239cfcedb465b0cdf074064f77d3e4e057c622e69c99280426d623d2daccab2",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/8-house.yaml",
+      "sha256": "826601414c8165f68d935c0507e9b15d0d3fed5b6f29f205d80938f0ea1394a7",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/9-house-details.yaml",
+      "sha256": "8a5f7f8ea4ce88cd0afe044fa0cb810f2c71709a15e8b61830bfbabbf487335a",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/9-house-health.yaml",
+      "sha256": "1d0e5e8ae03f0c6dde581725369a619ae9245682e50c6897bfcbcb07dd39d9f9",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/9-house-vacuums.yaml",
+      "sha256": "769c9f29a52584b858840ef29cfa9a3701b4f1b6892d40f10474c19d63459295",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/9-security.yaml",
+      "sha256": "736af5e4f2cf97f00b77987a066a9185b74e341146d29e7baa0e2bc8a6452bbb",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/home/clock.yaml",
+      "sha256": "23c0d0b68a96171e7eb25a1067edd96115a61d07dad159efaa0030e0e8fdab5e",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/home/energy.yaml",
+      "sha256": "cf0dda5ecb2ad2fa96b3f7f3bb5f1b56fe8476bcc10d01beb7be3c16adf3f053",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/home/home-buttons.yaml",
+      "sha256": "fcd22076546a919c463a87ad54f9027b0c847fe51296becf74f1d13640a6bb29",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/home/room-buttons.yaml",
+      "sha256": "884fabf2fdcc4485f74db14e2799f9ab1a8bd0b158254ddca6c501b30ed70552",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/home/rooms/ben.yaml",
+      "sha256": "c1c37b21f91dfa43bd371fa1dde8b1145e682834ce25b3d2ccd5d3ca1257e6e6",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/home/rooms/landing.yaml",
+      "sha256": "19efe5eadeefd8f5fea635449d4089fd4d7909e7e9876007858f939abd6169a0",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": true
+    },
+    {
+      "path": "config/dashboards/living/views/home/rooms/living.yaml",
+      "sha256": "93857a3a3975734aa154bbc73854e17a528d485c821b35c911a469096e1d66b9",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/home/rooms/matty.yaml",
+      "sha256": "1e96b0fc50a83a84a473c7828fce2bc5d81a6abfd6ed35dff5382b16bd9eeedc",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/home/rooms/outside.yaml",
+      "sha256": "00d17aa817e5aea1f7e1e95efcb441d2fbc7dba0f930a105ebfcd0f6eecc8510",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/dashboards/living/views/home/rooms/study.yaml",
+      "sha256": "4394d5fd1b7c98dbd29aab08c6e6c47842fdf108dd888baa1a1364cd5f72204e",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/docs/perisense-nonprod-runbook.md",
+      "sha256": "a2ddc307aa23537f19038c1bdeeae7f60021c449454d3fe0cf939b164b17a75f",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/docs/perisense-nonprod-secrets.yaml.example",
+      "sha256": "567651036c4d9d0d1f5d77648d6e6e754479321ea7a12db3575cb28466c702d0",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/energy_helpers/battery_journal_health.py",
+      "sha256": "28fad49d436e6e7000318ff2d9667d7f12108954e5b472d4d75df2309ad4ef9c",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/energy_helpers/forecast_cache.py",
+      "sha256": "78da4493995145b6874692ffd087339108e2d0428c4d754deb82f148db734e7f",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/energy_helpers/house_load_shape.flux",
+      "sha256": "8cf9106ae8d220ad6a5a65fe6d0fbc3c8fba77302566399020e2f2be84645d53",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/energy_helpers/house_load_shape.py",
+      "sha256": "cdff0fec4dee3d4f4173df8d47927d59bc0bdc063418de8238399fa2764d8ec7",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false,
+      "reviewed_org_match_lines": [
+        148
+      ]
+    },
+    {
+      "path": "config/energy_helpers/tests/test_battery_target_override.py",
+      "sha256": "d0a921accb07a2e2d55222a586898888bc43ae0a4ebf9289979425a8e75550d1",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/frontend.yaml",
+      "sha256": "f64162f597b829fe5abf188556b0f653096dd47d7a0ad0e0273527b1680f4118",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/gpt_response.py",
+      "sha256": "e0f89ea78942246ee1a5db47cc1f6dceab46b5bef81271a6cead8804dcca710a",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/group.yaml",
+      "sha256": "11ee87bcfb248e90e8b3992e1ec7979121cef9c3cf8f7d76d1a7318a56b0fffa",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/homeassistant.yaml",
+      "sha256": "ed2e7232cee392dda10a0294942c8d868bd63a178d546cf9b142e056346f607a",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/homekit.yaml",
+      "sha256": "54f6b505b18cea3a8240cd72ff89d8a977c7957c282e4cde97f10eefa4599ebb",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/influxdb.yaml",
+      "sha256": "952063f6408b11aa38c3e2d1c60b79352c5fd55911a9f9257b2e1d285fdb4417",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/battery_target_override.yaml",
+      "sha256": "cbe4d2749ccc2dbb96d21e2f77f67f4a420ce2a3e24d8a9b11198ed0be4d526f",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/bennis_car.yaml",
+      "sha256": "8b6b8d7bd262ffe31b0e13393ea2f31ba8fa39291dd6029060221874769cf12f",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/ceiling_fan.yaml",
+      "sha256": "f75cf2a24ec08bbced33f73e2e290309be6033c9f59a9e5f98ff67cb0b9aac44",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/codex_notifications.yaml",
+      "sha256": "3afa3dc79fa63a57c5db9615b045ee778ebd670d31be73eb1c1fbd5ece68a3f2",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/dashboard_living.yaml",
+      "sha256": "d5e1ae3f0160d35eb5cda29d662d24aa7541035c58c2101b5921158c2e4e0799",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/energy.yaml",
+      "sha256": "7590918cf6a57b7195523c9c0e4c9eddf50ffcec46ad674f87974360e0daead9",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false,
+      "reviewed_org_match_lines": [
+        3943,
+        4055,
+        4165
+      ]
+    },
+    {
+      "path": "config/integrations/garage.yaml",
+      "sha256": "866346af0f376b580aece0fb2d447da60936cf213914eb21236057e72bbd7efd",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/home_hub.yaml",
+      "sha256": "661258646affce9f0757ef4b7f44f609af6e3a76ff0f1084402aa33820f2f6ea",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/home_network.yaml",
+      "sha256": "99c5588c06c26f120477496c049b87e84105e87350f7b2b471d8201adb464a9b",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/house_alarm.yaml",
+      "sha256": "81b20443eb38b2c73bbcb1ffcce0035cfff82a4791993167d788c86d42cbc7f2",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/house_alarm_entry.yaml",
+      "sha256": "ecebcbfd7259953cd88331c3e0378f9b2e7ee5d74bca0d3cfc5320547d56a394",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/house_alarm_guests.yaml",
+      "sha256": "20d2cbf38774478bcd26d5d53d163f2a15a5503170acd1b892075489d7c84a58",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/house_alarm_mobile.yaml",
+      "sha256": "e626cc97ecaa1c7be889ff24e68f93ce1ee467d654b156c517b9c50557cf052e",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/house_alarm_tablet_audio.yaml",
+      "sha256": "1e5ca9cbf2a662ae5b8f32326e9cce5e3011c0d1d5bc9805899e03424bdc598e",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/house_fingerprint_entry.yaml",
+      "sha256": "64396f5de3bc14fe16f8ad0c67e9928ca9e474d6630963f43335c0242add3dc0",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": true
+    },
+    {
+      "path": "config/integrations/light_transitions.yaml",
+      "sha256": "02c28b6fe58ce2b57edb11dcd1c361433f7334629d3992503f03b2bc0fa97b64",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": true
+    },
+    {
+      "path": "config/integrations/matty_car.yaml",
+      "sha256": "c530d12e8bcf0059f4285b50ee2321fb6cb9971ef4c8aa16266dc4884ae540f5",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/modbus_sungrow.yaml",
+      "sha256": "c9993ad15d71ba91653dfacaabc7fd62929d6c16fff58406e6abc7a222d3f415",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/perisense_nonprod.yaml",
+      "sha256": "12c808c089efe86f9f27219385b3c7aa50642c4731261ef20ad464b7490e05b8",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/integrations/security_activity.yaml",
+      "sha256": "5c2f72964d86bb71e8a27dc76320afdff9b90335ae07660f5577312654744792",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/lovelace.yaml",
+      "sha256": "488c3e3b66b07d347fd2b9c77f30b04c5023c3046cfd0ff58abe193ccf5f71c5",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/notify.yaml",
+      "sha256": "91016da92d978d0307b352203ff4140f508c2a526e4a99ba27498cdb668d0acd",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/recorder.yaml",
+      "sha256": "dcaa0a9f6ad2c3013b85e19e3d9b8b3ee88cd99ab1b49046c88c838ea4d5bb4b",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/scenes.yaml",
+      "sha256": "136d70e7b713fafcd331556c7c8b15fb4d5ffa2d628e643e371d9347a8f85e73",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/scripts.yaml",
+      "sha256": "3ee463779c8364ad7ecfd81a1f7e0a6b7c69f214fd8fe70366f482a76be6e95e",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/sensors.yaml",
+      "sha256": "9d05773f6a9f6119c916c842580785f19f5d1c5d580c72f77211acb236ff7b28",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/sun2.yaml",
+      "sha256": "5fd1f0e9ec9272c8c1972d331f61a82a48ac24daf93159a7febda20e77fe87fb",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/switches.yaml",
+      "sha256": "a72e6a422e01d40b58eefa7d541e187b31f1af1ce636822bd5f0d05ab473fbb3",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/templates.yaml",
+      "sha256": "6154bc2b503ea2af201c72e5c253ec5613f1260897f6c299f2021ece8d7ee86e",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/www/group-person-pills.js",
+      "sha256": "9ffafa3e8dbd7a3bac99a9ff73fbb69c0939cca937c93c5770943050ffca47d5",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/www/living-alarm-lock.js",
+      "sha256": "caaef29781121fa2c55837c21ab89309c9f2d6533c48fe9cd61ff263df525071",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/www/security-activity-card.js",
+      "sha256": "b63b2f35e02fd3ee11ee7a0364857ed7b18af6587305297204a8422df6dc50b3",
+      "git_mode": "100644",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "config/www/weather.html",
+      "sha256": "0a68329e9e4d57374804ccd2a24fce48696d311d15a904c3a336d8c5bcc8d9bf",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    },
+    {
+      "path": "startup/mdns-route.sh",
+      "sha256": "24fcef93ac7956c851052a91352859e5d28b13d7d3fde6a3865ff86a1c7ec1ad",
+      "git_mode": "100755",
+      "privacy_review": "limited_whole_file_screen_complete",
+      "origin": "maintained_configuration_or_authored_helper",
+      "protected_capture_required": false
+    }
+  ],
+  "excluded_installation_prefixes": [
+    "config/custom_components",
+    "config/www/community",
+    "config/deps"
+  ],
+  "always_excluded_private_runtime": [
+    "config/.storage",
+    "config/.cloud",
+    "config/.ssh",
+    "config/.vscode",
+    "config/secrets.yaml",
+    "config/ip_bans.yaml",
+    "config/html5_push_registrations.conf",
+    "config/www/pictures/guest-wifi-living-qr.png",
+    "config/www/pictures/guest-wifi-qr.png",
+    "config/energy_logs",
+    "config/backups",
+    "config/.backups",
+    "config/codex-backups",
+    "config/.codex-backups",
+    "media"
+  ],
+  "provenance_hold": [
+    "config/blueprints/template/homeassistant/inverted_binary_sensor.yaml",
+    "config/themes/catppuccin/catppuccin.yaml",
+    "config/themes/dennis-boys/living-tablet.yaml",
+    "config/themes/minimalist-desktop/minimalist-desktop.yaml",
+    "config/themes/minimalist-ios-mobile/minimalist-ios-mobile.yaml",
+    "config/themes/minimalist-ios-tapbar/minimalist-ios-tapbar.yaml",
+    "config/themes/minimalist-mobile-tapbar/minimalist-mobile-tapbar.yaml",
+    "config/themes/minimalist-mobile/minimalist-mobile.yaml",
+    "config/themes/soft/soft.yaml",
+    "config/ui_lovelace_minimalist/custom_actions/custom_actions.yaml",
+    "config/ui_lovelace_minimalist/dashboard/adaptive-dash/adaptive-ui.yaml",
+    "config/ui_lovelace_minimalist/dashboard/adaptive-dash/popup/popup.yaml",
+    "config/ui_lovelace_minimalist/dashboard/adaptive-dash/views/livingroom.yaml",
+    "config/ui_lovelace_minimalist/dashboard/adaptive-dash/views/main.yaml",
+    "config/ui_lovelace_minimalist/dashboard/ui-lovelace.yaml"
+  ],
+  "unreadable_directory_inventory_hold": [
+    "config/blueprints/automation",
+    "config/blueprints/script",
+    "config/ui_lovelace_minimalist/custom_cards"
+  ],
+  "asset_and_editor_hold": [
+    "config/hass.code-workspace",
+    "config/www/pictures/background-light.png",
+    "config/www/pictures/background-night1.png",
+    "config/www/pictures/bay-leaf.png",
+    "config/www/pictures/chilli.png",
+    "config/www/pictures/lime.png",
+    "config/www/pictures/tomato.png",
+    "config/www/sounds/ring-doorbell-sound.mp3"
+  ],
+  "private_review_limitations": "Two short/empty scalars, other private stores, unrecognised encodings and full historical/publication review remain outside this limited screen.",
+  "recheck_before_capture": [
+    "exact current source bytes and ownership",
+    "current known-private-value inventory",
+    "main/ref/index/config and repository operations",
+    "review branch and selected staging",
+    "effective attributes and line endings"
+  ],
+  "runtime_and_entities": "Raw .storage registries, states, credentials and Recorder databases remain in private backups. Selected authored configuration and deliberate source patches are eligible for Git; runtime entity state is not."
+}

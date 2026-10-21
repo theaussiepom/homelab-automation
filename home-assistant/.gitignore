@@ -1,0 +1,61 @@
+# HA source-history policy. This supplements the repository root policy.
+# Ignore rules do not untrack existing entries or remove private Git history.
+# Untrack excluded files on the preparation branch; retain live originals.
+
+# Private and runtime state
+/config/.storage/
+/config/.cloud/
+/config/.ssh/
+/config/.vscode/
+/config/.HA_RESTORE
+/config/.HA_RESTORE_RESULT
+/config/.HA_VERSION
+/config/.ha_run.lock
+/config/secrets.yaml
+/config/secrets.yml
+/config/ip_bans.yaml
+/config/html5_push_registrations.conf
+/config/energy_logs/
+/config/.cache/
+/config/tts/
+/config/backups/
+/config/.backups/
+/config/codex-backups/
+/config/.codex-backups/
+/config/tmp_backups/
+/config/www/pictures/guest-wifi*-qr.png
+
+# Installed dependencies and downloaded frontend code.
+# Deliberate integration source/patches require a separately reviewed source path.
+# Do not discard local installation modifications while changing tracking policy.
+/config/custom_components/
+/config/www/community/
+/config/deps/
+**/site-packages/
+**/node_modules/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Private state and retained copies wherever generated inside this service.
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.log
+*.log.*
+*.bak
+*.backup
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Active media is external; retain old media files as recovery until separately retired.
+/media/
+/haos/
+
+# Themes, blueprints, authored overrides and ordinary assets are not blanket
+# excluded: review their privacy and provenance before public publication.

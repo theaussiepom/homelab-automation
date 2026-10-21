@@ -1,0 +1,14 @@
+customize:
+  sensor.guest_weather_weather_guest_apparent_temperature:
+    friendly_name: Guest Apparent Temperature
+  switch.guest_room_in_use:
+    friendly_name: Guest room in use
+  zone.home:
+    latitude: !secret latitude
+    longitude: !secret longitude
+    radius: 15
+name: !secret homeassistantName
+packages: !include_dir_named integrations
+allowlist_external_dirs:
+  - /influxdb_data
+  - /config/energy_logs

@@ -1,0 +1,198 @@
+type: custom:layout-card
+view_layout:
+  grid-area: h4
+layout_type: grid-layout
+layout:
+  margin: 0px 0px 0px 20px
+  card-margin: 0px
+  grid-template-columns: 100px
+  grid-template-rows: 100px 27px 100px 27px 100px 27px 100px 27px 100px 27px 100px
+  grid-template-areas: |
+    "vacuum" "m2" "guest" "m3" "garage" "m4" "energy" "m5" "hvac" "m6" "music"
+cards:
+  - type: custom:button-card
+    view_layout:
+      grid-area: music
+    entity: media_player.bennis_a9
+    icon: mdi:music
+    tap_action:
+      action: navigate
+      navigation_path: /lovelace-living/music
+    hold_action:
+      action: call-service
+      service: media_player.media_play_pause
+      target:
+        entity_id: media_player.bennis_a9
+    show_name: false
+    aspect_ratio: 1/1
+    styles:
+      card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+      icon:
+        - width: 80%
+    state:
+      - value: idle
+        color: var(--scene-icon-color)
+      - value: "off"
+        color: var(--scene-icon-color)
+      - value: paused
+        color: var(--scene-icon-color)
+      - value: playing
+        color: var(--scene-on-background-color)
+      - value: unavailable
+        color: var(--scene-icon-color)
+  - type: custom:button-card
+    view_layout:
+      grid-area: hvac
+    tap_action:
+      action: call-service
+      service: |
+        [[[
+          return states["climate.ac_0"].state == "off"
+            ? "climate.set_hvac_mode"
+            : "climate.turn_off"
+        ]]]
+      data:
+        hvac_mode: |
+          [[[
+            return states["climate.ac_0"].state == "off"
+              ? states["input_select.climate_ac_options"].state
+              : undefined
+          ]]]
+      target:
+        entity_id: climate.ac_0
+    hold_action:
+      action: call-service
+      service: script.change_hvac_option
+    entity: input_select.climate_ac_options
+    show_name: false
+    aspect_ratio: 1/1
+    styles:
+      card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+      icon:
+        - width: 80%
+        - color: |
+            [[[
+              if (states["climate.ac_0"].state == "off") {
+                return "var(--hvac-off)"
+              }
+              return `var(--hvac-${states["input_select.climate_ac_options"].state})`
+            ]]]
+    state:
+      - value: auto
+        icon: mdi:thermometer-auto
+      - value: cool
+        icon: mdi:snowflake
+      - value: dry
+        icon: mdi:water-percent
+      - value: fan_only
+        icon: mdi:ceiling-fan
+      - value: heat
+        icon: mdi:weather-sunny
+  - type: custom:button-card
+    view_layout:
+      grid-area: vacuum
+    entity: alarm_control_panel.house_alarm
+    icon: mdi:shield-home-outline
+    tap_action:
+      action: navigate
+      navigation_path: /lovelace-living/security
+    show_name: false
+    aspect_ratio: 1/1
+    styles:
+      card:
+      - border-radius: 20px
+      - border-color: var(--secondary-base-color)
+      - border-width: 2px
+      - background: var(--opaque-background-color)
+      icon:
+      - width: 80%
+      - color: '[[[ const s=entity?.state; return s===''disarmed'' ? ''var(--green)'' : [''armed_night''].includes(s)
+          || (s===''arming'' && [''armed_night''].includes(entity?.attributes?.next_state)) ? ''var(--yellow)''
+          : ''var(--red)''; ]]]'
+    name: Security
+    hold_action:
+      action: none
+    double_tap_action:
+      action: none
+  - type: custom:button-card
+    view_layout:
+      grid-area: energy
+    entity: sensor.energy_source
+    icon: mdi:lightning-bolt
+    tap_action:
+      action: navigate
+      navigation_path: /lovelace-living/consumption
+    show_name: false
+    aspect_ratio: 1/1
+    styles:
+      card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+      icon:
+        - width: 80%
+    state:
+      - value: battery
+        color: var(--energy-source-battery)
+      - value: grid
+        color: var(--energy-source-grid)
+      - value: solar
+        color: var(--energy-source-solar)
+  - type: custom:button-card
+    view_layout:
+      grid-area: guest
+    entity: binary_sensor.home_attention
+    show_name: false
+    aspect_ratio: 1/1
+    styles:
+      card:
+      - border-radius: 20px
+      - border-color: var(--secondary-base-color)
+      - border-width: 2px
+      - background: var(--opaque-background-color)
+      icon:
+      - width: 100%
+      - color: '[[[ return entity?.state === ''off'' ? ''var(--green)'' : ''var(--red)''; ]]]'
+    icon: mdi:home-heart
+    tap_action:
+      action: navigate
+      navigation_path: /lovelace-living/house
+    hold_action:
+      action: none
+    double_tap_action:
+      action: none
+  - type: custom:button-card
+    view_layout:
+      grid-area: garage
+    entity: cover.garage_door
+    tap_action:
+      action: toggle
+    show_name: false
+    aspect_ratio: 1/1
+    styles:
+      card:
+        - border-radius: 20px
+        - border-color: var(--secondary-base-color)
+        - border-width: 2px
+        - background: var(--opaque-background-color)
+      icon:
+        - width: 100%
+        - margin: "-6px 0px 0px 0px"
+    state:
+      - value: open
+        color: var(--red)
+      - value: opening
+        color: var(--yellow)
+      - value: closing
+        color: var(--yellow)
+      - value: closed
+        color: var(--green)

@@ -1,0 +1,14 @@
+- platform: group
+  name: notify_phones
+  services:
+    - action: !secret ha_notify_action_1
+      title: Benjamerin
+    - action: !secret ha_notify_action_2
+      title: Benjamerin
+- platform: group
+  name: notify_phones_perisense
+  services:
+    - action: !secret ha_notify_action_1
+      title: Perisense
+    - action: !secret ha_notify_action_2
+      title: Perisense

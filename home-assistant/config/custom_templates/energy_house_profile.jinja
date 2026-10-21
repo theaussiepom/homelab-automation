@@ -1,0 +1,79 @@
+{# Admission only: malformed/missing/old shapes use the existing flat profile.
+   The planner's energy totals, charge permission and overnight model are unchanged. #}
+{% macro shoulder_shape(attributes, state, now_epoch, latest_training_end, start_minute, end_minute, returns) -%}
+  {%- set a=attributes if attributes is mapping else {} -%}
+  {%- set weights=a.get('weights',[]) -%}
+  {%- set end=a.get('training_end_epoch') -%}
+  {%- set generated=a.get('generated_epoch') -%}
+  {%- set days=a.get('valid_days') -%}
+  {%- set counts=a.get('slot_contributor_counts',[]) -%}
+  {%- set coverage=a.get('slot_numeric_coverage',[]) -%}
+  {%- set dates=a.get('contributor_days',[]) -%}
+  {%- set begin_date=a.get('training_start_date') -%}
+  {%- set end_date=a.get('training_end_date') -%}
+  {%- set ns=namespace(reason=none,total=0) -%}
+  {%- if start_minute!=360 or end_minute!=660 -%}
+    {%- set ns.reason='unsupported_profile_clock_window' -%}
+  {%- elif a.get('restored',false) -%}
+    {%- set ns.reason='profile_restored_unverified' -%}
+  {%- elif state!='ready' -%}
+    {%- set ns.reason='profile_source_'~state -%}
+  {%- elif a.get('method_version') is boolean or a.get('method_version')!=3 or a.get('interval_seconds')!=1800 or a.get('shoulder_start_minute')!=360 or a.get('shoulder_end_minute')!=660 -%}
+    {%- set ns.reason='profile_metadata_invalid' -%}
+  {%- elif a.get('recent_days') is boolean or a.get('recent_days')!=7 or a.get('recent_day_weight') is boolean or a.get('recent_day_weight')!=3 or a.get('latest_days') is boolean or a.get('latest_days')!=3 or a.get('latest_day_weight') is boolean or a.get('latest_day_weight')!=4 or a.get('fortnight_days') is boolean or a.get('fortnight_days')!=14 or a.get('fortnight_day_weight') is boolean or a.get('fortnight_day_weight')!=2 or a.get('base_day_weight') is boolean or a.get('base_day_weight')!=1 -%}
+    {%- set ns.reason='profile_recency_policy_invalid' -%}
+  {%- elif a.get('recent_valid_days') is not number or a.get('recent_valid_days') is boolean or not 0<=a.get('recent_valid_days')<=7 or a.get('recent_valid_days')|int!=a.get('recent_valid_days') or a.get('historical_day_count') is not number or a.get('historical_day_count') is boolean or not 0<=a.get('historical_day_count')<=16 or a.get('historical_day_count')|int!=a.get('historical_day_count') -%}
+    {%- set ns.reason='profile_recency_counts_invalid' -%}
+  {%- elif a.get('latest_valid_days') is not number or a.get('latest_valid_days') is boolean or not 0<=a.get('latest_valid_days')<=3 or a.get('latest_valid_days')|int!=a.get('latest_valid_days') or a.get('fortnight_valid_days') is not number or a.get('fortnight_valid_days') is boolean or not 0<=a.get('fortnight_valid_days')<=14 or a.get('fortnight_valid_days')|int!=a.get('fortnight_valid_days') -%}
+    {%- set ns.reason='profile_recency_counts_invalid' -%}
+  {%- elif not 0<=a.get('recent_valid_days')-a.get('latest_valid_days')<=4 or not 0<=a.get('fortnight_valid_days')-a.get('recent_valid_days')<=7 -%}
+    {%- set ns.reason='profile_recency_counts_invalid' -%}
+  {%- elif a.get('fortnight_valid_days')+a.get('historical_day_count')!=days or a.get('weighted_day_count') is boolean or a.get('weighted_day_count')!=a.get('historical_day_count')+2*a.get('fortnight_valid_days')+a.get('recent_valid_days')+a.get('latest_valid_days') -%}
+    {%- set ns.reason='profile_recency_counts_invalid' -%}
+  {%- elif end is not number or end is boolean or generated is not number or generated is boolean -%}
+    {%- set ns.reason='profile_time_invalid' -%}
+  {%- elif not (0<=now_epoch-end<=172800 and end<=latest_training_end and end<=generated<=now_epoch and now_epoch-generated<=172800) -%}
+    {%- set ns.reason='profile_stale_or_future' -%}
+  {%- elif days is not number or days is boolean or not 3<=days<=30 or days|int!=days -%}
+    {%- set ns.reason='profile_insufficient_days' -%}
+  {%- elif dates is not sequence or dates is string or dates is mapping or dates|count!=days or begin_date is not string or end_date is not string -%}
+    {%- set ns.reason='profile_contributors_invalid' -%}
+  {%- elif weights is not sequence or weights is string or weights is mapping or weights|count!=10 -%}
+    {%- set ns.reason='profile_weights_invalid' -%}
+  {%- elif counts is not sequence or counts is string or counts is mapping or counts|count!=10 or coverage is not sequence or coverage is string or coverage is mapping or coverage|count!=10 -%}
+    {%- set ns.reason='profile_coverage_invalid' -%}
+  {%- else -%}
+    {%- for i in range(10) -%}
+      {%- if weights[i] is not number or weights[i] is boolean or not 0<=weights[i]<=1 -%}
+        {%- set ns.reason='profile_weights_invalid' -%}
+      {%- else -%}{%- set ns.total=ns.total+weights[i] -%}{%- endif -%}
+      {%- if counts[i] is boolean or counts[i]!=days or coverage[i] is boolean or coverage[i]!=1 -%}
+        {%- set ns.reason='profile_coverage_invalid' -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if (ns.total-1)|abs>1e-9 -%}{%- set ns.reason='profile_weights_invalid' -%}{%- endif -%}
+  {%- endif -%}
+  {%- if ns.reason is none -%}
+    {%- for day in dates -%}
+      {%- if day is not string or day|length!=10 or not begin_date<=day<end_date -%}
+        {%- set ns.reason='profile_contributors_invalid' -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if ns.reason is none and dates|unique|list|count!=days -%}{%- set ns.reason='profile_contributors_invalid' -%}{%- endif -%}
+  {%- endif -%}
+  {%- if ns.reason is none and (a.get('profile_id') is not string or a.get('profile_id')|length!=64) -%}
+    {%- set ns.reason='profile_identity_missing' -%}
+  {%- endif -%}
+  {%- if ns.reason is none and (a.get('query_sha256') is not string or a.get('query_sha256')|length!=64) -%}
+    {%- set ns.reason='profile_identity_missing' -%}
+  {%- endif -%}
+  {%- do returns(dict(applied=ns.reason is none, weights=weights if ns.reason is none else [],
+    status='learned_half_hour' if ns.reason is none else 'flat_fallback', reason=ns.reason,
+    recency_policy=dict(window_days=30,latest_days=3,latest_day_weight=4,recent_days=7,recent_day_weight=3,fortnight_days=14,fortnight_day_weight=2,base_day_weight=1,bands='Completed-day ages 1–3:4, 4–7:3, 8–14:2, 15–30:1'),
+    latest_valid_days=a.get('latest_valid_days'),fortnight_valid_days=a.get('fortnight_valid_days'),
+    recent_valid_days=a.get('recent_valid_days'),historical_day_count=a.get('historical_day_count'),weighted_day_count=a.get('weighted_day_count'),
+    profile_id=a.get('profile_id'), training_end_epoch=end, generated_epoch=generated, valid_days=days,
+    query_sha256=a.get('query_sha256'),contributor_days=dates,slot_contributor_counts=counts,slot_numeric_coverage=coverage,
+    training_start_date=begin_date,training_end_date=end_date,
+    source_limitation=a.get('source_limitation','Historical numeric coverage does not prove device uptime.'))) -%}
+{%- endmacro %}

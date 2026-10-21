@@ -1,0 +1,200 @@
+type: custom:button-card
+entity: binary_sensor.show_sunset
+show_icon: false
+show_name: false
+view_layout:
+  grid-column-start: h1
+  grid-column-end: h3
+  align-items: center
+  justify-content: center
+tap_action:
+  action: navigate
+  navigation_path: /lovelace-living/weather
+styles:
+  grid:
+  - grid-template-areas: '"clock"'
+  - grid-template-columns: 1fr
+  - grid-template-rows: 1fr
+  - height: 100%
+  - align-items: center
+  card:
+  - width: 700px
+  - padding: 0px
+  - height: |
+      [[[
+        const height = states['binary_sensor.show_sunset'].state == 'on' ? 115 : 80;
+        return `${height}px`;
+      ]]]
+  - border-color: var(--primary-base-color);
+  - border-width: 2px
+  - border-radius: 10px
+  - background: var(--tablet-card-background-color)
+  - margin: |
+      [[[
+        const topMargin = states['binary_sensor.show_sunset'].state == 'on' ? -130 : -100;
+        return `${topMargin}px 0px 0px 130px`;
+      ]]]
+  custom_fields:
+    clock:
+    - pointer-events: none
+    - align-self: center
+custom_fields:
+  clock:
+    card:
+      type: custom:stack-in-card
+      card_mod:
+        style: |
+          ha-card {
+            border-width: 0px;
+            background: var(--tablet-card-background-color);
+            width: 100%;
+            margin: 0;
+          }
+      cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: auto 1fr auto 1fr auto 1fr auto
+          place-items: center stretch
+          grid-template-areas: |
+            "app m1 temp m2 hum m3 time"
+        cards:
+        - type: markdown
+          view_layout:
+            grid-area: app
+          card_mod:
+            style:
+              .: |
+                ha-card {
+                  background: var(--secondary-background-color);
+                  border-style: none;
+                  margin: 0;
+                }
+                ha-markdown {
+                  padding: 0px 16px;
+                }
+              ha-markdown$: |
+                ha-markdown-element > div {
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  line-height: 1;
+                }
+                ha-markdown-element font {
+                  line-height: 1;
+                }
+                /* Centre the larger legacy font's visible glyphs within its line box. */
+                ha-markdown-element font[size="7"] {
+                  transform: translateY(-0.17em);
+                }
+          content: |
+            <div>
+              <font size=7><b>{{ (states['sensor.outside_apparent_temperature'].state | round(0)) }}°C</b></font>
+            </div>
+        - type: markdown
+          view_layout:
+            grid-area: temp
+          card_mod:
+            style:
+              .: |
+                ha-card {
+                  background: var(--secondary-background-color);
+                  border-style: none;
+                  margin: 0;
+                }
+                ha-markdown {
+                  padding: 0px 16px;
+                }
+              ha-markdown$: |
+                ha-markdown-element > div {
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  line-height: 1;
+                }
+                ha-markdown-element font {
+                  line-height: 1;
+                }
+                /* Centre the smaller text and icons within the grid row. */
+                ha-markdown-element font[size="6"] {
+                  transform: translateY(-0.22em);
+                }
+          content: |
+            <div>
+              <font size=6><b><ha-icon icon="mdi:thermometer"></ha-icon>{{ (states['sensor.outside_temperature'].state | round(0)) }}°C</b></font>
+            </div>
+        - type: markdown
+          view_layout:
+            grid-area: hum
+          card_mod:
+            style:
+              .: |
+                ha-card {
+                  background: var(--secondary-background-color);
+                  border-style: none;
+                  margin: 0;
+                }
+                ha-markdown {
+                  padding: 0px 16px;
+                }
+              ha-markdown$: |
+                ha-markdown-element > div {
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  line-height: 1;
+                }
+                ha-markdown-element font {
+                  line-height: 1;
+                }
+                /* Centre the smaller text and icons within the grid row. */
+                ha-markdown-element font[size="6"] {
+                  transform: translateY(-0.22em);
+                }
+          content: |
+            <div>
+              <font size=6><b><ha-icon icon="mdi:water-outline"></ha-icon>{{ (states['sensor.outside_humidity'].state | round(0)) }}%</b></font>
+            </div>
+        - type: markdown
+          view_layout:
+            grid-area: time
+          card_mod:
+            style:
+              .: |
+                ha-card {
+                  background: var(--secondary-background-color);
+                  border-style: none;
+                  margin: 0;
+                }
+                ha-markdown {
+                  padding: 0px 16px;
+                }
+              ha-markdown$: |
+                ha-markdown-element > div {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  line-height: 1;
+                }
+                ha-markdown-element > div > div {
+                  margin-top: 4px;
+                }
+                ha-markdown-element font {
+                  line-height: 1;
+                }
+                /* Centre the larger legacy font's visible glyphs within its line box. */
+                ha-markdown-element font[size="7"] {
+                  transform: translateY(-0.17em);
+                }
+          content: |
+            <div>
+              <font size=7><b>{{ now().strftime('%-I:%M %p') }}</b></font>
+              {%- set sunset = states['sensor.the_dennis_boys_sun_sunset_start'].state %}
+              {%- set sunsetTimestamp = sunset | as_timestamp %}
+              {%- set secondsToNextMin = (60 - (sunsetTimestamp - 1) % 60) - 1 %}
+              {%- set roundedTimestamp = sunsetTimestamp + secondsToNextMin %}
+              {%- set roundedSunset = roundedTimestamp | timestamp_custom('%-I:%M %p') %}
+              {%- if states['binary_sensor.show_sunset'].state == 'on' %}
+                <div><font size=5><b><ha-icon icon="mdi:weather-night"></ha-icon>{{ roundedSunset }}</b></font></div>
+              {% endif %}
+            </div>

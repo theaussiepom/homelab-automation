@@ -1,0 +1,60 @@
+type: custom:layout-card
+view_layout:
+  grid-area: rooms
+layout_type: grid-layout
+layout:
+  margin: 0px
+  card-margin: 0px
+  grid-template-columns: 100px
+  grid-template-rows: 100px 27px 100px 27px 100px 27px 100px 27px 100px 27px 100px
+  grid-template-areas: |
+    "living" "m2" "outside" "m3" "landing" "m4" "ben" "m5" "matty" "m6" "study"
+cards:
+  - type: custom:button-card
+    template: custom_room_card
+    variables:
+      room: living
+      icon: mdi:sofa-outline
+      iconScale: 0.8
+    view_layout:
+      grid-area: living
+  - type: custom:button-card
+    template: custom_room_card
+    variables:
+      room: landing
+      icon: mdi:stairs
+      iconScale: 0.8
+    view_layout:
+      grid-area: landing
+  - type: custom:button-card
+    template: custom_room_card
+    variables:
+      room: outside
+      icon: mdi:flower-outline
+      iconScale: 0.9
+    view_layout:
+      grid-area: outside
+  - type: custom:button-card
+    template: custom_room_card
+    variables:
+      room: ben
+      icon: mdi:human-male-female
+      iconScale: 0.9
+    view_layout:
+      grid-area: ben
+  - type: custom:button-card
+    template: custom_room_card
+    variables:
+      room: matty
+      icon: mdi:bed-outline
+      iconScale: 0.9
+    view_layout:
+      grid-area: matty
+  - type: custom:button-card
+    template: custom_room_card
+    variables:
+      room: study
+      icon: mdi:desktop-classic
+      iconScale: 0.9
+    view_layout:
+      grid-area: study

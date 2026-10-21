@@ -1,0 +1,236 @@
+sensor:
+  - name: Energy Source
+    unique_id: energy_source
+    state: >
+        {% if states('sensor.sh10rs_a2392201672_purchased_power')|float > 0 %}
+          grid
+        {% elif states('sensor.sh10rs_a2392201672_battery_discharging_power')|float > 0 %}
+          battery
+        {% elif states('sensor.sh10rs_a2392201672_mppt_total_power')|float > 0 %}
+          solar
+        {% else %}
+          none
+        {% endif %}
+  - name: Car Charge Energy
+    unique_id: car_charge_energy
+    state: >
+        {% if states('binary_sensor.bennis_located_at_home') == 'on' and states('binary_sensor.bennis_charge_cable') == 'on' and states('sensor.bennis_charger_power')|float > 0 %}
+          {{ states('sensor.bennis_charger_power')|float}}
+        {% else %}
+          {{ states('sensor.myenergi_zappi_21539112_internal_load_ct1')|float }}
+        {% endif %}
+  - name: "Is Daytime"
+    unique_id: is_daytime
+    attributes:
+      timestampNow: "{{ as_timestamp(now()) | int }}"
+      timestampSunrise: "{{ as_timestamp(states('sensor.the_dennis_boys_sun_rising')) }}"
+      timestampSunset: "{{ as_timestamp(states('sensor.the_dennis_boys_sun_sunset_start')) }}"
+      isDaytime: >
+        {% set sunrise_s = states('sensor.the_dennis_boys_sun_rising') %}
+        {% set sunset_s = states('sensor.the_dennis_boys_sun_sunset_start') %}
+        {% if sunrise_s in ['unknown', 'unavailable', 'none', '']
+             or sunset_s in ['unknown', 'unavailable', 'none', ''] %}
+          unknown
+        {% else %}
+          {% set n = now() %}
+          {% set sunrise = as_local(sunrise_s | as_datetime) %}
+          {% set sunset = as_local(sunset_s | as_datetime) %}
+          {% if sunrise.date() != n.date() or sunset.date() != n.date() %}
+            off
+          {% elif n >= sunrise and n < sunset %}
+            on
+          {% else %}
+            off
+          {% endif %}
+        {% endif %}
+    state: >
+      {% set sunrise_s = states('sensor.the_dennis_boys_sun_rising') %}
+      {% set sunset_s = states('sensor.the_dennis_boys_sun_sunset_start') %}
+      {% if sunrise_s in ['unknown', 'unavailable', 'none', '']
+           or sunset_s in ['unknown', 'unavailable', 'none', ''] %}
+        unknown
+      {% else %}
+        {% set n = now() %}
+        {% set sunrise = as_local(sunrise_s | as_datetime) %}
+        {% set sunset = as_local(sunset_s | as_datetime) %}
+        {% if sunrise.date() != n.date() or sunset.date() != n.date() %}
+          off
+        {% elif n >= sunrise and n < sunset %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      {% endif %}
+
+binary_sensor:
+  - name: Show Sunset
+    unique_id: show_sunset
+    attributes:
+      from_time: "{{ as_timestamp(today_at('15:00')) }}"
+      to_time: "{{ as_timestamp(states('sensor.the_dennis_boys_sun_sunset_start') | as_datetime) }}"
+      now_time: "{{ as_timestamp(now()) | int }}"
+      do_show: >
+        {% set now_time = as_timestamp(now()) | int %}
+        {% set from_time = as_timestamp(today_at('15:00')) %}
+        {% set to_time = as_timestamp(states('sensor.the_dennis_boys_sun_sunset_start') | as_datetime) %}
+        {{ from_time is number and to_time is number and now_time >= from_time and now_time < to_time }}
+    state: >
+      {% set now_time = as_timestamp(now()) | int %}
+      {% set from_time = as_timestamp(today_at('15:00')) %}
+      {% set to_time = as_timestamp(states('sensor.the_dennis_boys_sun_sunset_start') | as_datetime) %}
+      {{ from_time is number and to_time is number and now_time >= from_time and now_time < to_time }}
+  - name: "Ensuite Occupancy"
+    unique_id: occupancy_ensuite
+    device_class: occupancy
+    attributes:
+      occupancy: >
+        {{ states("binary_sensor.ensuite_robe_motion") }}
+      presence: >
+        {{ states("binary_sensor.ensuite_robe_presence") }}
+    state: >
+      {% set motion = is_state('binary_sensor.ensuite_robe_motion', 'on') %}
+      {% set presence = is_state('binary_sensor.ensuite_robe_presence', 'on') %}
+      {% if motion or (this.state == 'on' and presence) %}
+        on
+      {% else %}
+        off
+      {% endif %}
+  - name: "Bathroom Occupancy"
+    unique_id: occupancy_bathroom
+    device_class: occupancy
+    attributes:
+      occupancy: >
+        {{ states("binary_sensor.bathroom_motion_motion_bathroom_occupancy") }}
+      presence: >
+        {{ states("binary_sensor.bathroom_presence") }}
+    state: >
+      {% set motion = is_state('binary_sensor.bathroom_motion_motion_bathroom_occupancy', 'on') %}
+      {% set presence = is_state('binary_sensor.bathroom_presence', 'on') %}
+      {% if motion or (this.state == 'on' and presence) %}
+        on
+      {% else %}
+        off
+      {% endif %}
+  - name: "Powder Occupancy"
+    unique_id: occupancy_powder
+    device_class: occupancy
+    attributes:
+      occupancy: >
+        {{ states("binary_sensor.powder_motion_motion_powder_occupancy") }}
+      presence: >
+        {{ states("binary_sensor.powder_presence_presence_powder_presence") }}
+    state: >
+      {% set motion = is_state('binary_sensor.powder_motion_motion_powder_occupancy', 'on') %}
+      {% set presence = is_state('binary_sensor.powder_presence_presence_powder_presence', 'on') %}
+      {% if motion or (this.state == 'on' and presence) %}
+        on
+      {% else %}
+        off
+      {% endif %}
+  - name: "Garage Occupancy"
+    unique_id: occupancy_garage
+    device_class: occupancy
+    attributes:
+      occupancy: >
+        {{ states("binary_sensor.garage_motion") }}
+      presence: >
+        {{ states("binary_sensor.prescence_garage") }}
+    state: >
+      {% set motion = is_state('binary_sensor.garage_motion', 'on') %}
+      {% set presence = is_state('binary_sensor.prescence_garage', 'on') %}
+      {% if motion or (this.state == 'on' and presence) %}
+        on
+      {% else %}
+        off
+      {% endif %}
+  - name: "Laundry Occupancy"
+    unique_id: occupancy_laundry
+    device_class: occupancy
+    attributes:
+      occupancy: >
+        {{ states("binary_sensor.laundry_motion_motion_laundry_inside_occupancy") }}
+      presence: >
+        {{ states("binary_sensor.laundry_presence_presence_laundry_presence") }}
+    state: >
+      {% set motion = is_state('binary_sensor.laundry_motion_motion_laundry_inside_occupancy', 'on') %}
+      {% set presence = is_state('binary_sensor.laundry_presence_presence_laundry_presence', 'on') %}
+      {% if motion or (this.state == 'on' and presence) %}
+        on
+      {% else %}
+        off
+      {% endif %}
+  - name: "Is Demand Period"
+    unique_id: is_demand_period
+    attributes:
+      timestampNow: "{{ as_timestamp(now()) | int }}"
+      isDemandPeriod: >
+        {% if now() >= today_at('16:00') and now() < today_at('21:00') %}
+          on
+        {% else %}
+          off
+        {% endif %}
+    state: >
+      {% if now() >= today_at('16:00') and now() < today_at('21:00') %}
+        on
+      {% else %}
+        off
+      {% endif %}
+  - name: "Is Bennis Plugged In at Home"
+    unique_id: is_bennis_plugged_in_at_home
+    attributes:
+      isPluggedIn: "{{ is_state('binary_sensor.bennis_charge_cable', 'on') }}"
+      isHome: "{{ is_state('binary_sensor.bennis_located_at_home', 'on') }}"
+      isPluggedInAtHome: >
+        {{ is_state('binary_sensor.bennis_charge_cable', 'on')
+           and is_state('binary_sensor.bennis_located_at_home', 'on') }}
+    state: >
+      {{ is_state('binary_sensor.bennis_charge_cable', 'on')
+         and is_state('binary_sensor.bennis_located_at_home', 'on') }}
+
+switch:
+  - turn_on:
+    - action: input_boolean.turn_on
+      target:
+        entity_id:
+        - input_boolean.guest_in_study
+    turn_off:
+    - action: input_boolean.turn_off
+      target:
+        entity_id:
+        - input_boolean.guest_in_study
+    unique_id: 1abe89cf-aeeb-521e-84a5-5d7fce7a54e3
+    default_entity_id: switch.guest_in_study
+    icon: "{% if is_state('input_boolean.guest_in_study', 'on') %}\n  mdi:account-outline\n{%
+      else %}\n  mdi:account-off-outline\n{% endif %}"
+    state: '{{ is_state(''input_boolean.guest_in_study'', ''on'') }}'
+    name: guest_in_study
+  - turn_on:
+    - action: input_boolean.turn_on
+      target:
+        entity_id:
+        - input_boolean.guest_room_in_use
+    turn_off:
+    - action: input_boolean.turn_off
+      target:
+        entity_id:
+        - input_boolean.guest_room_in_use
+    unique_id: 5bb895ac-f1e9-5f67-88fe-a0d94a885029
+    default_entity_id: switch.guest_in_matty
+    icon: "{% if is_state('input_boolean.guest_room_in_use', 'on') %}\n  mdi:account-outline\n{% else %}\n  mdi:account-off-outline\n{% endif %}"
+    state: '{{ is_state(''input_boolean.guest_room_in_use'', ''on'') }}'
+    name: Guest room in use
+  - turn_on:
+    - action: switch.turn_on
+      target:
+        entity_id:
+        - switch.dennisboysguest
+    turn_off:
+    - action: switch.turn_off
+      target:
+        entity_id:
+        - switch.dennisboysguest
+    default_entity_id: switch.guest_wifi
+    icon: "{% if is_state('switch.dennisboysguest', 'on') %}\n  mdi:wifi\n{% else
+      %}\n  mdi:wifi-off\n{% endif %}"
+    state: '{{ is_state(''switch.dennisboysguest'', ''on'') }}'
+    name: guest_wifi

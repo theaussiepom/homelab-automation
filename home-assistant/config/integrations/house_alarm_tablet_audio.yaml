@@ -1,0 +1,89 @@
+automation:
+  - id: house_alarm_living_tablet_audio
+    alias: House Alarm - Living tablet audio
+    description: >-
+      Gentle exit beeps, faster entry warnings and a distinct triggered alert on
+      the Living tablet at 100% volume. Stop on each phase change.
+    mode: queued
+    max: 25
+    trace:
+      stored_traces: 5
+    triggers:
+      - trigger: state
+        entity_id: alarm_control_panel.house_alarm
+        to:
+          - arming
+          - pending
+          - triggered
+          - disarmed
+          - armed_home
+          - armed_away
+          - armed_night
+          - armed_vacation
+          - armed_custom_bypass
+          - unknown
+          - unavailable
+      - trigger: homeassistant
+        event: start
+      - trigger: state
+        entity_id: media_player.tablet_living_kiosk
+        from:
+          - unavailable
+          - unknown
+        to:
+          - idle
+          - playing
+          - paused
+          - 'on'
+          - 'off'
+    actions:
+      - condition: template
+        value_template: >-
+          {{ states('media_player.tablet_living_kiosk') not in ['unknown', 'unavailable'] }}
+      # Serialise stop/play commands. Evaluate the current phase after stopping,
+      # so queued notifications cannot restart an obsolete alarm sound.
+      - action: media_player.media_stop
+        target:
+          entity_id: media_player.tablet_living_kiosk
+      - condition: template
+        value_template: >-
+          {{ states('alarm_control_panel.house_alarm') in ['arming', 'pending', 'triggered'] }}
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.tablet_living_kiosk
+        data:
+          volume_level: 1.0
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: alarm_control_panel.house_alarm
+                state: arming
+            sequence:
+              - action: media_player.play_media
+                target:
+                  entity_id: media_player.tablet_living_kiosk
+                data:
+                  media_content_type: music
+                  media_content_id: !secret ha_house_alarm_tablet_audio_media_content_id_1
+          - conditions:
+              - condition: state
+                entity_id: alarm_control_panel.house_alarm
+                state: pending
+            sequence:
+              - action: media_player.play_media
+                target:
+                  entity_id: media_player.tablet_living_kiosk
+                data:
+                  media_content_type: music
+                  media_content_id: !secret ha_house_alarm_tablet_audio_media_content_id_2
+          - conditions:
+              - condition: state
+                entity_id: alarm_control_panel.house_alarm
+                state: triggered
+            sequence:
+              - action: media_player.play_media
+                target:
+                  entity_id: media_player.tablet_living_kiosk
+                data:
+                  media_content_type: music
+                  media_content_id: !secret ha_house_alarm_tablet_audio_media_content_id_3

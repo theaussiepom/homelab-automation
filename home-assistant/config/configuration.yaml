@@ -1,0 +1,29 @@
+api: # Required for Bluetooth Proxy
+automation: !include automations.yaml
+default_config: # Loads default set of integrations. Do not remove.
+frontend: !include frontend.yaml
+group: !include group.yaml
+homeassistant: !include homeassistant.yaml
+homekit: !include homekit.yaml
+influxdb: !include influxdb.yaml
+lovelace: !include lovelace.yaml
+notify: !include notify.yaml
+recorder: !include recorder.yaml
+scene: !include scenes.yaml
+script: !include scripts.yaml
+sensor: !include sensors.yaml
+command_line: !include command_line.yaml
+sun2: !include sun2.yaml
+switch: !include switches.yaml
+template: !include templates.yaml
+# Keep incoming HomeKit garage-door commands and sender addresses.
+# Suppress routine characteristic updates and commands for other accessory types.
+logger:
+  logs:
+    pyhap.characteristic: debug
+  filters:
+    pyhap.characteristic:
+      - '^set_value:'
+      - '^client_update_value: (?!TargetDoorState to )'
+
+tucompra:

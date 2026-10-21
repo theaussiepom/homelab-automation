@@ -1,0 +1,335 @@
+################################################################################
+# PeriSense nonprod platform wake / sleep / status (PER-266)
+#
+# Control plane: https://test.perisense.app/ops/platform/* (nonprod only)
+# API key: secrets.yaml → perisense_nonprod_ops_api_key (see docs/perisense-nonprod-secrets.yaml.example)
+################################################################################
+
+input_boolean:
+  perisense_nonprod_command_in_flight:
+    name: "PeriSense Nonprod Command In Flight"
+    icon: mdi:progress-clock
+
+rest_command:
+  perisense_nonprod_wake:
+    url: "https://test.perisense.app/ops/platform/wake"
+    method: POST
+    timeout: 30
+    headers:
+      x-api-key: !secret perisense_nonprod_ops_api_key
+      Content-Type: application/json
+    payload: "{}"
+
+  perisense_nonprod_sleep:
+    url: "https://test.perisense.app/ops/platform/sleep"
+    method: POST
+    timeout: 30
+    headers:
+      x-api-key: !secret perisense_nonprod_ops_api_key
+      Content-Type: application/json
+    payload: "{}"
+
+rest:
+  - resource: "https://test.perisense.app/ops/platform/status"
+    scan_interval: 60
+    timeout: 30
+    headers:
+      x-api-key: !secret perisense_nonprod_ops_api_key
+    sensor:
+      - name: PeriSense Nonprod Platform Status Raw
+        unique_id: perisense_nonprod_platform_status_raw
+        value_template: >
+          {% if value_json is mapping and value_json.get('aggregateStatus') %}
+            {{ value_json.aggregateStatus }}
+          {% else %}
+            unknown
+          {% endif %}
+        json_attributes:
+          - aggregateStatus
+          - services
+
+script:
+  perisense_nonprod_wake:
+    alias: "PeriSense Nonprod: Wake Test Environment"
+    icon: mdi:power
+    mode: single
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.perisense_nonprod_command_in_flight
+      - action: rest_command.perisense_nonprod_wake
+        continue_on_error: true
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.perisense_nonprod_platform_status_raw
+      - delay:
+          seconds: 4
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.perisense_nonprod_platform_status_raw
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.perisense_nonprod_command_in_flight
+
+  perisense_nonprod_sleep:
+    alias: "PeriSense Nonprod: Sleep Test Environment"
+    icon: mdi:sleep
+    mode: single
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.perisense_nonprod_command_in_flight
+      - action: rest_command.perisense_nonprod_sleep
+        continue_on_error: true
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.perisense_nonprod_platform_status_raw
+      - delay:
+          seconds: 4
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.perisense_nonprod_platform_status_raw
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.perisense_nonprod_command_in_flight
+
+  perisense_nonprod_refresh_status:
+    alias: "PeriSense Nonprod: Refresh Status"
+    icon: mdi:refresh
+    mode: single
+    sequence:
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.perisense_nonprod_platform_status_raw
+
+automation:
+  - id: perisense_nonprod_clear_stuck_busy
+    alias: "PeriSense Nonprod: Clear stuck command in flight"
+    trigger:
+      - platform: state
+        entity_id: input_boolean.perisense_nonprod_command_in_flight
+        to: "on"
+        for:
+          seconds: 35
+    action:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.perisense_nonprod_command_in_flight
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.perisense_nonprod_platform_status_raw
+
+  - id: perisense_nonprod_fast_status_poll
+    alias: "PeriSense Nonprod: Fast status poll while transitioning"
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: sensor.perisense_nonprod_platform
+        to:
+          - starting
+          - stopping
+    action:
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.perisense_nonprod_platform_status_raw
+      - repeat:
+          count: 6
+          sequence:
+            - delay:
+                seconds: 10
+            - action: homeassistant.update_entity
+              target:
+                entity_id: sensor.perisense_nonprod_platform_status_raw
+
+template:
+  - sensor:
+      - name: "PeriSense Nonprod Platform"
+        unique_id: perisense_nonprod_platform
+        icon: mdi:cloud-outline
+        state: >
+          {% set valid = ['started', 'stopped', 'starting', 'stopping'] %}
+          {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+          {% if states(raw) in ['unavailable', 'unknown', 'none'] %}
+            unknown
+          {% else %}
+            {% set agg = state_attr(raw, 'aggregateStatus') %}
+            {% set services = state_attr(raw, 'services') %}
+            {% if agg not in valid or services is not iterable or services | length == 0 %}
+              unknown
+            {% else %}
+              {% set web = services | selectattr('key', 'eq', 'web') | first | default(none) %}
+              {% set health = services | selectattr('key', 'eq', 'health') | first | default(none) %}
+              {% if web is none or health is none %}
+                unknown
+              {% else %}
+                {% set ws = web.status | default('') %}
+                {% set hs = health.status | default('') %}
+                {% if ws not in valid or hs not in valid %}
+                  unknown
+                {% elif agg == 'started' and ws != hs %}
+                  degraded
+                {% elif ws in ['starting', 'stopping'] and hs in ['started', 'stopped'] %}
+                  degraded
+                {% elif hs in ['starting', 'stopping'] and ws in ['started', 'stopped'] %}
+                  degraded
+                {% else %}
+                  {{ agg }}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+
+      - name: "PeriSense Nonprod Platform Label"
+        unique_id: perisense_nonprod_platform_label
+        icon: mdi:cloud-outline
+        state: >
+          {% set p = states('sensor.perisense_nonprod_platform') %}
+          {% set busy = is_state('input_boolean.perisense_nonprod_command_in_flight', 'on') %}
+          {% set ws = states('sensor.perisense_nonprod_web') %}
+          {% set hs = states('sensor.perisense_nonprod_health') %}
+          {% if p == 'unknown' %}
+            Unknown
+          {% elif busy and p == 'stopped' %}
+            Starting
+          {% elif busy and p in ['started', 'degraded'] %}
+            Stopping
+          {% elif p == 'stopped' %}
+            Stopped
+          {% elif p == 'starting' %}
+            Starting
+          {% elif p == 'stopping' %}
+            Stopping
+          {% elif p == 'degraded' %}
+            Started (degraded)
+          {% elif p == 'started' %}
+            {% if ws == 'started' and hs == 'started' %}
+              Started (healthy)
+            {% elif ws in ['starting', 'stopping'] or hs in ['starting', 'stopping'] %}
+              Started (...)
+            {% else %}
+              Started (degraded)
+            {% endif %}
+          {% else %}
+            Unknown
+          {% endif %}
+
+      - name: "PeriSense Nonprod Web"
+        unique_id: perisense_nonprod_web
+        icon: mdi:web
+        state: >
+          {% set valid = ['started', 'stopped', 'starting', 'stopping'] %}
+          {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+          {% if states(raw) in ['unavailable', 'unknown', 'none'] %}
+            unknown
+          {% else %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set web = services | selectattr('key', 'eq', 'web') | first | default(none) %}
+            {% if web is none or web.status is not defined or web.status not in valid %}
+              unknown
+            {% else %}
+              {{ web.status }}
+            {% endif %}
+          {% endif %}
+        attributes:
+          desired_count: >
+            {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set web = services | selectattr('key', 'eq', 'web') | first | default(none) %}
+            {{ web.desiredCount if web is not none else none }}
+          running_count: >
+            {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set web = services | selectattr('key', 'eq', 'web') | first | default(none) %}
+            {{ web.runningCount if web is not none else none }}
+          pending_count: >
+            {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set web = services | selectattr('key', 'eq', 'web') | first | default(none) %}
+            {{ web.pendingCount if web is not none else none }}
+          rollout_state: >
+            {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set web = services | selectattr('key', 'eq', 'web') | first | default(none) %}
+            {{ web.rolloutState if web is not none else none }}
+
+      - name: "PeriSense Nonprod Health"
+        unique_id: perisense_nonprod_health
+        icon: mdi:heart-pulse
+        state: >
+          {% set valid = ['started', 'stopped', 'starting', 'stopping'] %}
+          {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+          {% if states(raw) in ['unavailable', 'unknown', 'none'] %}
+            unknown
+          {% else %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set health = services | selectattr('key', 'eq', 'health') | first | default(none) %}
+            {% if health is none or health.status is not defined or health.status not in valid %}
+              unknown
+            {% else %}
+              {{ health.status }}
+            {% endif %}
+          {% endif %}
+        attributes:
+          desired_count: >
+            {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set health = services | selectattr('key', 'eq', 'health') | first | default(none) %}
+            {{ health.desiredCount if health is not none else none }}
+          running_count: >
+            {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set health = services | selectattr('key', 'eq', 'health') | first | default(none) %}
+            {{ health.runningCount if health is not none else none }}
+          pending_count: >
+            {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set health = services | selectattr('key', 'eq', 'health') | first | default(none) %}
+            {{ health.pendingCount if health is not none else none }}
+          rollout_state: >
+            {% set raw = 'sensor.perisense_nonprod_platform_status_raw' %}
+            {% set services = state_attr(raw, 'services') | default([]) %}
+            {% set health = services | selectattr('key', 'eq', 'health') | first | default(none) %}
+            {{ health.rolloutState if health is not none else none }}
+
+  - switch:
+      - name: "PeriSense Nonprod Test"
+        unique_id: perisense_nonprod_test
+        icon: mdi:cloud-outline
+        state: >
+          {{ states('sensor.perisense_nonprod_platform') in ['started', 'degraded'] }}
+        availability: >
+          {{ not is_state('input_boolean.perisense_nonprod_command_in_flight', 'on')
+             and states('sensor.perisense_nonprod_platform') in ['stopped', 'started', 'degraded'] }}
+        turn_on:
+          - condition: state
+            entity_id: sensor.perisense_nonprod_platform
+            state: stopped
+          - action: script.perisense_nonprod_wake
+        turn_off:
+          - condition: state
+            entity_id: sensor.perisense_nonprod_platform
+            state:
+              - started
+              - degraded
+          - action: script.perisense_nonprod_sleep
+
+  - binary_sensor:
+      - name: "PeriSense Nonprod Platform Running"
+        unique_id: perisense_nonprod_platform_running
+        icon: mdi:check-circle
+        state: >
+          {{ is_state('sensor.perisense_nonprod_platform', 'started') }}
+
+      - name: "PeriSense Nonprod Platform Transitioning"
+        unique_id: perisense_nonprod_platform_transitioning
+        icon: mdi:progress-clock
+        state: >
+          {{ is_state('sensor.perisense_nonprod_platform', 'starting')
+             or is_state('sensor.perisense_nonprod_platform', 'stopping')
+             or is_state('sensor.perisense_nonprod_web', 'starting')
+             or is_state('sensor.perisense_nonprod_web', 'stopping')
+             or is_state('sensor.perisense_nonprod_health', 'starting')
+             or is_state('sensor.perisense_nonprod_health', 'stopping') }}
+
+# Baseline REST scan_interval: 60s. While platform is starting/stopping, automation
+# perisense_nonprod_fast_status_poll forces update_entity every 10s for 60s (mode: restart).

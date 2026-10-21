@@ -1,0 +1,13 @@
+- sensor:
+    name: GPT Response
+    unique_id: command_line_gpt_response
+    command: "python3 /config/gpt_response.py {{ [states('sensor.time'), now().strftime('%A'), states('weather.forecast_home'), states('sensor.outside_temperature')] | to_json | base64_encode }}"
+    value_template: "{{ value_json.choices[0].message.content }}"
+    scan_interval: 100
+- sensor:
+    name: InfluxDB size
+    unique_id: command_line_influxdb_size
+    command: "du -shm /influxdb_data | cut -f1"
+    unit_of_measurement: MB
+    scan_interval: 3600
+    command_timeout: 30
