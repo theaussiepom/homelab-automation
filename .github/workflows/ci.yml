@@ -27,4 +27,4 @@ jobs:
       - run: python -B -m unittest discover -s .github/scripts -p 'test_config_validation.py'
       - run: python .github/scripts/config_validation.py
       - run: npm ci --prefix node-red/config --ignore-scripts --no-audit --no-fund
-      - run: node --test tools/node-red-cast/test-cast-protobuf.js tools/node-red-private-inputs/test-private-credentials.js tools/node-red-private-inputs/test-jsonata-upgrade.js tools/node-red-private-inputs/test-state-machine-renderer.js
+      - run: node --test tools/node-red-cast/test-cast-protobuf.js tools/node-red-cast/test-cast-tts.js tools/node-red-private-inputs/test-private-credentials.js tools/node-red-private-inputs/test-jsonata-upgrade.js tools/node-red-private-inputs/test-state-machine-renderer.js

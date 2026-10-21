@@ -38,6 +38,9 @@
         },
         "state-machine-cat": {
             "handlebars": "4.7.10"
+        },
+        "google-tts-api": {
+            "axios": "0.33.0"
         }
     },
     "engines": {
