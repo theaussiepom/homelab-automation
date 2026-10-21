@@ -57,4 +57,18 @@ function load({filePath, flowPath, settingKeys}, environment = process.env) {
     return resolved;
 }
 
-module.exports = {load, references, validate};
+// Node-RED 5 falls back to the flow directory if this file is absent. Never
+// create or replace a credential store here: restore it through the private
+// deployment workflow, using {} only for a deliberately new installation.
+function requirePrivateCredentials(filePath = "/data/flows_cred.json") {
+    try {
+        const stat = fs.lstatSync(filePath);
+        if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("Invalid file");
+        const value = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        if (!value || Array.isArray(value) || typeof value !== "object") throw new Error("Invalid JSON");
+    } catch (_) {
+        throw new Error("Restore the private Node-RED credential store before startup");
+    }
+}
+
+module.exports = {load, references, validate, requirePrivateCredentials};

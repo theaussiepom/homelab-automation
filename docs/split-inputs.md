@@ -21,3 +21,8 @@ volume subpaths, container targets, mount flags, IDs and networks are retained.
 These are source-only integration changes. No directory, data, service or live mount
 has moved. Actual installation still needs immutable release pins and the existing
 deployment/admission review. WiNet runtime/build settings are unchanged.
+
+The display package needs private `ha_display_base_url` (the HA origin only,
+without a dashboard path) instead of the old full dashboard URL. It appends the
+validated requested path, or the security path while the alarm is armed. Preserve
+`script.display_living_show`; populate the new secret before a separate deployment.

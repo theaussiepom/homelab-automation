@@ -28,5 +28,10 @@
         "node-red-node-smooth": "~0.1.2",
         "node-red-node-suncalc": "~1.1.2",
         "passport-openidconnect": "^0.1.2"
+    },
+    "overrides": {
+        "castv2": {
+            "protobufjs": "7.6.6"
+        }
     }
 }

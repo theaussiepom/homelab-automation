@@ -80,12 +80,16 @@ def compose(path):
         parsed = json.loads(output)
         if not parsed.get('services'):
             raise ValueError('Empty Compose model')
-        for variable in re.findall(r'\$\{(HOMELAB_[A-Z0-9_]+):\?required\}', text):
-            missing = dict(env)
-            missing.pop(variable, None)
-            result = subprocess.run(argv, input=data, env=missing, capture_output=True, timeout=30)
-            if result.returncode == 0:
-                raise ValueError('Required private input did not fail closed')
+        for variable in set(re.findall(r'\$\{([A-Z][A-Z0-9_]*):\?[^}]*\}', text)):
+            for empty in (False, True):
+                missing = dict(env)
+                if empty:
+                    missing[variable] = ''
+                else:
+                    missing.pop(variable, None)
+                result = subprocess.run(argv, input=data, env=missing, capture_output=True, timeout=30)
+                if result.returncode == 0:
+                    raise ValueError('Required private input did not fail closed')
         return len(parsed['services'])
 
 def run(root=ROOT):

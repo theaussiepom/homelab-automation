@@ -30,7 +30,7 @@ existing protected service backups.
 Run the loader tests with:
 
 ```sh
-node --test tools/node-red-private-inputs/test-private-inputs.js
+node --test tools/node-red-private-inputs/test-private-credentials.js
 ```
 
 Before deployment, test the prepared flow through the installed Node-RED
@@ -41,3 +41,26 @@ behaviour. Deploy/restart remains a separate operational step.
 This uses normal Git and `.gitignore`. There is no publication list. Review
 staged content and scan it before creating the clean public repository;
 ignore rules alone do not remove already tracked files or old history.
+
+Before deployment, set `HOMELAB_NODE_RED_IMAGE` to the reviewed immutable image
+reference for the target. The public Compose file has no floating-image default.
+Validate upgrades separately; this source update does not upgrade the live runtime.
+
+Restore `/data/flows_cred.json` and the matching `credentialSecret` before startup.
+For a deliberately new installation only, provision an empty JSON object there
+with mode `0600`, owned by the service account. Never replace existing encrypted
+credentials with an empty object. Startup now refuses missing, malformed or
+symlinked credential stores, without creating or rewriting anything. `userDir`
+is explicitly `/data`. This prevents Node-RED 5's missing-file fallback from
+placing the first credential save beside `/config/flows.json`.
+
+The Cast client has a scoped `protobufjs` override to `7.6.6` because its upstream
+6.x dependency range admits vulnerable releases. The test below exercises its
+real adapter, fixed wire bytes, auth messages and malformed input without opening
+sockets. It does not establish live device behavior.
+
+```sh
+npm ci --prefix node-red/config --ignore-scripts --no-audit --no-fund
+node --test tools/node-red-cast/test-cast-protobuf.js
+node --test tools/node-red-private-inputs/test-private-credentials.js
+```

@@ -112,7 +112,7 @@ services:
         ipv4_address: ${HOME_NETWORK_PREFIX}.242
       mqtt: null
   node-red:
-    image: nodered/node-red:latest
+    image: ${HOMELAB_NODE_RED_IMAGE:?Set a reviewed immutable Node-RED image reference}
     container_name: nodered
     labels:
       traefik.enable: true

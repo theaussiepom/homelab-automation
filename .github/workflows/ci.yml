@@ -26,3 +26,5 @@ jobs:
       - run: python -m pip install --require-hashes -r requirements.lock.txt
       - run: python -B -m unittest discover -s .github/scripts -p 'test_config_validation.py'
       - run: python .github/scripts/config_validation.py
+      - run: npm ci --prefix node-red/config --ignore-scripts --no-audit --no-fund
+      - run: node --test tools/node-red-cast/test-cast-protobuf.js tools/node-red-private-inputs/test-private-credentials.js

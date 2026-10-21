@@ -13,6 +13,7 @@ script:
           text: {}
     sequence:
     - variables:
+        display_base_url: !secret ha_display_base_url
         display_path: '{{ path | default(''/lovelace-living/home'', true) | trim }}'
     - if:
       - condition: template
@@ -25,4 +26,4 @@ script:
     - action: fully_kiosk.load_url
       data:
         device_id: 5719f051f5f7ed0ffc5ee8aa1799f4fa
-        url: !secret ha_display_dashboard_private_url_1
+        url: "{{ display_base_url.rstrip('/') ~ display_path }}"

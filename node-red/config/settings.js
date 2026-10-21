@@ -1,3 +1,5 @@
+require("./private-inputs.js").requirePrivateCredentials();
+
 const deploymentInputs = require("./private-inputs.js").load({
     filePath: "/data/deployment.private.json",
     flowPath: require("path").join(__dirname, "flows.json"),
@@ -79,7 +81,7 @@ module.exports = {
      * the user's home directory. To use a different location, the following
      * property can be used
      */
-    //userDir: '/home/nol/.node-red/',
+    userDir: '/data',
 
     /** Node-RED scans the `nodes` directory in the userDir to find local node files.
      * The following property can be used to specify an additional directory to scan.
