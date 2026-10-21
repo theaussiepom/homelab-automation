@@ -21,7 +21,7 @@ Node-RED core, including its own expression engine.
 | node-red-contrib-xstate-machine | 1.3.3 | 1.3.4 |
 | node-red-dashboard | 3.6.5 | 3.6.6 |
 | node-red-node-base64 | 0.3.0 | 1.0.0 |
-| node-red-node-email | 3.0.2 | 5.2.5 |
+| node-red-node-email | 3.0.2 | Removed with owner approval; unused in reviewed live flows |
 | node-red-node-feedparser | 0.3.0 | 1.0.7 |
 | node-red-node-suncalc | 1.1.2 | 1.2.0 |
 
@@ -53,6 +53,14 @@ In-memory adapter tests preserve the speech helper's URL construction,
 request serialization, audio response parsing and transport-error behavior; they
 contact neither Google nor a speaker.
 
+The unused email node was removed with owner approval. Its latest 5.2.5 release
+bundles DeepmergeTS 7.1.5 through mailparser/html-to-text; a scoped npm override
+still resolves that embedded copy. [The recursive-object advisory](https://github.com/advisories/GHSA-ggr8-5vv4-36mx)
+is fixed in 8.x. The reviewed live flows contain no email nodes, explicit email
+library references or function-node external email modules. Removing the unused
+package avoids a bespoke repackaging step; reintroduce it only with a qualified
+upstream fix. This source change does not uninstall anything from production.
+
 The tests use the dependency resolved from the HA node, its actual JSONata service
 with a synthetic Node-RED utility adapter, synthetic states and public flow
 expression parsing. They verify that prototype lookup/function construction is
@@ -64,15 +72,15 @@ not prove compatibility with the expression engine bundled in a selected runtime
 A clean `npm ci --ignore-scripts` and 31 focused Cast, credential-store, JSONata
 and renderer tests pass on Node.js 24. The same 31 tests pass in an isolated
 Node-RED 5.0.8 image using Node.js 24.21.0. A separate network-disabled safe-mode
-check loads the serial and Modbus modules, registers all 22 node packages and the
+check loads the serial and Modbus modules, registers all 21 node packages and the
 theme plugin, and finds all 23 node types used by the public flow snapshot.
 The HA expression service also passes a binding check using the actual Node-RED 5
 utility implementation. Core JSONata resolves to 2.2.2 and rejects the harmless
 function-construction regression.
 
-The refreshed npm audit has 21 affected dependency entries, down from 48: zero
-critical, ten high and eleven moderate. JSONata, protobuf, Handlebars and Axios
-are absent from that audit. Remaining chains include InfluxDB, email and the
+The refreshed npm audit has 12 affected dependency entries, down from 48: zero
+critical, 2 high and 10 moderate. JSONata, protobuf, Handlebars and Axios
+are absent from that audit. Remaining chains include InfluxDB, sun events and the
 state-machine renderer's other dependencies.
 These counts include parent packages affected by a dependency, not independent
 exploits. Latest node releases do not necessarily contain patched transitive
